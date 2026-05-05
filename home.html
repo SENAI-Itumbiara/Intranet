@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet SESI/SENAI</title>
+    <style>
+        :root { 
+            --primary: #003399; /* Azul Sesi/Senai */
+            --secondary: #0056b3;
+            --accent: #00d1ff;
+            --sidebar-bg: #002855;
+            --text-light: #f8f9fa;
+            --bg-main: #f0f2f5;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: var(--bg-main); }
+
+        .wrapper { 
+            display: grid; 
+            grid-template-columns: 280px 1fr; 
+            grid-template-rows: 70px 1fr; 
+            height: 100vh; 
+        }
+
+        /* --- Cabeçalho --- */
+        .header { 
+            grid-column: 1 / 3; 
+            background-color: var(--white); 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 30px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            z-index: 100;
+        }
+
+        .header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.5px; }
+        .unit-info { text-align: right; color: #666; font-size: 0.85rem; line-height: 1.2; }
+
+        /* --- Menu Lateral --- */
+        .sidebar { 
+            background-color: var(--sidebar-bg); 
+            color: var(--text-light); 
+            overflow-y: auto; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-brand {
+            padding: 25px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .menu-category { margin-bottom: 2px; }
+        
+        .category-header { 
+            width: 100%; padding: 14px 20px; background: none; border: none;
+            color: var(--text-light); text-align: left; cursor: pointer; 
+            font-weight: 500; font-size: 0.95rem;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .category-header:hover { background: rgba(255,255,255,0.05); }
+        .category-header.active { background: var(--secondary); color: white; }
+
+        /* Ícone de seta customizado */
+        .category-header::after { 
+            content: ''; width: 6px; height: 6px; 
+            border-right: 2px solid rgba(255,255,255,0.5); 
+            border-bottom: 2px solid rgba(255,255,255,0.5); 
+            transform: rotate(45deg); transition: 0.3s;
+        }
+        .category-header.active::after { transform: rotate(-135deg); border-color: white; }
+
+        .category-content { 
+            max-height: 0; overflow: hidden; 
+            background-color: rgba(0, 0, 0, 0.15);
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+        }
+
+        .category-content.open { max-height: 1000px; }
+
+        .menu-link { 
+            display: block; padding: 10px 20px 10px 45px; 
+            color: rgba(255,255,255,0.7); text-decoration: none;
+            font-size: 0.9rem; transition: 0.2s;
+        }
+
+        .menu-link:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+
+        /* --- Área Central --- */
+        .main-content { 
+            background: var(--bg-main); 
+            padding: 20px; 
+            display: flex;
+        }
+
+        .content-card {
+            flex: 1;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        #frame-conteudo { width: 100%; height: 100%; border: none; }
+
+        /* Scrollbar customizada para o menu */
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header class="header">
+        <img src="logo.png" width="280" height="52" alt="Logo">
+        <h1>Portal de Gestão</h1>
+        <div class="unit-info">
+            <strong>SENAI / SESI</strong><br>
+            Unidade Itumbiara / Quirinópolis
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">Navegação Principal</div>
+
+        <!-- Início -->
+        <!-- <div class="menu-category">
+            <button class="category-header" onclick="abrirLink('home.html')">🏠 Home</button>
+        </div> -->
+
+        <!-- Educação -->
+        <div class="menu-category">
+            <button class="category-header" onclick="toggleMenu(this)">Educação</button>
+            <div class="category-content">
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiZDRmNWRjMTYtN2UzOS00NmIxLWJmMDEtNTY2NjgzYjJjYzc2IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Programação de cursos</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiNjlmODBkMDUtNGZhZi00YTBjLTgxMGMtNDBhYWVhMjdhZWY0IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Cronogramas</a>
+                <a href="#" class="menu-link" onclick="abrirLink('educacao/secretaria.html')">Relatórios Secretaria</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiNTUyNTg0YmUtNDM3YS00MzFkLWE5MDctNzNiMDI5ZDg4MDRhIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Programação de Salas</a>
+                <a href="#" class="menu-link" onclick="abrirLink('educacao/lab_solic.html')">Reserva de Laboratório</a>
+                <!-- <a href="#" class="menu-link" onclick="abrirLink('https://sesigoias-my.sharepoint.com/:x:/g/personal/ricardotirone_senai_fieg_com_br/EZJKuqLHWl1Hkpe-0rLSR6ABCDFQjpjK5kS-5zcSzeIn-Q?e=9niYcS')">Acompanhamento de turmas</a> -->
+            </div>
+        </div>
+        <!-- Recursos Humanos -->
+        <div class="menu-category">
+            <button class="category-header" onclick="toggleMenu(this)">Recursos Humanos</button>
+            <div class="category-content">
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiMTBkZDU2Y2MtY2RmYi00ZWQ2LTllNGUtOWVhNmViM2VhNjczIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Banco de horas</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiM2EwMjFlOWYtN2EyYy00ODFjLThjYzEtOTc3MDg3NGNjNjE3IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Ramais e Telefone</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiZTg2ODZiMDctNjhmZi00MjQzLTk3ZmUtMDRjNGQ1MjlkOGM1IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Lotação Funcionários</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiYmFlNDk1NTQtNTE1Ni00ZTZmLWJjMTgtYWY2NmI1YzZhOTJiIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Regência</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiMTc4OTJhMTUtMWExMS00NGE5LTllZTMtZThiYjE2ZDlhZjc0IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Programação de férias</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiODkwYTc3MjItNmYwZC00NjBlLTk3ZjgtMDdmNmQ3NGE4OWExIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Exames e ASO</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=JP-jmEgkf0mvLRvoz58MaOQH8vjE4itIo29oAe8yOR9UM0JKVFpFMDZXVTdHODg2UTVJSTAxMzlTSy4u')">Ajuste de ponto (lançamento)</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiZTI4ZThlMjEtZDU1Ny00MTVlLWJhNTQtYTM5MDVjODFkMTY3IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Ajuste de ponto (relatório)</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiZmUxZjIzZmYtMWQwZC00MWE1LWFiMWYtY2NkZTM4ODI0YTNkIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Interjornada</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiNTBlZWQ3NGMtNTk0Mi00M2NjLTlkMzYtOWE2ODAxYjQ2MDcxIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Atestado</a>
+            </div>
+        </div>
+
+        <!-- Gestão -->
+        <div class="menu-category">
+            <button class="category-header" onclick="toggleMenu(this)">Gestão</button>
+            <div class="category-content">
+                <a href="#" class="menu-link" onclick="abrirLink('gestao/empresas.html')">Empresas / Industrias</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiNmRhYTBlOTQtNTM4Yy00OTRlLWIzZDMtNTU4ZTYzOTA3MzllIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">B+P</a>
+                <!-- <a href="#" class="menu-link" onclick="abrirLink('https://sesigoias-my.sharepoint.com/my?id=%2Fpersonal%2Fricardotirone%5Fsenai%5Ffieg%5Fcom%5Fbr%2FDocuments%2FBI%5FSENAI%5FITUMBIARA%2FPorf%C3%B3lio%20SESI%20Quirin%C3%B3polis%2Epdf&parent=%2Fpersonal%2Fricardotirone%5Fsenai%5Ffieg%5Fcom%5Fbr%2FDocuments%2FBI%5FSENAI%5FITUMBIARA&ga=1')">Portfólio SESI</a>
+                <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiZjk5YjZmOGMtN2YyMy00OTVhLTgzMzUtMGVmOGZiYWQwMmViIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Portfólio SENAI</a> -->
+                <a href="#" class="menu-link" onclick="abrirLink('gestao/portfolio_sti.html')">Portfólio STI</a>
+            </div>
+        </div>
+
+        <!-- Processos -->
+        <div class="menu-category">
+            <button class="category-header" onclick="toggleMenu(this)">Processos</button>
+            <div class="category-content">
+                <a href="#" class="menu-link" onclick="abrirLink('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=JP-jmEgkf0mvLRvoz58MaOQH8vjE4itIo29oAe8yOR9UOE5PWFIzNFNQSVdXS0c5QzQ1OUFXRkhQSi4u')">Frota (Solicitação)</a>
+                <a href="#" class="menu-link" onclick="abrirLink('processos/frota_acomp.html')">Frota (Acompanhamento)</a>
+                <a href="#" class="menu-link" onclick="abrirLink('processos/compras.html')">Compras</a>
+                <a href="#" class="menu-link" onclick="abrirLink('processos/patrimonio.html')">Patrimônio</a>
+                <a href="#" class="menu-link" onclick="abrirLink('processos/rpa_contratos.html')">RPA (Contratos)</a>
+                <a href="#" class="menu-link" onclick="abrirLink('processos/rpa_pagamentos.html')">RPA (Pagamentos)</a>
+            </div>
+        </div>
+
+
+                <div class="menu-category">
+            <button class="category-header" onclick="toggleMenu(this)">Ferramentas</button>
+            <div class="category-content">
+                <a href="#" class="menu-link" onclick="abrirLink('precificacao.html')">Precificação</a>
+                <a href="#" class="menu-link" onclick="abrirLink('cronograma.html')">Cronograma</a>
+                <a href="#" class="menu-link" onclick="abrirLink('viabilidade.html')">Break-even</a>
+
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-card">
+            <iframe id="frame-conteudo" src="sobre:blank"></iframe>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleMenu(button) {
+        // Fecha outros menus abertos (opcional, para um visual mais limpo)
+        const allHeaders = document.querySelectorAll('.category-header');
+        const allContents = document.querySelectorAll('.category-content');
+        
+        allContents.forEach((content) => {
+            if (content !== button.nextElementSibling) {
+                content.classList.remove('open');
+            }
+        });
+        allHeaders.forEach((header) => {
+            if (header !== button) {
+                header.classList.remove('active');
+            }
+        });
+
+        // Alterna o atual
+        button.classList.toggle('active');
+        const content = button.nextElementSibling;
+        content.classList.toggle('open');
+    }
+
+    function abrirLink(url) {
+        if(url !== '#') {
+            document.getElementById('frame-conteudo').src = url;
+        }
+    }
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWfBCDYGA4cUjYFVn9wwGA2XpJi_i3dV8",
+        authDomain: "login-github-pages.firebaseapp.com",
+        projectId: "login-github-pages",
+        appId: "1:432460559266:web:9578f281439a9be78e38fb"
+    };
+    initializeApp(firebaseConfig);
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+</script>
+</body>
+</html>

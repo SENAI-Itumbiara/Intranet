@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Acesso Restrito</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        input { display: block; width: 100%; margin-bottom: 1rem; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Seu e-mail">
+    <input type="password" id="senha" placeholder="Sua senha">
+    <button id="btnEntrar">Entrar</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // COLE SEUS DADOS AQUI
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWfBCDYGA4cUjYFVn9wwGA2XpJi_i3dV8",
+        authDomain: "login-github-pages.firebaseapp.com",
+        projectId: "login-github-pages",
+        storageBucket: "login-github-pages.firebasestorage.app",
+        messagingSenderId: "432460559266",
+        appId: "1:432460559266:web:9578f281439a9be78e38fb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById('btnEntrar').addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+
+        signInWithEmailAndPassword(auth, email, senha)
+            .then(() => {
+                window.location.href = "home.html"; // Vai para a página restrita
+            })
+            .catch((error) => {
+                alert("Erro: " + error.message);
+            });
+    });
+</script>
+</body>
+</html>

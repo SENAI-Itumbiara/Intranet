@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsão de Término - SENAI</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <style>
+        :root { --senai-blue: #005595; --senai-red: #da291c; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background-color: var(--senai-blue); color: white; padding: 15px 25px; }
+        
+        .main-container { display: flex; flex: 1; gap: 20px; padding: 20px; }
+        
+        .input-panel { width: 40%; background: white; padding: 25px; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .result-panel { width: 60%; background: white; padding: 25px; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; color: #444; }
+        input[type="date"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        .days-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: #f0f4f8; padding: 10px; border-radius: 6px; }
+        .day-option { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+        
+        .btn-calc { width: 100%; background: var(--senai-blue); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        
+        .final-date { font-size: 3rem; font-weight: 800; color: var(--senai-red); margin: 10px 0; }
+        .info-box { background: #eef7ff; padding: 15px; border-radius: 8px; color: var(--senai-blue); font-weight: 600; width: 80%; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 1.2rem; font-weight: bold;">Planejador de Cronograma de Cursos</div>
+    <div style="font-size: 0.8rem;">SENAI Itumbiara - Unidade Operacional</div>
+</header>
+
+<div class="main-container">
+    <aside class="input-panel">
+        <div class="form-group">
+            <label>Data de Início</label>
+            <input type="date" id="data_inicio">
+        </div>
+
+        <div class="form-group">
+            <label>Carga Horária Total (Horas)</label>
+            <input type="number" id="ch_total" value="160">
+        </div>
+
+        <div class="form-group">
+            <label>Carga Horária por Dia de Aula</label>
+            <input type="number" id="ch_diaria" value="4">
+        </div>
+
+        <div class="form-group">
+            <label>Dias da Semana com Aula</label>
+            <div class="days-selector">
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="0"> Seg</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="1"> Ter</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="2"> Qua</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="3"> Qui</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="4"> Sex</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="5"> Sab</div>
+                <div class="day-option"><input type="checkbox" class="dia-aula" value="6"> Dom</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Haverá Recesso/Férias?</label>
+            <select id="tem_recesso">
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="box_recesso" style="display:none;">
+            <label>Total de Dias Corridos de Recesso</label>
+            <input type="number" id="dias_recesso" value="0">
+        </div>
+
+        <button class="btn-calc" py-click="prever_termino">CALCULAR DATA DE TÉRMINO</button>
+    </aside>
+
+    <main class="result-panel">
+        <div style="text-transform: uppercase; letter-spacing: 1px; color: #777;">Data Prevista de Finalização</div>
+        <div class="final-date" id="res_data_fim">--/--/----</div>
+        <div class="info-box" id="res_info">
+            Selecione os parâmetros para calcular.
+        </div>
+        <div style="margin-top: 20px; font-size: 0.8rem; color: #999;">
+            *O cálculo considera dias corridos para o recesso e os dias da semana selecionados para as aulas.
+        </div>
+    </main>
+</div>
+
+<script type="py">
+from pyscript import document
+from datetime import datetime, timedelta
+
+def prever_termino(event):
+    # Coleta de dados
+    data_str = document.getElementById("data_inicio").value
+    if not data_str:
+        document.getElementById("res_info").innerText = "Por favor, insira a data de início."
+        return
+
+    ch_total = float(document.getElementById("ch_total").value)
+    ch_diaria = float(document.getElementById("ch_diaria").value)
+    tem_recesso = document.getElementById("tem_recesso").value
+    dias_recesso_val = int(document.getElementById("dias_recesso").value)
+    
+    # Dias da semana selecionados (0=Segunda, 6=Domingo)
+    checkboxes = document.querySelectorAll(".dia-aula")
+    dias_permitidos = [int(cb.value) for cb in checkboxes if cb.checked]
+
+    if not dias_permitidos:
+        document.getElementById("res_info").innerText = "Selecione ao menos um dia da semana para aula."
+        return
+
+    # Lógica de cálculo
+    data_atual = datetime.strptime(data_str, "%Y-%m-%d")
+    horas_cumpridas = 0
+    
+    # Aplica recesso no início se necessário ou durante (aqui simulamos recesso logo após o início para simplificar)
+    if tem_recesso == "sim":
+        data_atual += timedelta(days=dias_recesso_val)
+
+    # Loop de dias até completar a carga horária
+    iteracoes_seguranca = 0
+    while horas_cumpridas < ch_total and iteracoes_seguranca < 2000:
+        if data_atual.weekday() in dias_permitidos:
+            horas_cumpridas += ch_diaria
+        
+        if horas_cumpridas < ch_total:
+            data_atual += timedelta(days=1)
+        
+        iteracoes_seguranca += 1
+
+    # Saída
+    data_final_formatada = data_atual.strftime("%d/%m/%Y")
+    document.getElementById("res_data_fim").innerText = data_final_formatada
+    
+    semanas = (data_atual - datetime.strptime(data_str, "%Y-%m-%d")).days / 7
+    document.getElementById("res_info").innerHTML = f"O curso terá duração total de aproximadamente {int(semanas)} semanas."
+
+# Lógica para mostrar/esconder campo de recesso
+def toggle_recesso(event):
+    box = document.getElementById("box_recesso")
+    box.style.display = "block" if event.target.value == "sim" else "none"
+
+document.getElementById("tem_recesso").onchange = toggle_recesso
+</script>
+
+</body>
+</html>

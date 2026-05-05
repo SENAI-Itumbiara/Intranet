@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viabilidade de Turmas - SENAI</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root { --senai-blue: #005595; --senai-red: #da291c; --success: #28a745; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background-color: var(--senai-blue); color: white; padding: 15px 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        .main-container { display: flex; flex: 1; gap: 20px; padding: 20px; overflow: hidden; }
+        
+        /* Coluna de Entrada */
+        .input-panel { width: 35%; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-y: auto; }
+        .input-panel h3 { color: var(--senai-blue); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Coluna de Dashboard */
+        .dashboard-panel { width: 65%; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .form-row { display: flex; gap: 15px; margin-bottom: 12px; }
+        .field { flex: 1; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 1.5px solid #dde; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+        input:focus { border-color: var(--senai-blue); outline: none; }
+
+        .btn-run { width: 100%; background: var(--senai-blue); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-run:hover { background: #003d6b; }
+        
+        /* Cards de Resultado */
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .card { padding: 20px; border-radius: 10px; text-align: center; background: #f8f9fa; border-top: 5px solid var(--senai-blue); }
+        .card.highlight { border-top-color: var(--senai-red); background: #fff5f5; }
+        .card-val { font-size: 1.6rem; font-weight: 800; color: #222; margin: 5px 0; }
+        .card-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        #chart-area { flex: 1; min-height: 350px; }
+        .footer-note { font-size: 0.85rem; color: #777; font-style: italic; border-left: 3px solid #ccc; padding-left: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 1.4rem; font-weight: bold;">Simulador de Viabilidade Econômica</div>
+    <div style="font-size: 0.9rem; opacity: 0.9;">SENAI Itumbiara - Análise de Ponto de Equilíbrio</div>
+</header>
+
+<div class="main-container" id="capture-area">
+    <aside class="input-panel">
+        <h3>Custos Estruturais</h3>
+        <div class="form-row">
+            <div class="field">
+                <label>Carga Horária (h)</label>
+                <input type="number" id="ch_total" value="40">
+            </div>
+            <div class="field">
+                <label>Custo Hora Docente (R$)</label>
+                <input type="number" id="valor_hora" value="65.00">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="field">
+                <label>Despesa Materiais (Total)</label>
+                <input type="number" id="mat_total" value="500.00">
+            </div>
+            <div class="field">
+                <label>Insumos (por Aluno)</label>
+                <input type="number" id="insumo_aluno" value="15.00">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="field">
+                <label>Deslocamento/Pedágio</label>
+                <input type="number" id="deslocamento" value="0">
+            </div>
+            <div class="field">
+                <label>Diárias Totais</label>
+                <input type="number" id="diarias" value="0">
+            </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 20px;">
+            <label>Outras Despesas Fixas</label>
+            <input type="number" id="outras" value="0">
+        </div>
+
+        <h3>Receita Prevista</h3>
+        <div class="form-row">
+            <div class="field">
+                <label>Qtd. de Parcelas</label>
+                <input type="number" id="parcelas" value="1">
+            </div>
+            <div class="field">
+                <label>Valor da Parcela (R$)</label>
+                <input type="number" id="valor_parcela" value="450.00">
+            </div>
+        </div>
+
+        <button class="btn-run" py-click="calcular_viabilidade">ANALISAR VIABILIDADE</button>
+        <button onclick="window.print()" style="margin-top:10px; width:100%; border:1px solid #ccc; background:none; padding:10px; cursor:pointer; border-radius:6px;">Imprimir Relatório</button>
+    </aside>
+
+    <main class="dashboard-panel">
+        <div class="kpi-grid">
+            <div class="card highlight">
+                <div class="card-label">Ponto de Equilíbrio</div>
+                <div class="card-val" id="res_pe">0</div>
+                <div style="font-size:0.8rem; color:var(--senai-red)">Alunos Mínimos</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Custo Fixo Total</div>
+                <div class="card-val" id="res_fixo">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Receita por Aluno</div>
+                <div class="card-val" id="res_receita_un">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div id="chart-area">
+            <canvas id="canvas_break_even"></canvas>
+        </div>
+
+        <div id="analise_texto" class="footer-note">
+            Preencha os dados e clique em Analisar para gerar o parecer técnico.
+        </div>
+    </main>
+</div>
+
+<script type="py">
+from pyscript import document
+import js
+
+def calcular_viabilidade(event):
+    # Captura Entradas
+    ch = float(document.getElementById("ch_total").value)
+    v_hora = float(document.getElementById("valor_hora").value)
+    mat_total = float(document.getElementById("mat_total").value)
+    insumo_aluno = float(document.getElementById("insumo_aluno").value)
+    desloc = float(document.getElementById("deslocamento").value)
+    diarias = float(document.getElementById("diarias").value)
+    outras = float(document.getElementById("outras").value)
+    
+    n_parcelas = int(document.getElementById("parcelas").value)
+    v_parcela = float(document.getElementById("valor_parcela").value)
+
+    # 1. CÁLCULO DE CUSTOS FIXOS (O que o SENAI gasta mesmo se não tiver aluno)
+    # Nota: Materiais didáticos fixos entram aqui se for um lote fechado
+    custos_fixos = (ch * v_hora) + mat_total + desloc + diarias + outras
+    
+    # 2. CÁLCULO DE RECEITA E MARGEM VARIÁVEL
+    receita_por_aluno = n_parcelas * v_parcela
+    # Margem de contribuição unitária = Receita - Custo Variável (insumos)
+    margem_un = receita_por_aluno - insumo_aluno
+    
+    # 3. PONTO DE EQUILÍBRIO (BREAK-EVEN)
+    if margem_un > 0:
+        pe_alunos = custos_fixos / margem_un
+        pe_final = int(pe_alunos) + 1 if pe_alunos % 1 > 0 else int(pe_alunos)
+    else:
+        pe_final = "N/A"
+
+    # Atualiza Cards
+    document.getElementById("res_pe").innerText = str(pe_final)
+    document.getElementById("res_fixo").innerText = f"R$ {custos_fixos:,.2f}"
+    document.getElementById("res_receita_un").innerText = f"R$ {receita_por_aluno:,.2f}"
+    
+    # Texto de Parecer
+    if pe_final != "N/A":
+        texto = f"Para este curso ser sustentável em Itumbiara, é necessária a matrícula de no mínimo {pe_final} alunos. Abaixo disso, o curso opera com déficit financeiro."
+    else:
+        texto = "Atenção: O valor cobrado por aluno é menor que o custo de insumos. O curso nunca atingirá o equilíbrio!"
+    
+    document.getElementById("analise_texto").innerHTML = f"<strong>Parecer:</strong> {texto}"
+
+    # Dados para o Gráfico
+    max_alunos = 40
+    lista_alunos = list(range(0, max_alunos + 1, 5))
+    if pe_final != "N/A" and pe_final not in lista_alunos:
+        lista_alunos.append(pe_final)
+        lista_alunos.sort()
+
+    dados_receita = [n * receita_por_aluno for n in lista_alunos]
+    dados_despesa = [custos_fixos + (n * insumo_aluno) for n in lista_alunos]
+
+    # Chama o JS para renderizar o gráfico
+    js.renderChart(list(lista_alunos), list(dados_receita), list(dados_despesa), float(pe_final if pe_final != "N/A" else 0))
+
+</script>
+
+<script>
+    let myChart;
+    function renderChart(labels, receitas, despesas, pe) {
+        const ctx = document.getElementById('canvas_break_even').getContext('2d');
+        
+        if (myChart) { myChart.destroy(); }
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Receita Total (R$)',
+                        data: receitas,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Custo Total (R$)',
+                        data: despesas,
+                        borderColor: '#da291c',
+                        backgroundColor: 'rgba(218, 41, 28, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: 'Análise de Cruzamento (Ponto de Equilíbrio)' },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Quantidade de Alunos' } },
+                    y: { title: { display: true, text: 'Valor em Reais (R$)' } }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
