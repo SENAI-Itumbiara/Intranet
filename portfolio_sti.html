@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STI – Serviços de Tecnologia e Inovação | SENAI Itumbiara & Quirinópolis</title>
+  <style>
+    /* =============================================
+       VARIÁVEIS E RESET
+    ============================================= */
+    :root {
+      --blue-dark:    #003D7A;   /* Azul SENAI principal */
+      --blue-mid:     #005BAA;   /* Azul médio */
+      --blue-light:   #1A78C2;   /* Azul destaque */
+      --blue-accent:  #0096D6;   /* Azul ciano/acento */
+      --blue-soft:    #E8F2FB;   /* Fundo azul suave */
+      --blue-pale:    #F0F7FF;   /* Fundo quase branco */
+      --gray-100:     #F5F7FA;
+      --gray-200:     #EEF1F6;
+      --gray-400:     #9DAFC3;
+      --gray-600:     #5A6E87;
+      --gray-800:     #2C3E50;
+      --white:        #FFFFFF;
+      --shadow-sm:    0 2px 8px rgba(0,61,122,0.08);
+      --shadow-md:    0 6px 24px rgba(0,61,122,0.12);
+      --shadow-lg:    0 12px 40px rgba(0,61,122,0.16);
+      --radius-sm:    8px;
+      --radius-md:    14px;
+      --radius-lg:    20px;
+      --transition:   0.25s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--gray-800);
+      background: var(--white);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* =============================================
+       UTILITÁRIOS
+    ============================================= */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--blue-accent);
+      background: rgba(0,150,214,0.10);
+      border-radius: 40px;
+      padding: 5px 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 3.5vw, 38px);
+      font-weight: 700;
+      color: var(--blue-dark);
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .section-desc {
+      font-size: 17px;
+      color: var(--gray-600);
+      max-width: 620px;
+      line-height: 1.7;
+    }
+
+    /* =============================================
+       BOTÕES
+    ============================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 11px 22px;
+      cursor: pointer;
+      border: none;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--blue-mid);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,91,170,0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--blue-mid);
+      border: 2px solid var(--blue-mid);
+    }
+
+    .btn-outline:hover {
+      background: var(--blue-mid);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .btn-white {
+      background: var(--white);
+      color: var(--blue-dark);
+    }
+
+    .btn-white:hover {
+      background: var(--blue-pale);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255,255,255,0.25);
+    }
+
+    /* =============================================
+       <!-- HEADER/NAVBAR -->
+    ============================================= */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* === LOGOS === */
+    .logos {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* <!-- SUBSTITUA AQUI: troque o src das imagens pelo caminho real dos logos -->  */
+    .logo-block img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .logo-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--gray-200);
+    }
+
+    .logo-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--gray-600);
+      text-align: center;
+      line-height: 1.3;
+      max-width: 110px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    nav a {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--gray-600);
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color var(--transition), background var(--transition);
+    }
+
+    nav a:hover {
+      color: var(--blue-mid);
+      background: var(--blue-pale);
+    }
+
+    .header-cta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--blue-dark);
+      border-radius: 2px;
+      transition: transform 0.3s;
+    }
+
+    /* =============================================
+       <!-- SEÇÃO HERO (BANNER PRINCIPAL) -->
+    ============================================= */
+    .hero {
+      position: relative;
+      background: linear-gradient(135deg, var(--blue-dark) 0%, #005BAA 55%, var(--blue-light) 100%);
+      overflow: hidden;
+      padding: 90px 24px 80px;
+    }
+
+    /* Padrão geométrico decorativo de fundo */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 75% 30%, rgba(0,150,214,0.18) 0%, transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    /* Grade de pontos decorativos */
+    .hero-dots {
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 380px;
+      height: 380px;
+      opacity: 0.07;
+      background-image: radial-gradient(circle, white 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .hero-content {}
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.92);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 40px;
+      margin-bottom: 22px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--blue-accent);
+      border-radius: 50%;
+    }
+
+    .hero-title {
+      font-size: clamp(30px, 4.5vw, 52px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .hero-title span {
+      color: #5DD3FF;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.7;
+      margin-bottom: 32px;
+      max-width: 480px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 48px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
+    /* Painel de destaque do lado direito */
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .hero-feature-card {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      backdrop-filter: blur(6px);
+      transition: background var(--transition);
+    }
+
+    .hero-feature-card:hover {
+      background: rgba(255,255,255,0.16);
+    }
+
+    .hero-feature-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .hero-feature-content h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .hero-feature-content p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+    }
+
+    /* =============================================
+       <!-- FAIXA DE UNIDADES / LOCAIS -->
+    ============================================= */
+    .units-bar {
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .units-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .unit-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--blue-dark);
+    }
+
+    .unit-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--blue-mid);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+    }
+
+    /* =============================================
+       <!-- SEÇÃO: SERVIÇOS PRINCIPAIS -->
+    ============================================= */
+    .section-main-services {
+      padding: 88px 24px;
+      background: var(--white);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-header .section-desc {
+      margin: 0 auto;
+    }
+
+    /* ---- Card grids ---- */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    /* Card Principal */
+    .service-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(0,91,170,0.20);
+    }
+
+    /* <!-- IMAGEM DO CARD: substitua o src do placeholder pela imagem real -->  */
+    .card-image {
+      width: 100%;
+      height: 185px;
+      object-fit: cover;
+      background: var(--gray-100);
+    }
+
+    .card-body {
+      padding: 24px 24px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--blue-light);
+      background: var(--blue-pale);
+      border-radius: 40px;
+      padding: 4px 11px;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .card-desc {
+      font-size: 14.5px;
+      color: var(--gray-600);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .card-footer {
+      padding: 0 24px 22px;
+    }
+
+    .card-divider {
+      height: 1px;
+      background: var(--gray-200);
+      margin-bottom: 16px;
+    }
+
+    .card-action {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ---- Card DESTAQUE (Programa de Excelência - Full Width) ---- */
+    .highlight-card {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+      border-radius: var(--radius-lg);
+      padding: 40px 40px 36px;
+      color: white;
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 250px;
+      height: 250px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .highlight-card::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: 30%;
+      width: 200px;
+      height: 200px;
+      background: rgba(0,150,214,0.12);
+      border-radius: 50%;
+    }
+
+    .highlight-left .section-label {
+      background: rgba(255,255,255,0.15);
+      color: #5DD3FF;
+    }
+
+    .highlight-title {
+      font-size: clamp(22px, 2.8vw, 30px);
+      font-weight: 800;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .highlight-desc {
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .highlight-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Fases da jornada */
+    .phases-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phase-card {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      transition: background var(--transition);
+    }
+
+    .phase-card:hover { background: rgba(255,255,255,0.17); }
+
+    .phase-num {
+      width: 28px;
+      height: 28px;
+      background: var(--blue-accent);
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .phase-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    .phase-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .phase-items li {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+      padding: 2px 0;
+    }
+
+    .phase-items li::before {
+      content: '✓ ';
+      color: #5DD3FF;
+      font-weight: 700;
+    }
+
+    /* =============================================
+       <!-- SEÇÃO: SERVIÇOS COMPLEMENTARES -->
+    ============================================= */
+    .section-complementary {
+      padding: 80px 24px;
+      background: var(--gray-100);
+    }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .comp-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 28px 24px 22px;
+      border: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .comp-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .comp-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      background: var(--blue-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .comp-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray-400);
+    }
+
+    .comp-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      line-height: 1.3;
+    }
+
+    .comp-desc {
+      font-size: 13.5px;
+      color: var(--gray-600);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .comp-services {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .comp-services li {
+      font-size: 13px;
+      color: var(--gray-600);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .comp-services li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--blue-accent);
+      font-weight: 700;
+    }
+
+    /* =============================================
+       <!-- SEÇÃO: LOCAÇÃO DE ESPAÇOS E LABORATÓRIOS -->
+    ============================================= */
+    .section-rental {
+      padding: 80px 24px;
+      background: var(--white);
+    }
+
+    .rental-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .rental-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 60px;
+      align-items: center;
+      margin-top: 48px;
+    }
+
+    .rental-items {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .rental-item {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 20px;
+      background: var(--gray-100);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--blue-mid);
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .rental-item:hover {
+      background: var(--blue-soft);
+      border-color: var(--blue-accent);
+    }
+
+    .rental-item-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .rental-item-text h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 4px;
+    }
+
+    .rental-item-text p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    /* <!-- IMAGEM DA LOCAÇÃO: substitua o src do placeholder -->  */
+    .rental-image {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .rental-image img {
+      width: 100%;
+      height: 420px;
+      object-fit: cover;
+    }
+
+    /* =============================================
+       <!-- FAIXA CTA / CHAMADA PARA AÇÃO -->
+    ============================================= */
+    .cta-section {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-light) 100%);
+      padding: 72px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0,150,214,0.25) 0%, transparent 65%);
+    }
+
+    .cta-inner {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .cta-label {
+      display: inline-block;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.9);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 40px;
+      margin-bottom: 20px;
+    }
+
+    .cta-title {
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 800;
+      color: white;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .cta-desc {
+      font-size: 16px;
+      color: rgba(255,255,255,0.72);
+      margin-bottom: 34px;
+      line-height: 1.7;
+    }
+
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* =============================================
+       <!-- RODAPÉ DE CONTATO -->
+    ============================================= */
+    footer {
+      background: var(--blue-dark);
+      color: rgba(255,255,255,0.75);
+      padding: 60px 24px 32px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr 1.2fr;
+      gap: 48px;
+    }
+
+    .footer-brand h3 {
+      color: white;
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .footer-brand p {
+      font-size: 13.5px;
+      line-height: 1.65;
+      max-width: 280px;
+    }
+
+    .footer-col h4 {
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-links li {
+      font-size: 13.5px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.62);
+      transition: color var(--transition);
+    }
+
+    .footer-links a:hover { color: white; }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 13.5px;
+    }
+
+    .contact-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-bottom p { font-size: 12.5px; }
+
+    .footer-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.7);
+      padding: 4px 12px;
+      border-radius: 40px;
+    }
+
+    /* =============================================
+       RESPONSIVIDADE
+    ============================================= */
+    @media (max-width: 992px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .hero-visual { display: none; }
+
+      .highlight-card {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .rental-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .rental-image { display: none; }
+
+      .footer-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav, .header-cta { display: none; }
+
+      .hamburger { display: flex; }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phases-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .comp-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .units-inner {
+        gap: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .footer-inner {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+
+      .highlight-card {
+        padding: 28px 22px;
+      }
+    }
+
+    /* =============================================
+       ANIMAÇÕES DE ENTRADA (SCROLL)
+    ============================================= */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-delay-1 { transition-delay: 0.10s; }
+    .fade-in-delay-2 { transition-delay: 0.20s; }
+    .fade-in-delay-3 { transition-delay: 0.30s; }
+    .fade-in-delay-4 { transition-delay: 0.40s; }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       HEADER / NAVEGAÇÃO
+  ============================================= -->
+  <header>
+    <div class="header-inner">
+
+      <div class="logos">
+        <!-- LOGOS: substitua os src pelos arquivos reais dos logos SESI/SENAI -->
+        <div class="logo-block">
+          <img src="logo.png" alt="Logo SENAI" />
+        </div>
+        <div class="logo-divider"></div>
+        <!-- <div class="logo-block">
+          <img src="https://via.placeholder.com/100x44/005BAA/FFFFFF?text=SESI" alt="Logo SESI" />
+        </div> -->
+        <div class="logo-divider"></div>
+        <p class="logo-text">STI – Tecnologia &amp; Inovação</p>
+      </div>
+
+      <nav>
+        <a href="#servicos-principais">Serviços</a>
+        <a href="#complementares">Parcerias</a>
+        <a href="#locacao">Infraestrutura</a>
+        <a href="#contato">Contato</a>
+      </nav>
+
+      <div class="header-cta">
+        <a href="#contato" class="btn btn-primary">Solicitar Orçamento</a>
+      </div>
+
+      <button class="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- =============================================
+       HERO – BANNER PRINCIPAL
+  ============================================= -->
+  <section class="hero" id="inicio">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+
+      <div class="hero-content">
+        <span class="hero-badge">SENAI Itumbiara &amp; Unidade Integrada SESI/SENAI Quirinópolis</span>
+        <h1 class="hero-title">
+          Soluções de <span>Tecnologia</span><br/>e Inovação<br/>para a Indústria
+        </h1>
+        <p class="hero-subtitle">
+          Do diagnóstico à implantação: consultoria técnica, programas de excelência operacional,
+          metrologia industrial, inovação e muito mais. Seu parceiro estratégico de produtividade.
+        </p>
+        <div class="hero-actions">
+          <a href="#servicos-principais" class="btn btn-white">Conheça os Serviços</a>
+          <a href="#contato" class="btn btn-outline" style="border-color:rgba(255,255,255,0.45);color:white;">Fale Conosco</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">+250k</div>
+            <div class="hero-stat-label">Ensaios Realizados</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">+300</div>
+            <div class="hero-stat-label">Clientes Atendidos</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">4</div>
+            <div class="hero-stat-label">Fases de Excelência</div>
+          </div>
+        </div>
+      </div><!-- /hero-content -->
+
+      <div class="hero-visual">
+        <div class="hero-feature-card">
+          <div class="hero-feature-icon">🏭</div>
+          <div class="hero-feature-content">
+            <h3>Programa de Excelência Operacional</h3>
+            <p>Jornada de 4 fases para transformação real do chão de fábrica com foco em ROI mensurável.</p>
+          </div>
+        </div>
+        <div class="hero-feature-card">
+          <div class="hero-feature-icon">🔬</div>
+          <div class="hero-feature-content">
+            <h3>Metrologia SENAI ZEISS</h3>
+            <p>Medição de alta precisão, tomografia industrial e engenharia reversa em parceria com a FATEC Ítalo Bologna.</p>
+          </div>
+        </div>
+        <div class="hero-feature-card">
+          <div class="hero-feature-icon">🌾</div>
+          <div class="hero-feature-content">
+            <h3>Selo Alimento Confiável</h3>
+            <p>Certificação de boas práticas e segurança alimentar para agroindústrias em parceria SENAI GO + SEBRAE.</p>
+          </div>
+        </div>
+        <div class="hero-feature-card">
+          <div class="hero-feature-icon">💡</div>
+          <div class="hero-feature-content">
+            <h3>SEBRAETEC – Subsídios de até 70%</h3>
+            <p>Consultorias subsidiadas em inovação, design, produtividade e sustentabilidade para MPEs.</p>
+          </div>
+        </div>
+      </div><!-- /hero-visual -->
+
+    </div>
+  </section><!-- /hero -->
+
+  <!-- =============================================
+       FAIXA DE UNIDADES
+  ============================================= -->
+  <div class="units-bar">
+    <div class="units-inner">
+      <div class="unit-item">
+        <div class="unit-icon">📍</div>
+        <div>
+          <strong>SENAI Itumbiara</strong><br/>
+          <span style="font-size:12px;color:#5A6E87;">Serviços de Tecnologia e Inovação</span>
+        </div>
+      </div>
+      <div class="unit-item">
+        <div class="unit-icon">📍</div>
+        <div>
+          <strong>Unid. Integrada SESI/SENAI Quirinópolis</strong><br/>
+          <span style="font-size:12px;color:#5A6E87;">Atendimento Regional</span>
+        </div>
+      </div>
+      <div class="unit-item">
+        <div class="unit-icon">🤝</div>
+        <div>
+          <strong>Rede RESETGO</strong><br/>
+          <span style="font-size:12px;color:#5A6E87;">Parcerias Estratégicas em Goiás</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       SEÇÃO: SERVIÇOS PRINCIPAIS
+  ============================================= -->
+  <section class="section-main-services" id="servicos-principais">
+    <div class="container">
+
+      <div class="section-header fade-in">
+        <span class="section-label">Serviços Principais</span>
+        <h2 class="section-title">Soluções que transformam resultados</h2>
+        <p class="section-desc">
+          Portfólio completo de consultorias, programas de excelência e avaliações técnicas
+          para elevar a competitividade da sua empresa.
+        </p>
+      </div>
+
+      <div class="cards-grid">
+
+        <!-- =========================================
+             CARD DESTAQUE: Programa SENAI de Excelência
+        ========================================= -->
+        <div class="highlight-card fade-in">
+          <div class="highlight-left">
+            <span class="section-label">🏆 Carro-Chefe</span>
+            <h2 class="highlight-title">Programa SENAI de Excelência Operacional Industrial</h2>
+            <p class="highlight-desc">
+              Uma jornada estruturada de 4 fases que transforma a performance do chão de fábrica.
+              Diagnóstico rigoroso, capacitação técnica integrada, intervenção de processos e
+              sustentação contínua. Saímos de fornecedores de cursos para <strong>sócios estratégicos da produtividade.</strong>
+            </p>
+            <div class="highlight-cta">
+              <a href="#contato" class="btn btn-white">Solicitar Orçamento</a>
+              <a href="#contato" class="btn" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;">Saiba Mais</a>
+            </div>
+          </div>
+
+          <!-- FASES DA JORNADA -->
+          <div class="phases-grid">
+
+            <!-- FASE 1 -->
+            <div class="phase-card">
+              <div class="phase-num">1</div>
+              <div class="phase-title">Diagnóstico e Sensibilização</div>
+              <ul class="phase-items">
+                <li>Mapeamento de Competências Técnicas</li>
+                <li>Identificação de Gargalos Operacionais</li>
+                <li>Índice de Maturidade Operacional (IMO)</li>
+                <li>Plano de Ação Priorizado</li>
+              </ul>
+            </div>
+
+            <!-- FASE 2 -->
+            <div class="phase-card">
+              <div class="phase-num">2</div>
+              <div class="phase-title">Estabilização de Processos</div>
+              <ul class="phase-items">
+                <li>Capacitação técnica in loco</li>
+                <li>Matriz de Competências (MCT)</li>
+                <li>Desenvolvimento assistido na linha de produção</li>
+                <li>Indicadores de performance</li>
+              </ul>
+            </div>
+
+            <!-- FASE 3 -->
+            <div class="phase-card">
+              <div class="phase-num">3</div>
+              <div class="phase-title">Otimização de Performance</div>
+              <ul class="phase-items">
+                <li>Ajustes técnicos de processo</li>
+                <li>Redução de perdas e refugo</li>
+                <li>Otimização de setup e fluxo</li>
+                <li>Indicadores comparativos Antes/Depois</li>
+              </ul>
+            </div>
+
+            <!-- FASE 4 -->
+            <div class="phase-card">
+              <div class="phase-num">4</div>
+              <div class="phase-title">Sustentabilidade e Melhoria Contínua</div>
+              <ul class="phase-items">
+                <li>Residência Técnica Industrial</li>
+                <li>Formação de Multiplicadores Internos</li>
+                <li>Cultura de Melhoria Contínua</li>
+                <li>Relatório de Impacto Industrial (RII)</li>
+              </ul>
+            </div>
+
+          </div><!-- /phases-grid -->
+        </div><!-- /highlight-card -->
+
+        <!-- =========================================
+             CARD: Consultoria Lean Manufacturing
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-1">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/lean.png"
+            alt="Consultoria Lean Manufacturing"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">Consultoria</span>
+            <div class="card-icon">⚙️</div>
+            <h3 class="card-title">Consultoria Lean Manufacturing</h3>
+            <p class="card-desc">
+              Identificação e eliminação sistemática de desperdícios nos processos produtivos.
+              Aumentamos a produtividade com ferramentas como VSM, Kaizen, 5 Porquês e SMED,
+              gerando ganhos mensuráveis de eficiência e redução de custos.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Solicitar Orçamento</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================
+             CARD: 5S e Programas de Excelência
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-2">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/5s.png"
+            alt="Adequação e Implantação de 5S"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">Excelência Operacional</span>
+            <div class="card-icon">🗂️</div>
+            <h3 class="card-title">Adequação e Implantação de 5S e Programas de Excelência</h3>
+            <p class="card-desc">
+              Auditoria, implantação e consolidação de programas de organização e cultura
+              de qualidade. Desenvolvemos planos de ação, treinamentos de equipes e sistemas
+              de auditoria para garantir a sustentabilidade dos resultados.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Solicitar Orçamento</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================
+             CARD: Selo Alimento Confiável
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-1">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/selo.png"
+            alt="Selo Alimento Confiável"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">🤝 Parceria SENAI GO + SEBRAE</span>
+            <div class="card-icon">🌾</div>
+            <h3 class="card-title">Selo Alimento Confiável</h3>
+            <p class="card-desc">
+              Certificação de segurança alimentar e boas práticas de fabricação para
+              agroindústrias de pequeno porte (leite, mel, avicultura) e serviços de alimentação.
+              Empresas com mais de <strong>85% de conformidade</strong> recebem o Selo de Excelência.
+              Iniciativa SENAI GO em parceria com o SEBRAE.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Solicitar Orçamento</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================
+             CARD: Serviços SEBRAETEC
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-2">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/sebrae.png"
+            alt="Serviços SEBRAETEC"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">💰 Subsídio de até 70%</span>
+            <div class="card-icon">💡</div>
+            <h3 class="card-title">Serviços SEBRAETEC</h3>
+            <p class="card-desc">
+              Consultorias subsidiadas pelo SEBRAE para micro e pequenas empresas nas áreas de
+              <strong>design, produtividade, sustentabilidade e inovação</strong>. O SEBRAETEC
+              cobre até 70% do valor, reduzindo drasticamente o investimento do empresário.
+              Acesso simplificado via SENAI Itumbiara.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Verificar Elegibilidade</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================
+             CARD: Avaliações Técnicas
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-1">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/avaliacao.png"
+            alt="Avaliações Técnicas"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">Diagnóstico</span>
+            <div class="card-icon">📊</div>
+            <h3 class="card-title">Avaliações Técnicas e Diagnósticos</h3>
+            <p class="card-desc">
+              Diagnóstico de maturidade digital e tecnológica, avaliação de competência
+              técnica e assessment de maturidade operacional. Geramos o Índice de Maturidade
+              Operacional (IMO) com roadmap de evolução personalizado para cada empresa.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Solicitar Diagnóstico</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================
+             CARD: Inovação e PD&I
+        ========================================= -->
+        <div class="service-card fade-in fade-in-delay-2">
+          <!-- IMAGEM: substitua o src -->
+          <img
+            src="img/pdi.png"
+            alt="Inovação e PD&I"
+            class="card-image"
+          />
+          <div class="card-body">
+            <span class="card-tag">Inovação</span>
+            <div class="card-icon">🚀</div>
+            <h3 class="card-title">Inovação: Prototipagem e PD&amp;I / P&amp;D</h3>
+            <p class="card-desc">
+              Prototipagem de produtos, desenvolvimento de projetos de Pesquisa, Desenvolvimento
+              e Inovação (PD&amp;I) e Pesquisa &amp; Desenvolvimento (P&amp;D). Suporte técnico
+              desde a concepção do produto até a industrialização, com acesso a laboratórios
+              especializados e equipe multidisciplinar.
+            </p>
+          </div>
+          <div class="card-footer">
+            <div class="card-divider"></div>
+            <div class="card-action">
+              <a href="#contato" class="btn btn-primary" style="flex:1;justify-content:center;">Solicitar Orçamento</a>
+              <a href="#contato" class="btn btn-outline">Saiba Mais</a>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cards-grid -->
+    </div><!-- /container -->
+  </section><!-- /section-main-services -->
+
+  <!-- =============================================
+       SEÇÃO: SERVIÇOS COMPLEMENTARES E PARCERIAS
+  ============================================= -->
+  <section class="section-complementary" id="complementares">
+    <div class="container">
+
+      <div class="section-header fade-in">
+        <span class="section-label">Parcerias &amp; Serviços Complementares</span>
+        <h2 class="section-title">Uma rede de excelência técnica para você</h2>
+        <p class="section-desc">
+          Acesso a serviços especializados por meio da nossa rede de parceiros
+          institucionais em Goiás e no Brasil.
+        </p>
+      </div>
+
+      <div class="comp-grid">
+
+        <!-- CARD: Rede RESETGO -->
+        <div class="comp-card fade-in fade-in-delay-1">
+          <div class="comp-icon-wrap">🔗</div>
+          <span class="comp-tag">Rede Estadual · Goiás</span>
+          <h3 class="comp-title">Rede RESETGO</h3>
+          <p class="comp-desc">
+            Rede integrada de Serviços Tecnológicos do SENAI em Goiás. Acesso ampliado a
+            laboratórios, consultorias e serviços especializados em todo o estado, com
+            articulação entre as unidades SENAI para atender demandas de maior complexidade.
+          </p>
+          <a href="#contato" class="btn btn-outline" style="margin-top:4px;">Saiba Mais</a>
+        </div>
+
+        <!-- CARD: SENAI Vila Canaã -->
+        <div class="comp-card fade-in fade-in-delay-2">
+          <div class="comp-icon-wrap">🏗️</div>
+          <span class="comp-tag">Parceria · SENAI Goiânia</span>
+          <h3 class="comp-title">Parceria SENAI Vila Canaã (Goiânia)</h3>
+          <p class="comp-desc">
+            Serviços especializados em controle tecnológico de materiais de construção,
+            metrologia ambiental e engenharia reversa. Presente em mais de 350 obras,
+            com mais de 250 mil ensaios realizados. Áreas: concreto, aço, argamassas,
+            emissões atmosféricas, ruído e qualidade do ar.
+          </p>
+          <ul class="comp-services">
+            <li>Controle tecnológico de concreto e aço</li>
+            <li>Esclerometria e extração de testemunhos</li>
+            <li>Engenharia reversa e digitalização 3D</li>
+            <li>Monitoramento de emissões e ruído</li>
+          </ul>
+          <a href="#contato" class="btn btn-outline" style="margin-top:4px;">Solicitar Serviço</a>
+        </div>
+
+        <!-- CARD: Centro de Excelência em Metrologia ZEISS -->
+        <div class="comp-card fade-in fade-in-delay-3">
+          <div class="comp-icon-wrap">🔬</div>
+          <span class="comp-tag">Parceria · FATEC SENAI Ítalo Bologna</span>
+          <h3 class="comp-title">Centro de Excelência em Metrologia SENAI ZEISS</h3>
+          <p class="comp-desc">
+            Referência em precisão, tecnologia e inovação industrial. Parceria entre a
+            Faculdade SENAI Ítalo Bologna e a ZEISS para serviços de medição de alta
+            complexidade, tomografia industrial e PD&amp;I.
+          </p>
+          <ul class="comp-services">
+            <li>Controle dimensional e geométrico</li>
+            <li>Tomografia industrial (ensaio não destrutivo)</li>
+            <li>Engenharia reversa com scanner 3D</li>
+            <li>Digitalização de peças e análise de embalagens</li>
+            <li>Detecção de trincas, porosidade e defeitos internos</li>
+          </ul>
+          <a href="#contato" class="btn btn-outline" style="margin-top:4px;">Solicitar Medição</a>
+        </div>
+
+      </div><!-- /comp-grid -->
+    </div><!-- /container -->
+  </section><!-- /section-complementary -->
+
+  <!-- =============================================
+       SEÇÃO: LOCAÇÃO DE ESPAÇOS E LABORATÓRIOS
+  ============================================= -->
+  <section class="section-rental" id="locacao">
+    <div class="rental-inner">
+
+      <div class="section-header fade-in" style="text-align:left;">
+        <span class="section-label">Infraestrutura</span>
+        <h2 class="section-title">Locação de Espaços,<br/>Laboratórios e Equipamentos</h2>
+        <p class="section-desc">
+          Disponibilizamos nossa infraestrutura técnica e espaços para empresas,
+          eventos corporativos e projetos industriais. Ambiente equipado e suporte especializado.
+        </p>
+      </div>
+
+      <div class="rental-grid">
+        <div class="rental-items">
+
+          <div class="rental-item fade-in fade-in-delay-1">
+            <div class="rental-item-icon">🏛️</div>
+            <div class="rental-item-text">
+              <h4>Salas e Auditórios</h4>
+              <p>Espaços climatizados para treinamentos corporativos, workshops, palestras e reuniões empresariais com capacidade variada.</p>
+            </div>
+          </div>
+
+          <div class="rental-item fade-in fade-in-delay-2">
+            <div class="rental-item-icon">🧪</div>
+            <div class="rental-item-text">
+              <h4>Laboratórios Técnicos</h4>
+              <p>Laboratórios equipados para ensaios, pesquisa e desenvolvimento de produtos. Ideal para startups e empresas em P&amp;D.</p>
+            </div>
+          </div>
+
+          <div class="rental-item fade-in fade-in-delay-3">
+            <div class="rental-item-icon">⚙️</div>
+            <div class="rental-item-text">
+              <h4>Equipamentos e Máquinas Industriais</h4>
+              <p>Locação de máquinas e equipamentos industriais especializados com suporte técnico da equipe SENAI.</p>
+            </div>
+          </div>
+
+          <div class="rental-item fade-in fade-in-delay-4">
+            <div class="rental-item-icon">🏗️</div>
+            <div class="rental-item-text">
+              <h4>Oficinas e Áreas Produtivas</h4>
+              <p>Espaços para prototipagem, montagem e desenvolvimento de produtos. Acesso a ferramentas e bancadas técnicas.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;">
+            <a href="#contato" class="btn btn-primary">Consultar Disponibilidade</a>
+          </div>
+
+        </div><!-- /rental-items -->
+
+        <div class="rental-image fade-in">
+          <!-- IMAGEM: substitua o src pela foto da infraestrutura SENAI -->
+          <img
+            src="https://via.placeholder.com/640x420/003D7A/FFFFFF?text=Infraestrutura+SENAI"
+            alt="Infraestrutura SENAI Itumbiara"
+          />
+        </div>
+
+      </div><!-- /rental-grid -->
+    </div><!-- /rental-inner -->
+  </section><!-- /section-rental -->
+
+  <!-- =============================================
+       FAIXA CTA
+  ============================================= -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <span class="cta-label">Próximo Passo</span>
+      <h2 class="cta-title">Pronto para transformar sua operação?</h2>
+      <p class="cta-desc">
+        Entre em contato com nossa equipe de especialistas e descubra qual solução
+        STI é a mais indicada para os desafios da sua empresa.
+      </p>
+      <div class="cta-actions">
+        <a href="#contato" class="btn btn-white">Solicitar Orçamento</a>
+        <a href="mailto:sti@senaiitumbiara.com.br" class="btn" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;">Enviar E-mail</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       RODAPÉ DE CONTATO
+  ============================================= -->
+  <footer id="contato">
+    <div class="footer-inner">
+
+      <div class="footer-brand">
+        <!-- LOGO RODAPÉ: substitua o src -->
+        <img
+          src="logo2.png"
+          alt="Logo SENAI"
+          style="margin-bottom:14px;"
+        />
+        <h3>STI – Serviços de Tecnologia e Inovação</h3>
+        <p>
+          Consultoria, inovação e excelência operacional para a indústria de Goiás.
+          SENAI Itumbiara e Unidade Integrada SESI/SENAI Quirinópolis.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Serviços Principais</h4>
+        <ul class="footer-links">
+          <li><a href="#servicos-principais">Prog. Excelência Operacional</a></li>
+          <li><a href="#servicos-principais">Consultoria Lean Manufacturing</a></li>
+          <li><a href="#servicos-principais">Implantação de 5S</a></li>
+          <li><a href="#servicos-principais">Selo Alimento Confiável</a></li>
+          <li><a href="#servicos-principais">SEBRAETEC</a></li>
+          <li><a href="#servicos-principais">Avaliações Técnicas</a></li>
+          <li><a href="#servicos-principais">Inovação e PD&amp;I</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Parcerias</h4>
+        <ul class="footer-links">
+          <li><a href="#complementares">Rede RESETGO</a></li>
+          <li><a href="#complementares">SENAI Vila Canaã</a></li>
+          <li><a href="#complementares">Centro SENAI ZEISS</a></li>
+          <li><a href="#locacao">Infraestrutura / Locação</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contato</h4>
+
+        <div class="contact-item">
+          <span class="contact-icon">📍</span>
+          <span>SENAI Itumbiara – Goiás, Brasil</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📍</span>
+          <span>Unid. Integrada SESI/SENAI Quirinópolis – GO</span>
+        </div>
+        <div class="contact-item">
+          <!-- EDITE: substitua pelo e-mail real -->
+          <span class="contact-icon">✉️</span>
+          <span>ricardotirone.senai@fieg.com.br<br>rodrigoss.senai@fieg.com.br</span>
+        </div>
+        <div class="contact-item">
+          <!-- EDITE: substitua pelo telefone real -->
+          <span class="contact-icon">📞</span>
+          <span>(64) 3432-2500</span>
+        </div>
+        <div class="contact-item">
+          <!-- EDITE: substitua pelo WhatsApp real -->
+          <span class="contact-icon">💬</span>
+          <span>WhatsApp:<br>(64) 9 9235-4297<br>(64) 9 9977-7143</span>
+        </div>
+      </div>
+
+    </div><!-- /footer-inner -->
+
+    <div class="footer-bottom">
+      <p>© 2026 SENAI Itumbiara &amp; Unidade Integrada SESI/SENAI Quirinópolis. Todos os direitos reservados.</p>
+      <div class="footer-badges">
+        <span class="footer-badge">SENAI GO</span>
+        <span class="footer-badge">SESI GO</span>
+        <span class="footer-badge">SEBRAETEC</span>
+        <span class="footer-badge">Rede RESETGO</span>
+      </div>
+    </div>
+
+  </footer><!-- /footer -->
+
+  <!-- =============================================
+       JAVASCRIPT: Animações de scroll e menu mobile
+  ============================================= -->
+  <script>
+    // Intersection Observer para fade-in elements
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.10 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Ativa os cards do hero imediatamente
+    document.querySelectorAll('.hero .fade-in').forEach(el => el.classList.add('visible'));
+
+    // Menu mobile simples (toggle visibility)
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('nav');
+    hamburger.addEventListener('click', () => {
+      if (nav.style.display === 'flex') {
+        nav.style.display = '';
+      } else {
+        nav.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:white;padding:16px 24px;box-shadow:0 8px 24px rgba(0,0,0,0.10);gap:4px;z-index:99;';
+      }
+    });
+
+    // Fecha menu ao clicar em link
+    nav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => { nav.style.display = ''; });
+    });
+  </script>
+
+</body>
+</html>
