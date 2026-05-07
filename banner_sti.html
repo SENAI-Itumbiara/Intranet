@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1400"/>
+<title>Folder STI – SENAI Itumbiara & Quirinópolis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+
+/* ─── RESET & BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Barlow', sans-serif;
+  padding: 32px;
+}
+
+/* ─── WRAPPER DO FOLDER ─── */
+.folder {
+  width: 1400px;
+  height: 800px;
+  display: grid;
+  grid-template-columns: 420px 1fr 400px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.20);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ════════════════════════════════════════════════
+   PAINEL ESQUERDO — CAPA / IDENTIDADE
+════════════════════════════════════════════════ */
+.panel-left {
+  background: #003D7A;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Padrão geométrico de fundo */
+.panel-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,150,214,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,150,214,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Forma diagonal decorativa */
+.panel-left::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  height: 200px;
+  background: #002B57;
+  clip-path: polygon(0 60%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+.panel-left-top {
+  position: relative;
+  z-index: 2;
+  padding: 30px 28px 0;
+}
+
+/* ── Bloco de logos ── */
+.logos-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* ★ SUBSTITUA: troque os src abaixo pelos logos reais do SENAI/SESI */
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.logo-sep {
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.25);
+}
+
+/* ── Foto / Imagem principal ── */
+.cover-image-box {
+  position: relative;
+  z-index: 2;
+  margin: 0 28px;
+  height: 220px;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px dashed rgba(255,255,255,0.22);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.cover-image-box .img-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.40);
+}
+
+.cover-image-box .img-hint {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.28);
+  text-align: center;
+  line-height: 1.5;
+  max-width: 200px;
+}
+
+/* ── Título da capa ── */
+.cover-title-block {
+  position: relative;
+  z-index: 2;
+  padding: 22px 28px 0;
+  flex: 1;
+}
+
+.cover-overtitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #5DD3FF;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cover-overtitle::before {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 2px;
+  background: #5DD3FF;
+}
+
+.cover-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.0;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.cover-title em {
+  color: #5DD3FF;
+  font-style: normal;
+}
+
+.cover-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.55;
+  max-width: 300px;
+}
+
+/* ── Rodapé do painel esquerdo ── */
+.panel-left-footer {
+  position: relative;
+  z-index: 3;
+  padding: 18px 28px 24px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+
+.units-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.unit-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.unit-dot {
+  width: 6px;
+  height: 6px;
+  background: #5DD3FF;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.unit-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+}
+
+.unit-text span {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.40);
+}
+
+/* ════════════════════════════════════════════════
+   PAINEL CENTRAL — PROGRAMA DE EXCELÊNCIA
+════════════════════════════════════════════════ */
+.panel-center {
+  background: #F0F6FF;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid #D8E6F5;
+  border-right: 1px solid #D8E6F5;
+}
+
+/* Faixa de cabeçalho escura */
+.center-header {
+  background: #005BAA;
+  padding: 22px 30px 20px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.center-header::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 130px;
+  height: 130px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+
+.program-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #5DD3FF;
+  margin-bottom: 6px;
+}
+
+.program-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+}
+
+.program-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.66);
+  margin-top: 8px;
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+/* ── Grid das 4 Fases ── */
+.phases-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+.phase {
+  padding: 18px 22px 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* Bordas internas */
+.phase:nth-child(1) { border-right: 1px solid #D8E6F5; border-bottom: 1px solid #D8E6F5; }
+.phase:nth-child(2) { border-bottom: 1px solid #D8E6F5; }
+.phase:nth-child(3) { border-right: 1px solid #D8E6F5; }
+.phase:nth-child(4) { }
+
+/* Numeral fantasma */
+.phase-ghost {
+  position: absolute;
+  right: -8px;
+  bottom: -14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 100px;
+  font-weight: 900;
+  color: rgba(0,91,170,0.055);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.phase-num {
+  width: 24px;
+  height: 24px;
+  background: #005BAA;
+  color: #fff;
+  border-radius: 50%;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phase-stage {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #0096D6;
+}
+
+.phase-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #003D7A;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.phase-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.phase-items li {
+  font-size: 11.5px;
+  color: #4A6080;
+  line-height: 1.4;
+  padding-left: 12px;
+  position: relative;
+}
+
+.phase-items li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: #0096D6;
+  font-weight: 700;
+  line-height: 1;
+  top: 1px;
+}
+
+/* ── Barra metodológica ── */
+.method-bar {
+  background: #003D7A;
+  padding: 10px 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+}
+
+.method-abbr {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #5DD3FF;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.method-text {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.3;
+}
+
+.method-sep {
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ════════════════════════════════════════════════
+   PAINEL DIREITO — DEMAIS SERVIÇOS
+════════════════════════════════════════════════ */
+.panel-right {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Cabeçalho direito */
+.right-header {
+  background: #003D7A;
+  padding: 16px 24px;
+  flex-shrink: 0;
+}
+
+.right-header-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 2px;
+}
+
+.right-header-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  line-height: 1.0;
+}
+
+/* ── Lista de serviços (direita) ── */
+.services-list {
+  flex: 1;
+  overflow: hidden;
+  padding: 12px 0 0;
+}
+
+.svc-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0 10px;
+  align-items: start;
+  padding: 9px 20px 9px 16px;
+  border-bottom: 1px solid #EDF2F8;
+  position: relative;
+}
+
+.svc-item:last-child { border-bottom: none; }
+
+.svc-icon-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1px;
+}
+
+.svc-icon {
+  width: 30px;
+  height: 30px;
+  background: #E8F2FB;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.svc-content {}
+
+.svc-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #003D7A;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 3px;
+}
+
+.svc-desc {
+  font-size: 11px;
+  color: #5A6E87;
+  line-height: 1.45;
+}
+
+.svc-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #0096D6;
+  background: #E8F2FB;
+  border-radius: 20px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+
+/* ── Seção de Parcerias ── */
+.partnerships-block {
+  background: #F0F6FF;
+  padding: 12px 16px 10px;
+  border-top: 2px solid #D8E6F5;
+  flex-shrink: 0;
+}
+
+.partner-header {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8AA5C0;
+  margin-bottom: 8px;
+}
+
+.partners-row {
+  display: flex;
+  gap: 8px;
+}
+
+.partner-tag {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #D8E6F5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.partner-tag .p-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #003D7A;
+  text-transform: uppercase;
+  display: block;
+  line-height: 1.2;
+}
+
+.partner-tag .p-sub {
+  font-size: 9.5px;
+  color: #7A96B0;
+  display: block;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* ── Rodapé de contato ── */
+.right-footer {
+  background: #003D7A;
+  padding: 11px 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.contact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.contact-line {
+  font-size: 11px;
+  color: rgba(255,255,255,0.60);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contact-line strong {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+
+.qr-placeholder {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.10);
+  border: 1.5px dashed rgba(255,255,255,0.25);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qr-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.30);
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+/* ── Divisor visual entre painéis ── */
+.panel-divider {
+  position: absolute;
+  left: 420px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0,0,0,0.08);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.panel-divider-2 {
+  position: absolute;
+  right: 400px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0,0,0,0.08);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Nota de impressão (não imprime) ── */
+.print-note {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #1E293B;
+  color: #94A3B8;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 6px;
+  z-index: 999;
+}
+
+@media print {
+  body { background: white; padding: 0; min-height: auto; }
+  .print-note { display: none; }
+  .folder { box-shadow: none; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="print-note">1800 × 800 px — Folder Imprimível</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOLDER COMPLETO
+══════════════════════════════════════════════════════════════ -->
+<div class="folder">
+
+  <!-- Divisores visuais (dobras do folder) -->
+  <div class="panel-divider"></div>
+  <div class="panel-divider-2"></div>
+
+
+  <!-- ══════════════════════════════════
+       PAINEL ESQUERDO — CAPA
+  ══════════════════════════════════ -->
+  <div class="panel-left">
+
+    <div class="panel-left-top">
+
+      <!-- LOGOS -->
+      <div class="logos-row">
+        <!-- ★ IMAGEM 1: Logo SENAI — substitua src pelo arquivo real -->
+        <!-- <img class="logo-img" src="'logo.png' width='100' height='30'%3E%3Crect width='100' height='30' fill='rgba(255,255,255,0.15)' rx='3'/%3E%3Ctext x='50' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='13' font-weight='bold'%3ESENAI%3C/text%3E%3C/svg%3E" alt="Logo SENAI"/> -->
+        <div class="logo-sep"></div>
+        <!-- ★ IMAGEM 2: Logo SESI — substitua src pelo arquivo real -->
+        <!-- <img class="logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='30'%3E%3Crect width='80' height='30' fill='rgba(255,255,255,0.15)' rx='3'/%3E%3Ctext x='40' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='13' font-weight='bold'%3ESESI%3C/text%3E%3C/svg%3E" alt="Logo SESI"/> -->
+      </div>
+
+      <!-- IMAGEM PRINCIPAL DA CAPA -->
+      <!--
+        ★ IMAGEM 3: Foto de destaque da capa
+        Sugestão: foto do chão de fábrica, equipe técnica ou equipamento SENAI
+        Dimensões ideais: 364 × 220 px
+        Substitua o bloco .cover-image-box por:
+        <img src="SUA_IMAGEM.jpg" style="width:100%;height:220px;object-fit:cover;border-radius:6px;display:block;margin:0 28px;width:calc(100% - 56px);" alt="..."/>
+      -->
+      <div class="cover-image-box">
+        <div class="img-label">📷 Imagem Principal</div>
+        <div class="img-hint">Foto da equipe ou processo industrial<br/>364 × 220 px recomendado</div>
+      </div>
+
+    </div><!-- /panel-left-top -->
+
+    <div class="cover-title-block">
+      <div class="cover-overtitle">Serviços de Tecnologia e Inovação</div>
+      <h1 class="cover-title">
+        Do<br/>Diagnóstico<br/>à <em>Excelência</em><br/>Industrial
+      </h1>
+      <p class="cover-subtitle">
+        Consultoria técnica, programas de excelência operacional,
+        inovação e metrologia de precisão para a indústria goiana.
+      </p>
+    </div>
+
+    <div class="panel-left-footer">
+      <div class="units-stack">
+        <div class="unit-line">
+          <div class="unit-dot"></div>
+          <div class="unit-text">
+            SENAI Itumbiara
+            <span>Serviços de Tecnologia e Inovação</span>
+          </div>
+        </div>
+        <div class="unit-line">
+          <div class="unit-dot"></div>
+          <div class="unit-text">
+            Unidade Integrada SESI/SENAI Quirinópolis
+            <span>Atendimento Regional</span>
+          </div>
+        </div>
+        <div class="unit-line">
+          <div class="unit-dot" style="background:rgba(255,255,255,0.25);"></div>
+          <div class="unit-text" style="color:rgba(255,255,255,0.35);">
+            2026 · Goiás · Brasil
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-left -->
+
+
+  <!-- ══════════════════════════════════
+       PAINEL CENTRAL — PROG. EXCELÊNCIA
+  ══════════════════════════════════ -->
+  <div class="panel-center">
+
+    <div class="center-header">
+      <div class="program-label">🏆 Serviço Principal em Destaque</div>
+      <h2 class="program-title">Programa SENAI de<br/>Excelência Operacional Industrial</h2>
+      <p class="program-desc">
+        Uma jornada estruturada em 4 fases que transforma o desempenho real do chão de fábrica,
+        com diagnóstico rigoroso, capacitação técnica e entrega de ROI mensurável.
+      </p>
+    </div>
+
+    <!-- FASES -->
+    <div class="phases-container">
+
+      <!-- FASE 1 -->
+      <div class="phase">
+        <div class="phase-ghost">1</div>
+        <div class="phase-badge">
+          <div class="phase-num">1</div>
+          <span class="phase-stage">Diagnóstico</span>
+        </div>
+        <div class="phase-title">Diagnóstico e<br/>Sensibilização</div>
+        <ul class="phase-items">
+          <li>Mapeamento de Competências Técnicas</li>
+          <li>Identificação de Gargalos Operacionais</li>
+          <li>Índice de Maturidade Operacional (IMO)</li>
+          <li>Plano de Ação Priorizado</li>
+        </ul>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="phase">
+        <div class="phase-ghost">2</div>
+        <div class="phase-badge">
+          <div class="phase-num" style="background:#0069C0;">2</div>
+          <span class="phase-stage">Estabilização</span>
+        </div>
+        <div class="phase-title">Estabilização<br/>de Processos</div>
+        <ul class="phase-items">
+          <li>Capacitação técnica in loco (Matriz MCT)</li>
+          <li>Desenvolvimento assistido na produção</li>
+          <li>Implantação de indicadores de performance</li>
+          <li>Nivelamento de equipes operacionais</li>
+        </ul>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="phase">
+        <div class="phase-ghost">3</div>
+        <div class="phase-badge">
+          <div class="phase-num" style="background:#007AC0;">3</div>
+          <span class="phase-stage">Otimização</span>
+        </div>
+        <div class="phase-title">Otimização<br/>de Performance</div>
+        <ul class="phase-items">
+          <li>Intervenção técnica integrada nos processos</li>
+          <li>Redução de perdas, refugo e retrabalho</li>
+          <li>Otimização de setup e fluxo produtivo</li>
+          <li>Indicadores comparativos Antes/Depois</li>
+        </ul>
+      </div>
+
+      <!-- FASE 4 -->
+      <div class="phase">
+        <div class="phase-ghost">4</div>
+        <div class="phase-badge">
+          <div class="phase-num" style="background:#0096D6;">4</div>
+          <span class="phase-stage">Sustentabilidade</span>
+        </div>
+        <div class="phase-title">Sustentabilidade e<br/>Melhoria Contínua</div>
+        <ul class="phase-items">
+          <li>Residência Técnica Industrial</li>
+          <li>Formação de Multiplicadores Internos</li>
+          <li>Cultura de Melhoria Contínua</li>
+          <li>Relatório de Impacto Industrial (RII)</li>
+        </ul>
+      </div>
+
+    </div><!-- /phases-container -->
+
+    <!-- BARRA METODOLÓGICA -->
+    <div class="method-bar">
+      <div class="method-item">
+        <span class="method-abbr">MCT</span>
+        <span class="method-text">Matriz de<br/>Competências Técnicas</span>
+      </div>
+      <div class="method-sep"></div>
+      <div class="method-item">
+        <span class="method-abbr">IMO</span>
+        <span class="method-text">Índice de Maturidade<br/>Operacional</span>
+      </div>
+      <div class="method-sep"></div>
+      <div class="method-item">
+        <span class="method-abbr">RII</span>
+        <span class="method-text">Relatório de Impacto<br/>Industrial</span>
+      </div>
+    </div>
+
+  </div><!-- /panel-center -->
+
+
+  <!-- ══════════════════════════════════
+       PAINEL DIREITO — DEMAIS SERVIÇOS
+  ══════════════════════════════════ -->
+  <div class="panel-right">
+
+    <div class="right-header">
+      <div class="right-header-title">Portfólio Completo</div>
+      <div class="right-header-sub">Mais Serviços &amp;<br/>Parcerias</div>
+    </div>
+
+    <div class="services-list">
+
+      <!-- Lean Manufacturing -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">⚙️</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-title">Consultoria Lean Manufacturing</div>
+          <div class="svc-desc">Eliminação de desperdícios, VSM, Kaizen e SMED com ganhos mensuráveis de eficiência produtiva.</div>
+        </div>
+      </div>
+
+      <!-- 5S -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">🗂️</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-title">Adequação &amp; Implantação de 5S</div>
+          <div class="svc-desc">Auditoria, implantação e programas de excelência com cultura de organização sustentável.</div>
+        </div>
+      </div>
+
+      <!-- Selo Alimento -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">🌾</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-badge">Parceria SENAI GO + SEBRAE</div>
+          <div class="svc-title">Selo Alimento Confiável</div>
+          <div class="svc-desc">Certificação de segurança alimentar para agroindústrias com +85% de conformidade em BPF.</div>
+        </div>
+      </div>
+
+      <!-- SEBRAETEC -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">💡</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-badge">Subsídio de até 70%</div>
+          <div class="svc-title">Serviços SEBRAETEC</div>
+          <div class="svc-desc">Consultorias subsidiadas para MPEs em design, produtividade, sustentabilidade e inovação.</div>
+        </div>
+      </div>
+
+      <!-- Avaliações Técnicas -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">📊</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-title">Avaliações Técnicas e Diagnósticos</div>
+          <div class="svc-desc">Diagnóstico de maturidade digital, assessment de competência e Índice IMO personalizado.</div>
+        </div>
+      </div>
+
+      <!-- Inovação -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">🚀</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-title">Inovação: Prototipagem e PD&amp;I</div>
+          <div class="svc-desc">Desenvolvimento de projetos de P&amp;D, prototipagem de produtos e acesso a laboratórios especializados.</div>
+        </div>
+      </div>
+
+      <!-- Infraestrutura -->
+      <div class="svc-item">
+        <div class="svc-icon-col">
+          <div class="svc-icon">🏛️</div>
+        </div>
+        <div class="svc-content">
+          <div class="svc-title">Locação de Espaços e Laboratórios</div>
+          <div class="svc-desc">Salas, auditórios, laboratórios técnicos e equipamentos industriais disponíveis para locação.</div>
+        </div>
+      </div>
+
+    </div><!-- /services-list -->
+
+    <!-- PARCERIAS -->
+    <div class="partnerships-block">
+      <div class="partner-header">Parcerias Estratégicas</div>
+      <div class="partners-row">
+        <div class="partner-tag">
+          <span class="p-name">Rede RESETGO</span>
+          <span class="p-sub">Serviços Tecnológicos SENAI-GO</span>
+        </div>
+        <div class="partner-tag">
+          <span class="p-name">SENAI Canaã</span>
+          <span class="p-sub">Controle tecn. &amp; engenharia reversa</span>
+        </div>
+        <div class="partner-tag">
+          <span class="p-name">SENAI ZEISS</span>
+          <span class="p-sub">Metrologia industrial de precisão</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RODAPÉ DE CONTATO -->
+    <div class="right-footer">
+      <div class="contact-row">
+        <!-- ★ EDITE: substitua pelos dados de contato reais -->
+        <div class="contact-line">📍 <span>SENAI Itumbiara &amp; SESI/SENAI Quirinópolis – GO</span></div>
+        <div class="contact-line">✉️ <strong>Substitua pelo e-mail real</strong></div>
+        <div class="contact-line">📞 <strong>Substitua pelo telefone real</strong></div>
+      </div>
+      <!--
+        ★ IMAGEM 4: QR Code para contato/site
+        Gere o QR do site ou WhatsApp e substitua este bloco por:
+        <img src="qrcode.png" style="width:44px;height:44px;border-radius:4px;" alt="QR Code"/>
+      -->
+      <div class="qr-placeholder">
+        <div class="qr-label">QR<br/>Code</div>
+      </div>
+    </div>
+
+  </div><!-- /panel-right -->
+
+</div><!-- /folder -->
+
+</body>
+</html>
