@@ -24,15 +24,13 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // COLE SEUS DADOS AQUI
-    const firebaseConfig = {
-        apiKey: "AIzaSyCWfBCDYGA4cUjYFVn9wwGA2XpJi_i3dV8",
-        authDomain: "login-github-pages.firebaseapp.com",
-        projectId: "login-github-pages",
-        storageBucket: "login-github-pages.firebasestorage.app",
-        messagingSenderId: "432460559266",
-        appId: "1:432460559266:web:9578f281439a9be78e38fb"
-    };
+
+    // O nome aqui deve ser EXATAMENTE o nome do seu arquivo
+    import firebaseConfig from './config.js';
+
+    // Inicializa o Firebase
+    firebase.initializeApp(firebaseConfig);
+
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
