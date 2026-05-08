@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPR 2026 - Contrato de Gestão</title>
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-blue: #0056b3;
+            --light-blue: #eef4fb;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #5d6d7e;
+            --bg-body: #f4f7f9;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 2rem 5%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin-top: 0.5rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 15px;
+        }
+
+        .unit-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+
+        .unit-title {
+            background-color: var(--light-blue);
+            color: var(--primary-blue);
+            padding: 1.2rem 1.5rem;
+            margin: 0;
+            font-size: 1.4rem;
+            border-bottom: 3px solid var(--primary-blue);
+            display: flex;
+            align-items: center;
+        }
+
+        .unit-title::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background-color: var(--primary-blue);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        th {
+            text-align: left;
+            background-color: #f8f9fa;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 12px 15px;
+            border-bottom: 2px solid #eaeff2;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .indicator-name {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .concept-text {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .badge-group {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .weight-cell {
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        .meta-cell {
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .row-gatilho {
+            background-color: #fffdf5;
+        }
+
+        .badge-gatilho {
+            background-color: #ffedd5;
+            color: #9a3412;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border: 1px solid #fdba74;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        /* Cores dos Grupos */
+        .group-qualidade { background-color: #e0f2fe; color: #0369a1; }
+        .group-producao { background-color: #f0fdf4; color: #15803d; }
+        .group-financeiro { background-color: #fef2f2; color: #b91c1c; }
+
+        @media (max-width: 768px) {
+            .container { margin: 1rem auto; }
+            header { padding: 1.5rem 5%; }
+            header h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Programa de Participação de Resultados (PPR)</h1>
+        <p>Pactuação de Metas Estratégicas</p>
+    </header>
+
+    <div class="container">
+
+        <!-- SENAI ITUMBIARA -->
+        <div class="unit-card">
+            <h2 class="unit-title">SENAI ITUMBIARA</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Indicador</th>
+                            <th>Unidade</th>
+                            <th>Peso</th>
+                            <th>Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge-group group-qualidade">QUALIDADE</span></td>
+                            <td>
+                                <span class="indicator-name">GRAU DE SATISFAÇÃO DO CLIENTE</span>
+                                <span class="concept-text">Avaliação do atendimento pelo cliente</span>
+                            </td>
+                            <td>%</td>
+                            <td class="weight-cell">15%</td>
+                            <td class="meta-cell">0,85</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-qualidade">QUALIDADE</span></td>
+                            <td>
+                                <span class="indicator-name">PONTUAÇÃO IDAP</span>
+                                <span class="concept-text">Índice de Desempenho da Avaliação</span>
+                            </td>
+                            <td>Pts</td>
+                            <td class="weight-cell">15%</td>
+                            <td class="meta-cell">8</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-producao">PRODUÇÃO</span></td>
+                            <td>
+                                <span class="indicator-name">MATRÍCULAS EDUCAÇÃO</span>
+                                <span class="concept-text">Total de Matrículas</span>
+                            </td>
+                            <td>UN</td>
+                            <td class="weight-cell">20%</td>
+                            <td class="meta-cell">11.156</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RECEITA DE SERVIÇOS</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td class="weight-cell">50%</td>
+                            <td class="meta-cell">R$ 5.229.545,00</td>
+                        </tr>
+                        <tr class="row-gatilho">
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RESULTADO OPERACIONAL</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td><span class="badge-gatilho">GATILHO</span></td>
+                            <td class="meta-cell">-R$ 720.823,00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SENAI QUIRINÓPOLIS -->
+        <div class="unit-card">
+            <h2 class="unit-title">SENAI QUIRINÓPOLIS</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Indicador</th>
+                            <th>Unidade</th>
+                            <th>Peso</th>
+                            <th>Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge-group group-qualidade">QUALIDADE</span></td>
+                            <td>
+                                <span class="indicator-name">GRAU DE SATISFAÇÃO DO CLIENTE</span>
+                                <span class="concept-text">Avaliação do atendimento pelo cliente</span>
+                            </td>
+                            <td>%</td>
+                            <td class="weight-cell">15%</td>
+                            <td class="meta-cell">0,85</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-qualidade">QUALIDADE</span></td>
+                            <td>
+                                <span class="indicator-name">PONTUAÇÃO IDAP</span>
+                                <span class="concept-text">Índice de Desempenho da Avaliação</span>
+                            </td>
+                            <td>Pts</td>
+                            <td class="weight-cell">15%</td>
+                            <td class="meta-cell">8</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-producao">PRODUÇÃO</span></td>
+                            <td>
+                                <span class="indicator-name">MATRÍCULAS EDUCAÇÃO</span>
+                                <span class="concept-text">Quantidade de matrículas realizadas</span>
+                            </td>
+                            <td>UN</td>
+                            <td class="weight-cell">20%</td>
+                            <td class="meta-cell">3.115</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RECEITA DE SERVIÇOS</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td class="weight-cell">50%</td>
+                            <td class="meta-cell">R$ 1.134.897,00</td>
+                        </tr>
+                        <tr class="row-gatilho">
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RESULTADO OPERACIONAL</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td><span class="badge-gatilho">GATILHO</span></td>
+                            <td class="meta-cell">-R$ 229.233,00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SESI QUIRINÓPOLIS -->
+        <div class="unit-card">
+            <h2 class="unit-title">SESI QUIRINÓPOLIS</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Indicador</th>
+                            <th>Unidade</th>
+                            <th>Peso</th>
+                            <th>Meta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge-group group-qualidade">QUALIDADE</span></td>
+                            <td>
+                                <span class="indicator-name">GRAU DE SATISFAÇÃO DO CLIENTE</span>
+                                <span class="concept-text">Avaliação conforme pesquisa da qualidade</span>
+                            </td>
+                            <td>%</td>
+                            <td class="weight-cell">30%</td>
+                            <td class="meta-cell">0,85</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-producao">PRODUÇÃO</span></td>
+                            <td>
+                                <span class="indicator-name">EMPRESAS ATENDIDAS SSI</span>
+                                <span class="concept-text">Número de CNPJ's atendidos com serviços de SSI</span>
+                            </td>
+                            <td>UN</td>
+                            <td class="weight-cell">20%</td>
+                            <td class="meta-cell">10</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RECEITA DE SERVIÇOS</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td class="weight-cell">50%</td>
+                            <td class="meta-cell">R$ 831.666,00</td>
+                        </tr>
+                        <tr class="row-gatilho">
+                            <td><span class="badge-group group-financeiro">FINANCEIRO</span></td>
+                            <td>
+                                <span class="indicator-name">RESULTADO OPERACIONAL</span>
+                                <span class="concept-text">Conforme PPR</span>
+                            </td>
+                            <td>$</td>
+                            <td><span class="badge-gatilho">GATILHO</span></td>
+                            <td class="meta-cell">R$ 133.797,00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Sistema FIEG - Documento de Consulta Interna</p>
+    </footer>
+
+</body>
+</html>

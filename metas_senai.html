@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel SENAI 2026</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f9ff;
+        color: #1a2b4c;
+    }
+
+    header {
+        background: #0d47a1;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .container {
+        display: flex;
+        height: calc(100vh - 60px);
+    }
+
+    .col {
+        width: 50%;
+        padding: 15px;
+        overflow-y: auto;
+    }
+
+    .left {
+        border-right: 2px solid #dbe6f6;
+    }
+
+    h2 {
+        text-align: center;
+        color: #0d47a1;
+    }
+
+    .cards {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        flex: 1;
+        min-width: 120px;
+        background: white;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .card h3 {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .card span {
+        font-size: 18px;
+        font-weight: bold;
+        color: #0d47a1;
+    }
+
+    select {
+        padding: 6px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th {
+        background: #1976d2;
+        color: white;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    td {
+        padding: 8px;
+        font-size: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    tr:hover {
+        background: #f0f6ff;
+    }
+</style>
+</head>
+
+<body>
+
+<header>Painel de Metas SENAI 2026</header>
+
+<div class="container">
+
+    <!-- QUIRINÓPOLIS -->
+    <div class="col left">
+        <h2>Quirinópolis</h2>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Total Matrículas</h3>
+                <span id="qm"></span>
+            </div>
+            <div class="card">
+                <h3>Total Aluno-Hora</h3>
+                <span id="qh"></span>
+            </div>
+        </div>
+
+        <select onchange="filterTable('q', this.value)">
+            <option value="ALL">Todas Modalidades</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="EAD">EAD</option>
+        </select>
+
+        <table id="table-q">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Modalidade</th>
+                    <th>Matrícula</th>
+                    <th>Aluno-Hora</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ITUMBIARA -->
+    <div class="col">
+        <h2>Itumbiara</h2>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Total Matrículas</h3>
+                <span id="im"></span>
+            </div>
+            <div class="card">
+                <h3>Total Aluno-Hora</h3>
+                <span id="ih"></span>
+            </div>
+        </div>
+
+        <select onchange="filterTable('i', this.value)">
+            <option value="ALL">Todas Modalidades</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="EAD">EAD</option>
+        </select>
+
+        <table id="table-i">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Modalidade</th>
+                    <th>Matrícula</th>
+                    <th>Aluno-Hora</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+const data = [
+    // ITUMBIARA
+    {u:'i', t:'PRESENCIAL', m:'INICIAÇÃO PROFISSIONAL', mat:510, h:6436},
+    {u:'i', t:'PRESENCIAL', m:'APRENDIZAGEM INDUSTRIAL', mat:669, h:217639},
+    {u:'i', t:'PRESENCIAL', m:'QUALIFICAÇÃO PROFISSIONAL', mat:548, h:71230},
+    {u:'i', t:'PRESENCIAL', m:'APERFEIÇOAMENTO PROFISSIONAL', mat:3347, h:71666},
+    {u:'i', t:'PRESENCIAL', m:'NOVO ENSINO MÉDIO', mat:69, h:30750},
+    {u:'i', t:'PRESENCIAL', m:'NOVO ENSINO MÉDIO - SEDUC', mat:368, h:118200},
+    {u:'i', t:'PRESENCIAL', m:'HABILITAÇÃO TÉCNICA', mat:364, h:107402},
+    {u:'i', t:'EAD', m:'INICIAÇÃO PROFISSIONAL', mat:2208, h:24884},
+    {u:'i', t:'EAD', m:'APRENDIZAGEM INDUSTRIAL', mat:107, h:31792},
+    {u:'i', t:'EAD', m:'QUALIFICAÇÃO PROFISSIONAL', mat:1304, h:148742},
+    {u:'i', t:'EAD', m:'APERFEIÇOAMENTO PROFISSIONAL', mat:1188, h:23493},
+    {u:'i', t:'EAD', m:'HABILITAÇÃO TÉCNICA', mat:514, h:121835},
+
+    // QUIRINÓPOLIS
+    {u:'q', t:'PRESENCIAL', m:'INICIAÇÃO PROFISSIONAL', mat:46, h:554},
+    {u:'q', t:'PRESENCIAL', m:'APRENDIZAGEM INDUSTRIAL', mat:465, h:131532},
+    {u:'q', t:'PRESENCIAL', m:'QUALIFICAÇÃO PROFISSIONAL', mat:224, h:26858},
+    {u:'q', t:'PRESENCIAL', m:'APERFEIÇOAMENTO PROFISSIONAL', mat:386, h:8724},
+    {u:'q', t:'PRESENCIAL', m:'NOVO ENSINO MÉDIO - SEDUC', mat:166, h:61276},
+    {u:'q', t:'PRESENCIAL', m:'HABILITAÇÃO TÉCNICA', mat:100, h:29014},
+    {u:'q', t:'EAD', m:'INICIAÇÃO PROFISSIONAL', mat:650, h:6836},
+    {u:'q', t:'EAD', m:'APRENDIZAGEM INDUSTRIAL', mat:101, h:69972},
+    {u:'q', t:'EAD', m:'QUALIFICAÇÃO PROFISSIONAL', mat:709, h:80690},
+    {u:'q', t:'EAD', m:'APERFEIÇOAMENTO PROFISSIONAL', mat:402, h:7890},
+    {u:'q', t:'EAD', m:'HABILITAÇÃO TÉCNICA', mat:86, h:24889},
+];
+
+function loadTable(unit) {
+    const tbody = document.querySelector(`#table-${unit} tbody`);
+    tbody.innerHTML = "";
+
+    let totalMat = 0;
+    let totalH = 0;
+
+    data.filter(d => d.u === unit).forEach(d => {
+        totalMat += d.mat;
+        totalH += d.h;
+
+        tbody.innerHTML += `
+            <tr data-tipo="${d.t}">
+                <td>${d.t}</td>
+                <td>${d.m}</td>
+                <td>${d.mat.toLocaleString()}</td>
+                <td>${d.h.toLocaleString()}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById(unit + "m").innerText = totalMat.toLocaleString();
+    document.getElementById(unit + "h").innerText = totalH.toLocaleString();
+}
+
+function filterTable(unit, tipo) {
+    const rows = document.querySelectorAll(`#table-${unit} tbody tr`);
+    rows.forEach(r => {
+        if (tipo === "ALL" || r.dataset.tipo === tipo) {
+            r.style.display = "";
+        } else {
+            r.style.display = "none";
+        }
+    });
+}
+
+loadTable('i');
+loadTable('q');
+
+</script>
+
+</body>
+</html>
