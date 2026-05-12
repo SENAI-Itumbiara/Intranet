@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Aproveitamento de Estudos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-900: #0c2a4a;
+    --blue-800: #1a3f6f;
+    --blue-700: #1d5096;
+    --blue-600: #2563b0;
+    --blue-500: #3b82d4;
+    --blue-400: #60a5e8;
+    --blue-300: #93c4f5;
+    --blue-200: #bfdbfe;
+    --blue-100: #dbeafe;
+    --blue-50:  #eff6ff;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --radius: 10px;
+    --shadow-sm: 0 1px 3px rgba(12,42,74,0.08);
+    --shadow-md: 0 4px 16px rgba(12,42,74,0.10);
+    --shadow-lg: 0 8px 32px rgba(12,42,74,0.13);
+    --sidebar-w: 260px;
+    --transition: 0.18s cubic-bezier(.4,0,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+    display: flex;
+    font-size: 14px;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: linear-gradient(170deg, var(--blue-900) 0%, var(--blue-800) 100%);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar-brand {
+    padding: 28px 22px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-brand h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .sidebar-brand span {
+    display: block;
+    color: var(--blue-300);
+    font-size: 11px;
+    font-weight: 400;
+    margin-top: 3px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-section {
+    padding: 18px 16px 8px;
+  }
+  .sidebar-section-title {
+    color: var(--blue-300);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 6px;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: var(--blue-200);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    text-align: left;
+    margin-bottom: 2px;
+  }
+  .sidebar-btn:hover { background: rgba(255,255,255,0.09); color: var(--white); }
+  .sidebar-btn svg { flex-shrink: 0; opacity: 0.75; }
+  .sidebar-btn:hover svg { opacity: 1; }
+
+  .sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 16px; }
+
+  .sidebar-type-group {
+    padding: 8px 16px 16px;
+  }
+  .sidebar-type-label {
+    color: var(--blue-300);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 6px;
+    margin-bottom: 8px;
+  }
+  .type-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .type-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--blue-200);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    user-select: none;
+  }
+  .type-toggle label:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .type-toggle input[type=checkbox] {
+    accent-color: var(--blue-400);
+    width: 16px; height: 16px;
+    cursor: pointer;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+  }
+
+  /* ─── MAIN ─── */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 36px 60px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .page-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--blue-900);
+    font-weight: 700;
+  }
+  .page-header p {
+    color: var(--gray-500);
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 26px 28px;
+    margin-bottom: 22px;
+    border: 1px solid var(--blue-100);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--blue-700);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: var(--blue-500);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 22px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label.field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    letter-spacing: 0.04em;
+  }
+
+  input[type=text], input[type=date], textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 7px;
+    padding: 9px 13px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+    resize: vertical;
+    width: 100%;
+  }
+  input[type=text]:focus, input[type=date]:focus, textarea:focus {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(59,130,212,0.13);
+    background: var(--white);
+  }
+  textarea { min-height: 80px; line-height: 1.5; }
+
+  /* ─── MODAL TYPE SECTION ─── */
+  .analysis-section {
+    margin-bottom: 22px;
+  }
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .badge-presencial { background: var(--blue-100); color: var(--blue-800); }
+  .badge-ead        { background: #e0f2fe;         color: #0369a1; }
+
+  /* ─── TABLE ─── */
+  .comp-table-wrap { overflow-x: auto; margin-top: 4px; }
+  table.comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.comp-table thead tr {
+    background: var(--blue-800);
+    color: var(--white);
+  }
+  table.comp-table thead th {
+    padding: 10px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.comp-table thead th:first-child { border-radius: 8px 0 0 0; }
+  table.comp-table thead th:last-child  { border-radius: 0 8px 0 0; }
+
+  table.comp-table tbody tr {
+    border-bottom: 1px solid var(--blue-100);
+    transition: background var(--transition);
+  }
+  table.comp-table tbody tr:hover { background: var(--blue-50); }
+  table.comp-table tbody tr.aproveitada { background: #f0fdf4; }
+  table.comp-table tbody td { padding: 8px 10px; vertical-align: middle; }
+
+  table.comp-table input[type=checkbox] {
+    accent-color: var(--blue-600);
+    width: 16px; height: 16px;
+    cursor: pointer;
+  }
+
+  table.comp-table .td-comp { font-weight: 500; color: var(--gray-800); min-width: 180px; }
+  table.comp-table .td-ch   { font-weight: 700; color: var(--blue-700); text-align: center; min-width: 60px; }
+  table.comp-table .td-input textarea {
+    width: 100%;
+    min-height: 52px;
+    font-size: 12.5px;
+    padding: 6px 9px;
+    background: var(--white);
+  }
+  table.comp-table .td-ch-apr input {
+    width: 80px;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* totals row */
+  .totals-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--blue-50);
+    border-radius: 8px;
+    border: 1px solid var(--blue-200);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-900);
+  }
+  .totals-row span { color: var(--blue-600); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--gray-400);
+    font-size: 13px;
+  }
+  .empty-state svg { margin: 0 auto 10px; display: block; opacity: 0.35; }
+
+  /* ─── PRINT / PDF ─── */
+  @media print {
+    #sidebar, .no-print { display: none !important; }
+    #main { margin-left: 0; padding: 20px; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+  }
+
+  /* ─── scrollbar ─── */
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--blue-200); border-radius: 99px; }
+
+  /* hide sections initially */
+  #section-presencial, #section-ead { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<aside id="sidebar">
+  <div class="sidebar-brand">
+    <h1>Aproveitamento<br>de Estudos</h1>
+    <span>Sistema de Avaliação</span>
+  </div>
+
+  <div class="sidebar-type-group">
+    <div class="sidebar-type-label">Modalidade de Análise</div>
+    <div class="type-toggle">
+      <label>
+        <input type="checkbox" id="chk-presencial" onchange="toggleSection('presencial')">
+        Presencial
+      </label>
+      <label>
+        <input type="checkbox" id="chk-ead" onchange="toggleSection('ead')">
+        EAD
+      </label>
+    </div>
+  </div>
+
+  <hr class="sidebar-divider">
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Importação</div>
+
+    <button class="sidebar-btn" onclick="triggerImport('presencial')" id="btn-import-presencial">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/>
+      </svg>
+      Importar Presencial
+    </button>
+    <input type="file" id="file-presencial" accept=".txt" style="display:none" onchange="loadFile('presencial', this)">
+
+    <button class="sidebar-btn" onclick="triggerImport('ead')" id="btn-import-ead">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/>
+      </svg>
+      Importar EAD
+    </button>
+    <input type="file" id="file-ead" accept=".txt" style="display:none" onchange="loadFile('ead', this)">
+  </div>
+
+  <hr class="sidebar-divider">
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Exportação</div>
+    <button class="sidebar-btn" onclick="exportPDF()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 3v6h6"/>
+      </svg>
+      Exportar PDF
+    </button>
+  </div>
+
+  <div class="sidebar-footer">Sistema de Aproveitamento v1.0</div>
+</aside>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main id="main">
+
+  <!-- Page header -->
+  <div class="page-header no-print">
+    <h2>Análise de Aproveitamento de Estudos</h2>
+    <p>Preencha os dados da avaliação e importe as componentes curriculares pelo menu lateral.</p>
+  </div>
+
+  <!-- ── Dados da avaliação ── -->
+  <div class="card" id="card-dados">
+    <div class="card-title">Dados da Avaliação</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="field-label" for="avaliador">Avaliador</label>
+        <input type="text" id="avaliador" placeholder="Nome completo do avaliador">
+      </div>
+      <div class="form-group">
+        <label class="field-label" for="data-analise">Data da Análise</label>
+        <input type="date" id="data-analise">
+      </div>
+      <div class="form-group full">
+        <label class="field-label" for="nome-curso">Nome do Curso Solicitado</label>
+        <input type="text" id="nome-curso" placeholder="Ex: Técnico em Eletrotécnica">
+      </div>
+      <div class="form-group full">
+        <label class="field-label" for="documentos">Documentos Analisados</label>
+        <textarea id="documentos" rows="4" placeholder="Liste os documentos analisados (histórico, ementas, certificados, etc.)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Seção Presencial ── -->
+  <div class="card analysis-section" id="section-presencial">
+    <div class="section-badge badge-presencial">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-5.447-3.724M9 20H4v-2a4 4 0 015.447-3.724M15 10a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      Presencial
+    </div>
+    <div id="table-presencial-wrap">
+      <div class="empty-state">
+        <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/></svg>
+        Importe o arquivo .txt da modalidade Presencial pelo menu lateral.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Seção EAD ── -->
+  <div class="card analysis-section" id="section-ead">
+    <div class="section-badge badge-ead">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      EAD
+    </div>
+    <div id="table-ead-wrap">
+      <div class="empty-state">
+        <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/></svg>
+        Importe o arquivo .txt da modalidade EAD pelo menu lateral.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+<script>
+  /* ─── Toggle sections ─── */
+  function toggleSection(type) {
+    const chk = document.getElementById('chk-' + type);
+    const sec = document.getElementById('section-' + type);
+    sec.style.display = chk.checked ? 'block' : 'none';
+  }
+
+  /* ─── Trigger file input ─── */
+  function triggerImport(type) {
+    const chk = document.getElementById('chk-' + type);
+    if (!chk.checked) {
+      chk.checked = true;
+      toggleSection(type);
+    }
+    document.getElementById('file-' + type).click();
+  }
+
+  /* ─── Parse and render ─── */
+  function loadFile(type, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const comps = lines.map(l => {
+        const parts = l.split(',');
+        const ch = parts.pop().trim();
+        const nome = parts.join(',').trim();
+        return { nome, ch };
+      });
+      renderTable(type, comps);
+    };
+    reader.readAsText(file);
+    input.value = '';
+  }
+
+  function renderTable(type, comps) {
+    const wrap = document.getElementById('table-' + type + '-wrap');
+    if (comps.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">Nenhuma componente encontrada no arquivo.</div>';
+      return;
+    }
+
+    let html = `
+    <div class="comp-table-wrap">
+    <table class="comp-table" id="tbl-${type}">
+      <thead>
+        <tr>
+          <th style="width:36px;text-align:center">✓</th>
+          <th>Componente Curricular Importada</th>
+          <th style="text-align:center">CH Importada</th>
+          <th>Disciplinas Aproveitadas</th>
+          <th style="text-align:center">CH Aproveitada</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    comps.forEach((c, i) => {
+      html += `
+        <tr id="${type}-row-${i}">
+          <td style="text-align:center">
+            <input type="checkbox" onchange="toggleRow('${type}',${i})" id="${type}-chk-${i}">
+          </td>
+          <td class="td-comp">${escapeHtml(c.nome)}</td>
+          <td class="td-ch">${escapeHtml(c.ch)}</td>
+          <td class="td-input">
+            <textarea placeholder="Disciplinas aproveitadas..." rows="2" id="${type}-disc-${i}"></textarea>
+          </td>
+          <td class="td-ch-apr">
+            <input type="text" placeholder="0" id="${type}-chap-${i}">
+          </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    html += `<div class="totals-row" id="totals-${type}">
+      Componentes aproveitadas: <span id="${type}-tot-count">0</span> &nbsp;|&nbsp;
+      Total CH aproveitada: <span id="${type}-tot-ch">0</span>h
+    </div>`;
+
+    wrap.innerHTML = html;
+
+    // attach listeners for totals
+    comps.forEach((_, i) => {
+      document.getElementById(`${type}-chap-${i}`).addEventListener('input', () => updateTotals(type, comps.length));
+      document.getElementById(`${type}-chk-${i}`).addEventListener('change', () => updateTotals(type, comps.length));
+    });
+  }
+
+  function toggleRow(type, i) {
+    const chk = document.getElementById(`${type}-chk-${i}`);
+    const row = document.getElementById(`${type}-row-${i}`);
+    row.classList.toggle('aproveitada', chk.checked);
+    updateTotals(type);
+  }
+
+  function updateTotals(type) {
+    const table = document.getElementById(`tbl-${type}`);
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    let count = 0, chTotal = 0;
+    rows.forEach((row, i) => {
+      const chk = document.getElementById(`${type}-chk-${i}`);
+      const chVal = document.getElementById(`${type}-chap-${i}`);
+      if (chk && chk.checked) {
+        count++;
+        chTotal += parseFloat(chVal.value) || 0;
+      }
+    });
+    document.getElementById(`${type}-tot-count`).textContent = count;
+    document.getElementById(`${type}-tot-ch`).textContent = chTotal;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ─── Export PDF ─── */
+  async function exportPDF() {
+    // Build a print-friendly page
+    const avaliador   = document.getElementById('avaliador').value || '—';
+    const curso        = document.getElementById('nome-curso').value || '—';
+    const documentos   = document.getElementById('documentos').value || '—';
+    const dataAnalise  = document.getElementById('data-analise').value
+      ? new Date(document.getElementById('data-analise').value + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
+
+    let sectionsHtml = '';
+
+    ['presencial','ead'].forEach(type => {
+      const sec = document.getElementById('section-' + type);
+      if (sec.style.display === 'none') return;
+      const table = document.getElementById('tbl-' + type);
+      if (!table) return;
+
+      const label = type === 'presencial' ? 'Presencial' : 'EAD';
+      sectionsHtml += `<h3 style="margin:18px 0 8px;color:#1d5096;font-family:serif;">${label}</h3>`;
+      sectionsHtml += `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#1a3f6f;color:#fff;">
+            <th style="padding:7px 10px;text-align:left">Aprov.</th>
+            <th style="padding:7px 10px;text-align:left">Componente Curricular</th>
+            <th style="padding:7px 10px;text-align:center">CH Import.</th>
+            <th style="padding:7px 10px;text-align:left">Disciplinas Aproveitadas</th>
+            <th style="padding:7px 10px;text-align:center">CH Aprov.</th>
+          </tr>
+        </thead><tbody>`;
+
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach((row, i) => {
+        const chk  = document.getElementById(`${type}-chk-${i}`);
+        const disc = document.getElementById(`${type}-disc-${i}`);
+        const chap = document.getElementById(`${type}-chap-${i}`);
+        const cells = row.querySelectorAll('td');
+        const comp = cells[1] ? cells[1].textContent.trim() : '';
+        const chi  = cells[2] ? cells[2].textContent.trim() : '';
+        const marcado = chk && chk.checked ? '✓' : '';
+        const bg = chk && chk.checked ? '#f0fdf4' : '#fff';
+        sectionsHtml += `<tr style="background:${bg};border-bottom:1px solid #dbeafe;">
+          <td style="padding:6px 10px;text-align:center;font-weight:bold;color:#166534;">${marcado}</td>
+          <td style="padding:6px 10px;">${comp}</td>
+          <td style="padding:6px 10px;text-align:center;font-weight:700;color:#1d5096;">${chi}</td>
+          <td style="padding:6px 10px;white-space:pre-wrap;">${(disc && disc.value) ? disc.value : '—'}</td>
+          <td style="padding:6px 10px;text-align:center;font-weight:700;">${(chap && chap.value) ? chap.value : '—'}</td>
+        </tr>`;
+      });
+
+      const totCount = document.getElementById(`${type}-tot-count`).textContent;
+      const totCh    = document.getElementById(`${type}-tot-ch`).textContent;
+      sectionsHtml += `</tbody></table>
+        <p style="margin-top:8px;font-size:11.5px;color:#475569;">
+          <strong>Componentes aproveitadas:</strong> ${totCount} &nbsp;|&nbsp;
+          <strong>Total CH aproveitada:</strong> ${totCh}h
+        </p>`;
+    });
+
+    const printHTML = `
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="UTF-8">
+      <title>Análise de Aproveitamento</title>
+      <style>
+        body { font-family: Arial, sans-serif; color: #1e293b; padding: 30px; font-size: 13px; }
+        h1 { font-size: 20px; color: #0c2a4a; margin-bottom: 2px; }
+        h2 { font-size: 13px; color: #475569; margin-bottom: 18px; font-weight: 400; }
+        .header-bar { border-bottom: 2px solid #1d5096; margin-bottom: 20px; padding-bottom: 12px; }
+        .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; margin-bottom: 18px; }
+        .meta-item label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: #64748b; font-weight: 600; display: block; margin-bottom: 2px; }
+        .meta-item span { font-size: 13px; font-weight: 500; }
+        .meta-item.full { grid-column: 1/-1; }
+        .docs { white-space: pre-wrap; background: #f8fafc; padding: 10px; border-radius: 6px; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="header-bar">
+        <h1>Análise de Aproveitamento de Estudos</h1>
+        <h2>Documento gerado em ${new Date().toLocaleDateString('pt-BR')}</h2>
+      </div>
+      <div class="meta">
+        <div class="meta-item"><label>Avaliador</label><span>${avaliador}</span></div>
+        <div class="meta-item"><label>Data da Análise</label><span>${dataAnalise}</span></div>
+        <div class="meta-item full"><label>Curso Solicitado</label><span>${curso}</span></div>
+        <div class="meta-item full"><label>Documentos Analisados</label><div class="docs">${documentos.replace(/</g,'&lt;')}</div></div>
+      </div>
+      ${sectionsHtml}
+    </body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(printHTML);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 600);
+  }
+</script>
+</body>
+</html>

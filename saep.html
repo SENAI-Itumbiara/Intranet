@@ -1,0 +1,1427 @@
+html
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Avaliação Educacional — SENAI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f5f7fb;
+  --surface:  #ffffff;
+  --surface2: #eef3fb;
+  --border:   #d6e0f0;
+  --text:     #1f2937;
+  --muted:    #6b7280;
+
+  --accent:   #2563eb;
+  --accent2:  #3b82f6;
+
+  --green:    #16a34a;
+  --yellow:   #ca8a04;
+  --red:      #dc2626;
+
+  --green-bg: rgba(22,163,74,.10);
+  --yellow-bg:rgba(202,138,4,.10);
+  --red-bg:   rgba(220,38,38,.10);
+
+  --font-h:   'Syne', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+  --r:        12px;
+}
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── UPLOAD SCREEN ── */
+  #upload-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37,99,235,.15) 0%, transparent 70%);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 3rem;
+    animation: fadeDown .6s ease both;
+  }
+
+  .brand-logo {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-h); font-weight: 800; font-size: 18px;
+    color: #fff; letter-spacing: -.5px;
+  }
+
+  .brand-text { font-family: var(--font-h); font-size: 22px; font-weight: 700; color: var(--text); }
+  .brand-sub  { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+  .upload-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 620px;
+    animation: fadeUp .7s .1s ease both;
+  }
+
+  .upload-card h1 {
+    font-family: var(--font-h);
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: .5rem;
+  }
+
+  .upload-card h1 span { color: var(--accent2); }
+
+  .upload-card p.lead {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 2rem;
+  }
+
+  .upload-fields { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .upload-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .5rem;
+  }
+
+  .upload-field label span { color: var(--accent2); font-size: 10px; margin-left: 4px; }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--r);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: var(--surface2);
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.over {
+    border-color: var(--accent2);
+    background: rgba(31,111,235,.08);
+  }
+
+  .drop-zone.loaded { border-color: var(--green); background: var(--green-bg); }
+
+  .drop-icon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: var(--surface);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .drop-zone.loaded .drop-icon { background: var(--green-bg); }
+
+  .drop-text .name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .drop-text .hint { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+    margin-top: 2rem;
+    padding: .85rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: var(--r);
+    font-family: var(--font-h);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .02em;
+    transition: opacity .2s, transform .15s;
+  }
+
+  .btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+  .err-msg { color: var(--red); font-size: 12px; margin-top: .75rem; display: none; }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: .85rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar .logo { display: flex; align-items: center; gap: .6rem; }
+  .topbar .logo-sq {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-h); font-weight: 800; font-size: 13px; color: #fff;
+  }
+
+  .topbar .logo-text { font-family: var(--font-h); font-size: 15px; font-weight: 700; }
+  .topbar .logo-sub  { font-size: 10px; color: var(--muted); }
+
+  .topbar-meta { display: flex; align-items: center; gap: 1rem; }
+  .topbar-meta .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: .25rem .7rem;
+    border-radius: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-reset {
+    font-size: 11px;
+    font-weight: 600;
+    padding: .3rem .75rem;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .2s, border-color .2s;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ── TABS ── */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    gap: .25rem;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font-b);
+    font-size: 13px;
+    font-weight: 500;
+    padding: .75rem 1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* ── CONTENT ── */
+  .content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+  .tab-panel { display: none; animation: fadeUp .35s ease both; }
+  .tab-panel.active { display: block; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp .4s ease both;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--r) var(--r) 0 0;
+  }
+
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.blue::before { background: var(--accent2); }
+
+  .kpi-icon { font-size: 22px; margin-bottom: .5rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; }
+  .kpi-value { font-family: var(--font-h); font-size: 32px; font-weight: 800; line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: .35rem; }
+
+  .kpi-card.green .kpi-value  { color: var(--green); }
+  .kpi-card.yellow .kpi-value { color: var(--yellow); }
+  .kpi-card.red .kpi-value    { color: var(--red); }
+  .kpi-card.blue .kpi-value   { color: var(--accent2); }
+
+  /* ── SECTIONS ── */
+  .section-title {
+    font-family: var(--font-h);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-family: var(--font-h);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── CHART CONTAINERS ── */
+  .chart-wrap { position: relative; }
+  .chart-wrap canvas { max-height: 320px; }
+
+  /* ── COMPETENCY BARS ── */
+  .comp-list { display: flex; flex-direction: column; gap: .85rem; }
+
+  .comp-item {}
+  .comp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .35rem; gap: .5rem; }
+  .comp-name { font-size: 12px; font-weight: 500; flex: 1; }
+  .comp-pct {
+    font-family: var(--font-h);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .comp-pct.green  { color: var(--green); }
+  .comp-pct.yellow { color: var(--yellow); }
+  .comp-pct.red    { color: var(--red); }
+
+  .comp-bar-bg {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+
+  .comp-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+
+  .comp-bar-fill.green  { background: var(--green); }
+  .comp-bar-fill.yellow { background: var(--yellow); }
+  .comp-bar-fill.red    { background: var(--red); }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: .6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .15s;
+  }
+
+ tbody tr:hover { background: rgba(37,99,235,.05); }
+
+  tbody td {
+    padding: .65rem 1rem;
+    vertical-align: middle;
+  }
+
+  /* ── BADGES ── */
+  .badge-pct {
+    display: inline-block;
+    padding: .2rem .55rem;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-h);
+  }
+
+  .badge-pct.green  { background: var(--green-bg);  color: var(--green); }
+  .badge-pct.yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-pct.red    { background: var(--red-bg);    color: var(--red); }
+
+  /* ── RANKING ── */
+  .ranking-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
+
+  .filter-row { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+  .filter-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: .3rem .8rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .filter-btn:hover, .filter-btn.active { color: var(--text); border-color: var(--accent2); background: rgba(31,111,235,.12); }
+
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 12px;
+    padding: .35rem .75rem;
+    width: 200px;
+    transition: border-color .2s;
+  }
+
+  .search-input:focus { outline: none; border-color: var(--accent2); }
+
+  .rank-num {
+    font-family: var(--font-h);
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--muted);
+    width: 30px;
+  }
+
+  .rank-num.top { color: var(--green); }
+  .rank-num.bot { color: var(--red); }
+
+  .progress-mini {
+    width: 80px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+
+  .progress-mini .fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .alert-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .alert-tag.warn { background: var(--yellow-bg); color: var(--yellow); }
+  .alert-tag.crit { background: var(--red-bg);    color: var(--red); }
+  .alert-tag.ok   { background: var(--green-bg);  color: var(--green); }
+
+  /* ── ITEMS TAB ── */
+  .diff-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .diff-tag.mf { background: rgba(56,139,253,.12); color: var(--accent2); }
+  .diff-tag.fa { background: var(--green-bg); color: var(--green); }
+  .diff-tag.me { background: rgba(139,148,158,.1); color: var(--muted); }
+  .diff-tag.di { background: var(--yellow-bg); color: var(--yellow); }
+  .diff-tag.md { background: var(--red-bg); color: var(--red); }
+
+  .err-bar { width: 60px; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .err-fill { height: 100%; border-radius: 3px; background: var(--red); }
+
+  /* ── LOADING OVERLAY ── */
+  #loading {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,.85);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: .4rem; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    background: var(--red-bg);
+    border: 1px solid rgba(248,81,73,.25);
+    border-radius: var(--r);
+    padding: .85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+    font-size: 12px;
+  }
+
+  .alert-banner .icon { font-size: 20px; }
+  .alert-banner strong { color: var(--red); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:none; } }
+  @keyframes spin     { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--muted);">Processando dados…</div>
+</div>
+
+<!-- ══════════════════════════════ UPLOAD SCREEN ══════════════════════════════ -->
+<div id="upload-screen">
+  <div class="brand">
+    <div class="brand-logo">S</div>
+    <div>
+      <div class="brand-text">SENAI Analytics</div>
+      <div class="brand-sub">Sistema de Análise de Avaliações</div>
+    </div>
+  </div>
+
+  <div class="upload-card">
+    <h1>Carregue os <span>dados da avaliação</span></h1>
+    <p class="lead">Selecione os dois ficheiros Excel exportados do sistema SAEP para gerar o dashboard completo. Todo o processamento é feito localmente, sem envio de dados.</p>
+
+    <div class="upload-fields">
+      <!-- FILE 1: COMPETÊNCIAS -->
+      <div class="upload-field">
+        <label>📊 Arquivo 1 — Desempenho por Competência <span>(xlsx)</span></label>
+        <div class="drop-zone" id="drop1">
+          <div class="drop-icon">📂</div>
+          <div class="drop-text">
+            <div class="name" id="name1">Clique ou arraste o ficheiro aqui</div>
+            <div class="hint">Contém as abas: Cruzamento · Itens · Detalhes</div>
+          </div>
+          <input type="file" id="file1" accept=".xlsx,.xls">
+        </div>
+      </div>
+
+      <!-- FILE 2: INDIVIDUAL -->
+      <div class="upload-field">
+        <label>👤 Arquivo 2 — Desempenho Individual <span>(xlsx)</span></label>
+        <div class="drop-zone" id="drop2">
+          <div class="drop-icon">📂</div>
+          <div class="drop-text">
+            <div class="name" id="name2">Clique ou arraste o ficheiro aqui</div>
+            <div class="hint">Contém as abas: Resumo · Individual · Por Registro</div>
+          </div>
+          <input type="file" id="file2" accept=".xlsx,.xls">
+        </div>
+      </div>
+    </div>
+
+    <div class="err-msg" id="err-msg">⚠️ Certifique-se de que os dois ficheiros foram carregados corretamente.</div>
+    <button class="btn-primary" id="btn-analyze" disabled>Gerar Dashboard →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ DASHBOARD ══════════════════════════════ -->
+<div id="dashboard">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-sq">S</div>
+      <div>
+        <div class="logo-text">SENAI Analytics</div>
+        <div class="logo-sub">Análise de Avaliação Educacional</div>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <span class="badge" id="badge-curso">—</span>
+      <span class="badge" id="badge-aval">—</span>
+      <button class="btn-reset" id="btn-reset">↩ Nova análise</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="visao">📋 Visão Geral</button>
+    <button class="tab-btn" data-tab="competencias">🎯 Competências</button>
+    <button class="tab-btn" data-tab="itens">📝 Itens / Questões</button>
+    <button class="tab-btn" data-tab="alunos">👥 Ranking de Alunos</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── TAB: VISÃO GERAL ── -->
+    <div class="tab-panel active" id="tab-visao">
+
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-icon">🎓</div>
+          <div class="kpi-label">Alunos Avaliados</div>
+          <div class="kpi-value" id="kpi-alunos">—</div>
+          <div class="kpi-sub" id="kpi-itens-sub">— questões aplicadas</div>
+        </div>
+        <div class="kpi-card" id="kpi-card-desemp">
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-label">Desempenho Médio</div>
+          <div class="kpi-value" id="kpi-desemp">—</div>
+          <div class="kpi-sub">média da turma</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-label">Acertos Médios</div>
+          <div class="kpi-value" id="kpi-acertos">—</div>
+          <div class="kpi-sub" id="kpi-pct-acertos">— de acerto</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-icon">❌</div>
+          <div class="kpi-label">Erros Médios</div>
+          <div class="kpi-value" id="kpi-erros">—</div>
+          <div class="kpi-sub" id="kpi-pct-erros">— de erro</div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-icon">⏱️</div>
+          <div class="kpi-label">Tempo Médio de Prova</div>
+          <div class="kpi-value" id="kpi-tempo">—</div>
+          <div class="kpi-sub">min:seg</div>
+        </div>
+      </div>
+
+      <div id="alert-banner-wrap"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📊 Distribuição de Desempenho</div>
+          <div class="chart-wrap"><canvas id="chart-dist"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Aproveitamento por Subfunção</div>
+          <div class="chart-wrap"><canvas id="chart-comp-overview"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏆 Top 5 Melhores · ⚠️ Top 5 em Alerta</div>
+        <div class="grid-2">
+          <div>
+            <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem;">Melhores Alunos</div>
+            <div id="top5-best"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem;">Alunos em Alerta</div>
+            <div id="top5-alert"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: COMPETÊNCIAS ── -->
+    <div class="tab-panel" id="tab-competencias">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> ≥ 75% Satisfatório</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> 60–74% Atenção</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> &lt; 60% Crítico</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Aproveitamento por Subfunção — Gráfico</div>
+        <div class="chart-wrap"><canvas id="chart-comp-bar"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Detalhe por Subfunção</div>
+        <div class="comp-list" id="comp-detail-list"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: ITENS ── -->
+    <div class="tab-panel" id="tab-itens">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+        <div class="filter-row" id="diff-filters">
+          <span style="font-size:11px;color:var(--muted);line-height:2;margin-right:.25rem;">Dificuldade:</span>
+          <button class="filter-btn active" data-diff="all">Todas</button>
+          <button class="filter-btn" data-diff="Muito Facil">Muito Fácil</button>
+          <button class="filter-btn" data-diff="Facil">Fácil</button>
+          <button class="filter-btn" data-diff="Medio">Médio</button>
+          <button class="filter-btn" data-diff="Dificil">Difícil</button>
+          <button class="filter-btn" data-diff="Muito Dificil">Muito Difícil</button>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn active" data-sort="erros" id="sort-erros">Ordenar por erro ↓</button>
+          <button class="filter-btn" data-sort="acertos" id="sort-acertos">Ordenar por acerto ↓</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0">
+        <div class="tbl-wrap">
+          <table id="table-itens">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Identificador</th>
+                <th>Dificuldade</th>
+                <th>% Acertos</th>
+                <th>% Erros</th>
+                <th>Erro visual</th>
+                <th>Gabarito</th>
+                <th>Resp. mais errada</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-itens"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: ALUNOS ── -->
+    <div class="tab-panel" id="tab-alunos">
+      <div class="ranking-header">
+        <div class="filter-row" id="aluno-filters">
+          <button class="filter-btn active" data-status="all">Todos</button>
+          <button class="filter-btn" data-status="critico">🔴 Críticos (&lt;60%)</button>
+          <button class="filter-btn" data-status="atencao">🟡 Atenção (60–75%)</button>
+          <button class="filter-btn" data-status="ok">🟢 Satisfatório (≥75%)</button>
+        </div>
+        <input type="text" class="search-input" id="search-aluno" placeholder="🔎  Buscar aluno…">
+      </div>
+
+      <div class="card" style="padding:0">
+        <div class="tbl-wrap">
+          <table id="table-alunos">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Aluno</th>
+                <th>Matrícula</th>
+                <th>Desempenho</th>
+                <th>Acertos</th>
+                <th>Erros</th>
+                <th>Tempo</th>
+                <th>Progresso</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-alunos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+const STATE = {
+  file1: null, file2: null,
+  wb1: null, wb2: null,
+  data: {}
+};
+
+let chartDist = null, chartCompOverview = null, chartCompBar = null;
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD HANDLING
+═══════════════════════════════════════════════════════ */
+function setupUpload(inputId, dropId, nameId, stateKey) {
+  const inp = document.getElementById(inputId);
+  const drop = document.getElementById(dropId);
+  const nameEl = document.getElementById(nameId);
+
+  inp.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    STATE[stateKey] = f;
+    nameEl.textContent = f.name;
+    drop.classList.add('loaded');
+    drop.querySelector('.drop-icon').textContent = '✅';
+    checkReady();
+  });
+
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    drop.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    STATE[stateKey] = f;
+    nameEl.textContent = f.name;
+    drop.classList.add('loaded');
+    drop.querySelector('.drop-icon').textContent = '✅';
+    checkReady();
+  });
+}
+
+function checkReady() {
+  document.getElementById('btn-analyze').disabled = !(STATE.file1 && STATE.file2);
+}
+
+setupUpload('file1','drop1','name1','file1');
+setupUpload('file2','drop2','name2','file2');
+
+document.getElementById('btn-analyze').addEventListener('click', runAnalysis);
+document.getElementById('btn-reset').addEventListener('click', () => {
+  location.reload();
+});
+
+/* ═══════════════════════════════════════════════════════
+   EXCEL PARSING HELPERS
+═══════════════════════════════════════════════════════ */
+function readWorkbook(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        res(wb);
+      } catch(err) { rej(err); }
+    };
+    reader.onerror = rej;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function sheetToRows(ws) {
+  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+}
+
+function findHeaderRow(rows, keywords) {
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowStr = row.map(c => String(c).trim().toLowerCase()).join('|');
+    if (keywords.some(kw => rowStr.includes(kw.toLowerCase()))) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function rowsToObjects(rows, headerIdx) {
+  const headers = rows[headerIdx].map(c => String(c).trim());
+  const result = [];
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.every(c => c === '' || c === null || c === undefined)) continue;
+    const obj = {};
+    headers.forEach((h, j) => { obj[h] = row[j] !== undefined ? String(row[j]).trim() : ''; });
+    result.push(obj);
+  }
+  return result;
+}
+
+function parsePct(str) {
+  if (!str && str !== 0) return NaN;
+  const n = parseFloat(String(str).replace(',','.').replace('%',''));
+  return isNaN(n) ? NaN : (n > 1 ? n : n * 100);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN ANALYSIS
+═══════════════════════════════════════════════════════ */
+async function runAnalysis() {
+  const errEl = document.getElementById('err-msg');
+  errEl.style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+
+  try {
+    STATE.wb1 = await readWorkbook(STATE.file1);
+    STATE.wb2 = await readWorkbook(STATE.file2);
+
+    // ── Parse Competência Cruzamento ──
+    const sheetCruz = findSheet(STATE.wb1, ['cruzamento','cruzam']);
+    const sheetItens = findSheet(STATE.wb1, ['itens','item']);
+    const sheetResume = findSheet(STATE.wb2, ['resumo']);
+
+    const rowsCruz  = sheetToRows(STATE.wb1.Sheets[sheetCruz]);
+    const rowsItens = sheetToRows(STATE.wb1.Sheets[sheetItens]);
+    const rowsRes   = sheetToRows(STATE.wb2.Sheets[sheetResume]);
+
+    // Meta from cruzamento header
+    const metaRow = rowsCruz.find(r => r.some(c => /DESEMPENHO M[EÉ]DIO/i.test(String(c))));
+    let metaDesemp = 77, metaAcertos = 30.89, metaErros = 9.11;
+    if (metaRow) {
+      // Try to find the data row just above header
+      const mVals = rowsCruz[rowsCruz.indexOf(metaRow) - 1] || [];
+      metaDesemp  = parsePct(mVals[3]) || metaDesemp;
+      metaAcertos = parseFloat(String(mVals[4]).replace(',','.')) || metaAcertos;
+      metaErros   = parseFloat(String(mVals[5]).replace(',','.')) || metaErros;
+    }
+
+    const infoRow = rowsCruz.find(r => r.some(c => /AVALIA[ÇC][AÃ]O/i.test(String(c))));
+    let curso = 'Curso Técnico', avaliacao = 'Avaliação SAEP';
+    if (infoRow) {
+      curso     = infoRow[0] || curso;
+      avaliacao = infoRow[1] || avaliacao;
+    }
+
+    // ── Parse Competências Cruzamento ──
+    const hCruz = findHeaderRow(rowsCruz, ['Subfunção', 'subfuncao', 'Aproveitamento']);
+    const competencias = hCruz >= 0 ? rowsToObjects(rowsCruz, hCruz) : [];
+    const compData = competencias
+      .filter(c => c['Subfunção'] || c['Subfuncao'])
+      .map(c => ({
+        subfuncao: c['Subfunção'] || c['Subfuncao'] || c[Object.keys(c)[0]],
+        capacidade: c['Capacidade'] || '',
+        conhecimento: c['Conhecimento'] || '',
+        aproveitamento: parsePct(c['Aproveitamento'])
+      }))
+      .filter(c => !isNaN(c.aproveitamento));
+
+    // ── Parse Itens ──
+    const hItens = findHeaderRow(rowsItens, ['Identificador','IDENTIFICADOR','identificador']);
+    const itensData = hItens >= 0 ? rowsToObjects(rowsItens, hItens) : [];
+    const itens = itensData
+      .filter(it => (it['Identificador']||it['IDENTIFICADOR']||'').startsWith('SAEP'))
+      .map(it => ({
+        id:         it['Identificador'] || it['IDENTIFICADOR'],
+        dificuldade: it['Dificuldade'] || it['DIFICULDADE'] || 'Médio',
+        acertos:    parsePct(it['Acertos'] || it['ACERTOS']),
+        erros:      parsePct(it['Erros']   || it['ERROS']),
+        gabarito:   it['Gabarito'] || it['GABARITO'] || '—',
+        distA:      parsePct(it['A'] || 0),
+        distB:      parsePct(it['B'] || 0),
+        distC:      parsePct(it['C'] || 0),
+        distD:      parsePct(it['D'] || 0),
+        distE:      parsePct(it['E'] || 0),
+      }));
+
+    // ── Parse Resumo ──
+    const hRes = findHeaderRow(rowsRes, ['Aluno','ALUNO','aluno']);
+    const resumoData = hRes >= 0 ? rowsToObjects(rowsRes, hRes) : [];
+    const alunos = resumoData
+      .filter(a => (a['Aluno']||a['ALUNO']||'').length > 2)
+      .map((a, i) => ({
+        pos:       i + 1,
+        nome:      toTitleCase(a['Aluno'] || a['ALUNO'] || ''),
+        matricula: a['Matrícula'] || a['Matricula'] || a['MATRÍCULA'] || '',
+        desemp:    parsePct(a['Desempenho'] || a['DESEMPENHO']),
+        acertos:   parseInt(a['Acertos'] || a['ACERTOS']) || 0,
+        erros:     parseInt(a['Erros'] || a['ERROS']) || 0,
+        tempo:     a['Tempo de realização'] || a['TEMPO DE REALIZAÇÃO'] || '—',
+      }))
+      .filter(a => !isNaN(a.desemp))
+      .sort((a,b) => b.desemp - a.desemp)
+      .map((a, i) => ({ ...a, pos: i + 1 }));
+
+    // Compute avg tempo
+    const tempos = alunos.map(a => timeToSec(a.tempo)).filter(t => t > 0);
+    const avgTempo = tempos.length ? tempos.reduce((s,t)=>s+t,0)/tempos.length : 0;
+
+    const itensTotal = alunos[0] ? (alunos[0].acertos + alunos[0].erros) : 40;
+
+    STATE.data = { compData, itens, alunos, metaDesemp, metaAcertos, metaErros,
+                   curso, avaliacao, avgTempo, itensTotal };
+
+    buildDashboard();
+  } catch(e) {
+    console.error(e);
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠️ Erro ao processar: ' + e.message;
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function findSheet(wb, keywords) {
+  for (const kw of keywords) {
+    const name = wb.SheetNames.find(n => n.toLowerCase().includes(kw.toLowerCase()));
+    if (name) return name;
+  }
+  return wb.SheetNames[0];
+}
+
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+}
+
+function timeToSec(str) {
+  const parts = String(str).split(':').map(Number);
+  if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  if (parts.length === 2) return parts[0]*60 + parts[1];
+  return 0;
+}
+
+function secToMin(sec) {
+  const m = Math.floor(sec/60);
+  const s = Math.round(sec % 60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function pctClass(v) {
+  if (v >= 75) return 'green';
+  if (v >= 60) return 'yellow';
+  return 'red';
+}
+
+function pctColor(v) {
+  if (v >= 75) return 'var(--green)';
+  if (v >= 60) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function diffTag(d) {
+  const map = {
+    'Muito Facil': ['mf','Muito Fácil'],
+    'Facil': ['fa','Fácil'],
+    'Medio': ['me','Médio'],
+    'Dificil': ['di','Difícil'],
+    'Muito Dificil': ['md','Muito Difícil']
+  };
+  const [cls, lbl] = map[d] || ['me', d];
+  return `<span class="diff-tag ${cls}">${lbl}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD DASHBOARD
+═══════════════════════════════════════════════════════ */
+function buildDashboard() {
+  document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  const { compData, itens, alunos, metaDesemp, metaAcertos, metaErros,
+          curso, avaliacao, avgTempo, itensTotal } = STATE.data;
+
+  // Meta
+  document.getElementById('badge-curso').textContent = curso;
+  document.getElementById('badge-aval').textContent  = avaliacao;
+
+  // KPIs
+  document.getElementById('kpi-alunos').textContent = alunos.length;
+  document.getElementById('kpi-itens-sub').textContent = `${itensTotal} questões aplicadas`;
+
+  const avgDesemp = alunos.reduce((s,a)=>s+a.desemp,0)/alunos.length;
+  const kpiDesemp = document.getElementById('kpi-desemp');
+  const kpiCard   = document.getElementById('kpi-card-desemp');
+  kpiDesemp.textContent = avgDesemp.toFixed(1) + '%';
+  kpiCard.classList.add(pctClass(avgDesemp));
+
+  const avgAc = alunos.reduce((s,a)=>s+a.acertos,0)/alunos.length;
+  const avgEr = alunos.reduce((s,a)=>s+a.erros,0)/alunos.length;
+  document.getElementById('kpi-acertos').textContent = avgAc.toFixed(1);
+  document.getElementById('kpi-pct-acertos').textContent = (avgAc/itensTotal*100).toFixed(1)+'% de acerto';
+  document.getElementById('kpi-erros').textContent = avgEr.toFixed(1);
+  document.getElementById('kpi-pct-erros').textContent = (avgEr/itensTotal*100).toFixed(1)+'% de erro';
+  document.getElementById('kpi-tempo').textContent = secToMin(avgTempo);
+
+  // Alert banner
+  const criticos = alunos.filter(a=>a.desemp<60);
+  const alertWrap = document.getElementById('alert-banner-wrap');
+  if (criticos.length > 0) {
+    alertWrap.innerHTML = `
+      <div class="alert-banner">
+        <div class="icon">🚨</div>
+        <div><strong>${criticos.length} aluno(s) com desempenho crítico (&lt;60%)</strong>
+          — Intervenção pedagógica imediata recomendada:
+          ${criticos.slice(0,3).map(a=>`<strong style="color:var(--text)">${a.nome.split(' ')[0]}</strong>`).join(', ')}
+          ${criticos.length>3 ? `e mais ${criticos.length-3}…` : ''}.
+        </div>
+      </div>`;
+  }
+
+  // Distribuição de desempenho
+  buildDistChart(alunos);
+
+  // Comp overview chart
+  buildCompOverviewChart(compData);
+
+  // Top5
+  buildTop5(alunos);
+
+  // Competências tab
+  buildCompTab(compData);
+
+  // Itens tab
+  buildItensTab(itens);
+
+  // Alunos tab
+  buildAlunosTab(alunos);
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+/* ─── Distribution Chart ─── */
+function buildDistChart(alunos) {
+  const bins = [
+    { label:'<50%', min:0,   max:50,  color:'var(--red)'    },
+    { label:'50–60%', min:50, max:60, color:'#c9413a'       },
+    { label:'60–70%', min:60, max:70, color:'var(--yellow)' },
+    { label:'70–80%', min:70, max:80, color:'#7bb54c'       },
+    { label:'80–90%', min:80, max:90, color:'var(--green)'  },
+    { label:'≥90%',  min:90, max:101, color:'#45d15d'       },
+  ];
+  const counts = bins.map(b => alunos.filter(a=>a.desemp>=b.min&&a.desemp<b.max).length);
+
+  const ctx = document.getElementById('chart-dist').getContext('2d');
+  if (chartDist) chartDist.destroy();
+  chartDist = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: bins.map(b=>b.label),
+      datasets: [{
+        data: counts,
+        backgroundColor: bins.map(b=>b.color+'cc'),
+        borderColor: bins.map(b=>b.color),
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.raw} aluno(s)` } } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#8b949e', font:{size:11} } },
+        y: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#8b949e', stepSize:1, font:{size:11} } }
+      }
+    }
+  });
+}
+
+/* ─── Comp Overview Chart ─── */
+function buildCompOverviewChart(compData) {
+  const ctx = document.getElementById('chart-comp-overview').getContext('2d');
+  if (chartCompOverview) chartCompOverview.destroy();
+  chartCompOverview = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: compData.map(c => c.subfuncao.length>20 ? c.subfuncao.slice(0,20)+'…' : c.subfuncao),
+      datasets: [{
+        label: 'Aproveitamento %',
+        data: compData.map(c => c.aproveitamento),
+        backgroundColor: 'rgba(56,139,253,.15)',
+        borderColor: 'rgba(56,139,253,.8)',
+        pointBackgroundColor: compData.map(c => pctColor(c.aproveitamento)),
+        pointRadius: 5,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(1)}%` } } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(255,255,255,.07)' },
+          pointLabels: { color: '#8b949e', font:{size:10} },
+          ticks: { color: '#8b949e', stepSize: 25, backdropColor: 'transparent', font:{size:9} }
+        }
+      }
+    }
+  });
+}
+
+/* ─── Top 5 ─── */
+function buildTop5(alunos) {
+  const top5 = alunos.slice(0,5);
+  const bot5 = [...alunos].filter(a=>a.desemp<75).slice(-5).reverse();
+
+  function miniCard(a, idx) {
+    const cls = pctClass(a.desemp);
+    return `<div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border);">
+      <div class="rank-num ${idx<3?'top':''}">#${idx+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.nome}</div>
+        <div style="font-size:10px;color:var(--muted);">${a.acertos} acertos · ${a.tempo}</div>
+      </div>
+      <span class="badge-pct ${cls}">${a.desemp.toFixed(1)}%</span>
+    </div>`;
+  }
+
+  document.getElementById('top5-best').innerHTML  = top5.map((a,i)=>miniCard(a,i)).join('');
+  document.getElementById('top5-alert').innerHTML = bot5.length
+    ? bot5.map((a,i)=>miniCard(a,i)).join('')
+    : '<div style="color:var(--green);font-size:12px;padding:.5rem 0">🎉 Nenhum aluno em situação crítica!</div>';
+}
+
+/* ─── Competências Tab ─── */
+function buildCompTab(compData) {
+  // Bar chart
+  const ctx = document.getElementById('chart-comp-bar').getContext('2d');
+  if (chartCompBar) chartCompBar.destroy();
+
+  const sorted = [...compData].sort((a,b)=>b.aproveitamento-a.aproveitamento);
+  chartCompBar = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(c => c.subfuncao.length>30 ? c.subfuncao.slice(0,30)+'…' : c.subfuncao),
+      datasets: [{
+        label: 'Aproveitamento %',
+        data: sorted.map(c=>c.aproveitamento),
+        backgroundColor: sorted.map(c=>pctColor(c.aproveitamento)+'99'),
+        borderColor: sorted.map(c=>pctColor(c.aproveitamento)),
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(1)}%` } },
+        annotation: {}
+      },
+      scales: {
+        x: { min:0, max:100, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color:'#8b949e', callback: v=>v+'%' } },
+        y: { grid: { display:false }, ticks: { color:'#8b949e', font:{size:11} } }
+      }
+    }
+  });
+
+  // Draw 60% reference line manually via plugin
+  chartCompBar.options.plugins.annotation = {};
+
+  // Detail list
+  const list = document.getElementById('comp-detail-list');
+  list.innerHTML = compData.map(c => {
+    const cls = pctClass(c.aproveitamento);
+    return `<div class="comp-item">
+      <div class="comp-header">
+        <div class="comp-name">${c.subfuncao}
+          <span style="color:var(--muted);font-size:11px;"> — ${c.capacidade.slice(0,50)}${c.capacidade.length>50?'…':''}</span>
+        </div>
+        <div class="comp-pct ${cls}">${c.aproveitamento.toFixed(1)}%</div>
+      </div>
+      <div class="comp-bar-bg">
+        <div class="comp-bar-fill ${cls}" style="width:${c.aproveitamento}%"></div>
+      </div>
+      ${c.conhecimento ? `<div style="font-size:10px;color:var(--muted);margin-top:.3rem;">📚 ${c.conhecimento}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ─── Itens Tab ─── */
+let itensAll = [], itensSortMode = 'erros', itensDiffFilter = 'all';
+
+function buildItensTab(itens) {
+  itensAll = itens;
+
+  // Filters
+  document.querySelectorAll('#diff-filters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#diff-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      itensDiffFilter = btn.dataset.diff;
+      renderItens();
+    });
+  });
+
+  document.getElementById('sort-erros').addEventListener('click', () => {
+    itensSortMode = 'erros';
+    document.querySelectorAll('[data-sort]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('sort-erros').classList.add('active');
+    renderItens();
+  });
+
+  document.getElementById('sort-acertos').addEventListener('click', () => {
+    itensSortMode = 'acertos';
+    document.querySelectorAll('[data-sort]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('sort-acertos').classList.add('active');
+    renderItens();
+  });
+
+  renderItens();
+}
+
+function renderItens() {
+  let data = [...itensAll];
+  if (itensDiffFilter !== 'all') data = data.filter(it=>it.dificuldade === itensDiffFilter);
+
+  if (itensSortMode === 'erros')   data.sort((a,b)=>b.erros-a.erros);
+  if (itensSortMode === 'acertos') data.sort((a,b)=>b.acertos-a.acertos);
+
+  const tbody = document.getElementById('tbody-itens');
+  tbody.innerHTML = data.map((it,i) => {
+    // Most chosen wrong option
+    const erradas = ['A','B','C','D','E']
+      .filter(l=>l!==it.gabarito)
+      .map(l=>({l, v:it['dist'+l]||0}))
+      .sort((a,b)=>b.v-a.v);
+    const wrongTop = erradas[0];
+
+    return `<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-family:var(--font-h);font-size:11px;color:var(--accent2)">${it.id}</td>
+      <td>${diffTag(it.dificuldade)}</td>
+      <td><span class="badge-pct ${pctClass(it.acertos)}">${it.acertos.toFixed(1)}%</span></td>
+      <td><span class="badge-pct ${it.erros>=40?'red':it.erros>=20?'yellow':'green'}">${it.erros.toFixed(1)}%</span></td>
+      <td><div class="err-bar"><div class="err-fill" style="width:${it.erros}%"></div></div></td>
+      <td><span style="background:var(--surface2);padding:.15rem .45rem;border-radius:4px;font-weight:700;font-size:11px">${it.gabarito}</span></td>
+      <td>${wrongTop&&wrongTop.v>0?`<span style="color:var(--red);font-size:11px">Letra ${wrongTop.l} (${wrongTop.v.toFixed(0)}%)</span>`:
+           `<span style="color:var(--muted);font-size:11px">—</span>`}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ─── Alunos Tab ─── */
+let alunosAll = [], alunosStatusFilter = 'all', alunosSearch = '';
+
+function buildAlunosTab(alunos) {
+  alunosAll = alunos;
+  const itensTotal = STATE.data.itensTotal;
+
+  document.querySelectorAll('#aluno-filters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#aluno-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      alunosStatusFilter = btn.dataset.status;
+      renderAlunos();
+    });
+  });
+
+  document.getElementById('search-aluno').addEventListener('input', e => {
+    alunosSearch = e.target.value.toLowerCase();
+    renderAlunos();
+  });
+
+  renderAlunos();
+}
+
+function renderAlunos() {
+  const itensTotal = STATE.data.itensTotal;
+  let data = [...alunosAll];
+
+  if (alunosStatusFilter === 'critico') data = data.filter(a=>a.desemp<60);
+  else if (alunosStatusFilter === 'atencao') data = data.filter(a=>a.desemp>=60&&a.desemp<75);
+  else if (alunosStatusFilter === 'ok') data = data.filter(a=>a.desemp>=75);
+
+  if (alunosSearch) data = data.filter(a=>a.nome.toLowerCase().includes(alunosSearch));
+
+  const tbody = document.getElementById('tbody-alunos');
+  tbody.innerHTML = data.map((a,i) => {
+    const cls = pctClass(a.desemp);
+    const statusLabel = a.desemp<60 ? '<span class="alert-tag crit">Crítico</span>'
+                      : a.desemp<75 ? '<span class="alert-tag warn">Atenção</span>'
+                      : '<span class="alert-tag ok">OK</span>';
+    const rnCls = i === 0 && alunosStatusFilter === 'all' ? 'top' : i >= data.length-3 && alunosStatusFilter==='all' ? 'bot' : '';
+
+    return `<tr>
+      <td><span class="rank-num ${rnCls}">${a.pos}</span></td>
+      <td style="font-weight:500;font-size:12px;">${a.nome}</td>
+      <td style="color:var(--muted);font-size:11px;font-family:monospace">${a.matricula}</td>
+      <td><span class="badge-pct ${cls}">${a.desemp.toFixed(1)}%</span></td>
+      <td style="color:var(--green);font-weight:700">${a.acertos}</td>
+      <td style="color:var(--red)">${a.erros}</td>
+      <td style="color:var(--muted);font-size:11px">${a.tempo}</td>
+      <td>
+        <div class="progress-mini">
+          <div class="fill" style="width:${a.desemp}%;background:${pctColor(a.desemp)}"></div>
+        </div>
+      </td>
+      <td>${statusLabel}</td>
+    </tr>`;
+  }).join('');
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">Nenhum aluno encontrado.</td></tr>`;
+  }
+}
+</script>
+</body>
+</html>
+Concluído
