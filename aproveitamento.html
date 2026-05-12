@@ -442,6 +442,10 @@
   <div class="card" id="card-dados">
     <div class="card-title">Dados da Avaliação</div>
     <div class="form-grid">
+            <div class="form-group">
+        <label class="field-label" for="solicitante">Solicitante</label>
+        <input type="text" id="solicitante" placeholder="Nome completo do Solicitante">
+      </div>
       <div class="form-group">
         <label class="field-label" for="avaliador">Avaliador</label>
         <input type="text" id="avaliador" placeholder="Nome completo do avaliador">
@@ -617,6 +621,7 @@
   /* ─── Export PDF ─── */
   async function exportPDF() {
     // Build a print-friendly page
+    const solicitante   = document.getElementById('solicitante').value || '—';
     const avaliador   = document.getElementById('avaliador').value || '—';
     const curso        = document.getElementById('nome-curso').value || '—';
     const documentos   = document.getElementById('documentos').value || '—';
@@ -696,6 +701,7 @@
         <h2>Documento gerado em ${new Date().toLocaleDateString('pt-BR')}</h2>
       </div>
       <div class="meta">
+        <div class="meta-item"><label>Solicitante</label><span>${solicitante}</span></div>
         <div class="meta-item"><label>Avaliador</label><span>${avaliador}</span></div>
         <div class="meta-item"><label>Data da Análise</label><span>${dataAnalise}</span></div>
         <div class="meta-item full"><label>Curso Solicitado</label><span>${curso}</span></div>
