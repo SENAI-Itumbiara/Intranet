@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala de Colaboradores</title>
+<style>
+  :root{
+    --azul-escuro:#0d3b66;
+    --azul:#1d6fd6;
+    --azul-claro:#e8f1fc;
+    --azul-claro2:#f4f9ff;
+    --branco:#ffffff;
+    --cinza-texto:#33495e;
+    --borda:#cfe0f5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Verdana, sans-serif;
+    background:var(--azul-claro2);
+    color:var(--cinza-texto);
+  }
+  header{
+    background:linear-gradient(135deg,var(--azul-escuro),var(--azul));
+    color:#fff;
+    padding:24px 32px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  }
+  header h1{
+    margin:0;
+    font-size:1.6rem;
+    font-weight:600;
+  }
+  header p{
+    margin:4px 0 0;
+    font-size:0.9rem;
+    opacity:0.9;
+  }
+  .container{
+    max-width:1400px;
+    margin:0 auto;
+    padding:24px 32px 60px;
+  }
+  .toolbar{
+    background:var(--branco);
+    border:1px solid var(--borda);
+    border-radius:12px;
+    padding:18px 20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    align-items:flex-end;
+    margin-bottom:20px;
+    box-shadow:0 2px 6px rgba(13,59,102,0.06);
+  }
+  .campo{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1 1 200px;
+  }
+  .campo label{
+    font-size:0.78rem;
+    font-weight:600;
+    color:var(--azul-escuro);
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  select, input[type="text"]{
+    padding:9px 12px;
+    border:1px solid var(--borda);
+    border-radius:8px;
+    font-size:0.95rem;
+    color:var(--cinza-texto);
+    background:var(--azul-claro2);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  select:focus, input[type="text"]:focus{
+    border-color:var(--azul);
+    box-shadow:0 0 0 3px rgba(29,111,214,0.15);
+    background:#fff;
+  }
+  .btn-limpar{
+    padding:9px 16px;
+    border-radius:8px;
+    border:1px solid var(--azul);
+    background:var(--branco);
+    color:var(--azul);
+    font-weight:600;
+    cursor:pointer;
+    font-size:0.9rem;
+    transition:background .15s, color .15s;
+    white-space:nowrap;
+  }
+  .btn-limpar:hover{
+    background:var(--azul);
+    color:#fff;
+  }
+  .status-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
+    font-size:0.85rem;
+    color:var(--azul-escuro);
+  }
+  .status-bar .info{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    background:var(--azul-claro);
+    border-radius:20px;
+    padding:4px 12px;
+    font-weight:600;
+  }
+  .table-wrap{
+    background:var(--branco);
+    border:1px solid var(--borda);
+    border-radius:12px;
+    overflow:auto;
+    box-shadow:0 2px 6px rgba(13,59,102,0.06);
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1100px;
+  }
+  thead th{
+    background:var(--azul-escuro);
+    color:#fff;
+    text-align:left;
+    padding:12px 14px;
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    position:sticky;
+    top:0;
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--borda);
+    font-size:0.88rem;
+    vertical-align:top;
+  }
+  tbody tr:nth-child(even){
+    background:var(--azul-claro2);
+  }
+  tbody tr:hover{
+    background:var(--azul-claro);
+  }
+  td.nome{
+    font-weight:600;
+    color:var(--azul-escuro);
+    white-space:nowrap;
+  }
+  td.setor{
+    white-space:nowrap;
+  }
+  .setor-tag{
+    display:inline-block;
+    background:var(--azul-claro);
+    color:var(--azul-escuro);
+    border-radius:6px;
+    padding:3px 9px;
+    font-size:0.78rem;
+    font-weight:600;
+  }
+  .vazio{
+    color:#a9b9cc;
+    font-style:italic;
+  }
+  .estado-msg{
+    text-align:center;
+    padding:40px;
+    color:var(--azul-escuro);
+    font-size:0.95rem;
+  }
+  .spinner{
+    width:28px;height:28px;
+    border:3px solid var(--azul-claro);
+    border-top-color:var(--azul);
+    border-radius:50%;
+    margin:0 auto 12px;
+    animation:girar 0.8s linear infinite;
+  }
+  @keyframes girar{to{transform:rotate(360deg);}}
+  .erro{
+    color:#b3261e;
+    font-weight:600;
+  }
+  footer{
+    text-align:center;
+    font-size:0.78rem;
+    color:#7e93ad;
+    padding:10px 0 30px;
+  }
+  @media (max-width:700px){
+    header{padding:18px 18px;}
+    .container{padding:18px 14px 40px;}
+    .campo{flex:1 1 100%;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📅 Escala de Colaboradores</h1>
+  <p>Horários por dia da semana — atualizado automaticamente a partir da planilha</p>
+</header>
+
+<div class="container">
+
+  <div class="toolbar">
+    <div class="campo">
+      <label for="filtroSetor">Setor</label>
+      <select id="filtroSetor">
+        <option value="">Todos os setores</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="filtroCargo">Cargo</label>
+      <select id="filtroCargo">
+        <option value="">Todos os cargos</option>
+      </select>
+    </div>
+    <div class="campo" style="flex:2 1 240px;">
+      <label for="buscaNome">Buscar colaborador</label>
+      <input type="text" id="buscaNome" placeholder="Digite o nome do colaborador...">
+    </div>
+    <button class="btn-limpar" id="btnLimpar">Limpar filtros</button>
+  </div>
+
+  <div class="status-bar">
+    <div class="info">
+      <span class="badge" id="contagem">0 colaboradores</span>
+      <span id="ultimaAtualizacao"></span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="tabelaEscala">
+      <thead>
+        <tr id="linhaCabecalho"></tr>
+      </thead>
+      <tbody id="corpoTabela">
+        <tr><td colspan="9" class="estado-msg"><div class="spinner"></div>Carregando dados da planilha...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Dados carregados diretamente da planilha Google Sheets publicada em CSV.</footer>
+</div>
+
+<script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjNc911iftxXnHWXyfqdqy7fU3IAW38TiheFAGOV9Fk1fM76OXEE0BY3JoFLWVdNNKKw4fTve5AiWG/pub?output=csv";
+
+  let dadosCompletos = [];
+  let cabecalhos = [];
+
+  // Parser simples de CSV com suporte a aspas e vírgulas dentro de campos
+  function parseCSV(texto) {
+    const linhas = [];
+    let linhaAtual = [];
+    let campoAtual = "";
+    let dentroAspas = false;
+
+    for (let i = 0; i < texto.length; i++) {
+      const c = texto[i];
+      const proximo = texto[i + 1];
+
+      if (dentroAspas) {
+        if (c === '"' && proximo === '"') {
+          campoAtual += '"';
+          i++;
+        } else if (c === '"') {
+          dentroAspas = false;
+        } else {
+          campoAtual += c;
+        }
+      } else {
+        if (c === '"') {
+          dentroAspas = true;
+        } else if (c === ',') {
+          linhaAtual.push(campoAtual);
+          campoAtual = "";
+        } else if (c === '\r') {
+          // ignora
+        } else if (c === '\n') {
+          linhaAtual.push(campoAtual);
+          linhas.push(linhaAtual);
+          linhaAtual = [];
+          campoAtual = "";
+        } else {
+          campoAtual += c;
+        }
+      }
+    }
+    if (campoAtual.length > 0 || linhaAtual.length > 0) {
+      linhaAtual.push(campoAtual);
+      linhas.push(linhaAtual);
+    }
+    return linhas.filter(l => l.some(campo => campo.trim() !== ""));
+  }
+
+  function popularSelect(select, valores) {
+    const valorAtual = select.value;
+    select.innerHTML = select.id === "filtroSetor"
+      ? '<option value="">Todos os setores</option>'
+      : '<option value="">Todos os cargos</option>';
+    valores.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+    if (valores.includes(valorAtual)) select.value = valorAtual;
+  }
+
+  function renderizarCabecalho() {
+    const linha = document.getElementById("linhaCabecalho");
+    linha.innerHTML = cabecalhos.map(h => `<th>${h}</th>`).join("");
+  }
+
+  function renderizarTabela() {
+    const corpo = document.getElementById("corpoTabela");
+    const filtroSetor = document.getElementById("filtroSetor").value;
+    const filtroCargo = document.getElementById("filtroCargo").value;
+    const busca = document.getElementById("buscaNome").value.trim().toLowerCase();
+
+    const idxSetor = cabecalhos.findIndex(h => h.toLowerCase().includes("setor"));
+    const idxCargo = cabecalhos.findIndex(h => h.toLowerCase().includes("cargo"));
+    const idxNome = cabecalhos.findIndex(h => h.toLowerCase().includes("colaborador"));
+
+    const filtrados = dadosCompletos.filter(linha => {
+      const setor = linha[idxSetor] || "";
+      const cargo = linha[idxCargo] || "";
+      const nome = linha[idxNome] || "";
+      if (filtroSetor && setor !== filtroSetor) return false;
+      if (filtroCargo && cargo !== filtroCargo) return false;
+      if (busca && !nome.toLowerCase().includes(busca)) return false;
+      return true;
+    });
+
+    if (filtrados.length === 0) {
+      corpo.innerHTML = `<tr><td colspan="${cabecalhos.length}" class="estado-msg">Nenhum colaborador encontrado com os filtros aplicados.</td></tr>`;
+    } else {
+      corpo.innerHTML = filtrados.map(linha => {
+        return "<tr>" + linha.map((campo, i) => {
+          let classe = "";
+          if (i === idxNome) classe = "nome";
+          if (i === idxSetor) classe = "setor";
+          const conteudo = campo && campo.trim() !== "" ? campo : '<span class="vazio">—</span>';
+          if (i === idxSetor && campo && campo.trim() !== "") {
+            return `<td class="${classe}"><span class="setor-tag">${campo}</span></td>`;
+          }
+          return `<td class="${classe}">${conteudo}</td>`;
+        }).join("") + "</tr>";
+      }).join("");
+    }
+
+    document.getElementById("contagem").textContent = `${filtrados.length} colaborador${filtrados.length === 1 ? "" : "es"}`;
+  }
+
+  function montarFiltros() {
+    const idxSetor = cabecalhos.findIndex(h => h.toLowerCase().includes("setor"));
+    const idxCargo = cabecalhos.findIndex(h => h.toLowerCase().includes("cargo"));
+
+    const setores = [...new Set(dadosCompletos.map(l => l[idxSetor]).filter(Boolean))].sort();
+    const cargos = [...new Set(dadosCompletos.map(l => l[idxCargo]).filter(Boolean))].sort();
+
+    popularSelect(document.getElementById("filtroSetor"), setores);
+    popularSelect(document.getElementById("filtroCargo"), cargos);
+  }
+
+  async function carregarDados() {
+    try {
+      const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
+      const resposta = await fetch(url, { cache: "no-store" });
+      if (!resposta.ok) throw new Error("Falha ao buscar a planilha (HTTP " + resposta.status + ")");
+      const texto = await resposta.text();
+      const linhas = parseCSV(texto);
+
+      if (linhas.length === 0) throw new Error("Planilha vazia ou ilegível.");
+
+      cabecalhos = linhas[0].map(h => h.trim());
+      dadosCompletos = linhas.slice(1);
+
+      renderizarCabecalho();
+      montarFiltros();
+      renderizarTabela();
+
+      document.getElementById("ultimaAtualizacao").textContent =
+        "Atualizado em " + new Date().toLocaleString("pt-BR");
+    } catch (erro) {
+      document.getElementById("corpoTabela").innerHTML =
+        `<tr><td colspan="9" class="estado-msg erro">⚠️ Não foi possível carregar a planilha.<br>${erro.message}</td></tr>`;
+      console.error(erro);
+    }
+  }
+
+  document.getElementById("filtroSetor").addEventListener("change", renderizarTabela);
+  document.getElementById("filtroCargo").addEventListener("change", renderizarTabela);
+  document.getElementById("buscaNome").addEventListener("input", renderizarTabela);
+  document.getElementById("btnLimpar").addEventListener("click", () => {
+    document.getElementById("filtroSetor").value = "";
+    document.getElementById("filtroCargo").value = "";
+    document.getElementById("buscaNome").value = "";
+    renderizarTabela();
+  });
+
+  carregarDados();
+</script>
+
+</body>
+</html>
