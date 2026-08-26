@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Laboratórios e Salas</title>
+  <style>
+    :root {
+      --bg: #f4f8fc;
+      --surface: #ffffff;
+      --surface-2: #f8fbff;
+      --primary: #0f5ea8;
+      --primary-2: #1677c8;
+      --primary-soft: #eaf4ff;
+      --text: #183247;
+      --muted: #6b7f90;
+      --line: #dfe8f0;
+      --success: #137a50;
+      --success-soft: #e7f7ef;
+      --warning: #a35d00;
+      --warning-soft: #fff3dd;
+      --danger: #b42318;
+      --danger-soft: #fff0ef;
+      --morning: #eaf4ff;
+      --afternoon: #fff6dd;
+      --night: #f0ecff;
+      --shadow: 0 8px 24px rgba(35, 65, 90, .08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app { max-width: 1560px; margin: 0 auto; padding: 24px; }
+    .topbar {
+      background: linear-gradient(135deg, #ffffff, #f5faff);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 20px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 { margin: 0 0 4px; font-size: clamp(1.35rem, 2vw, 2rem); }
+    .brand p { margin: 0; color: var(--muted); }
+    .status-wrap { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      min-height: 34px; padding: 7px 11px; border-radius: 999px;
+      font-size: .86rem; font-weight: 700; border: 1px solid transparent;
+    }
+    .badge.ok { background: var(--success-soft); color: var(--success); border-color: #c7ead9; }
+    .badge.warn { background: var(--warning-soft); color: var(--warning); border-color: #f3dbac; }
+    .badge.info { background: var(--primary-soft); color: var(--primary); border-color: #cfe4f8; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.1fr 1.4fr auto auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field label { display: block; color: var(--muted); font-size: .78rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; margin-bottom: 7px; }
+    select, input[type="month"], button, .file-label {
+      width: 100%; min-height: 44px; border-radius: 11px; border: 1px solid #cad7e3;
+      background: #fff; color: var(--text); padding: 10px 12px; font: inherit;
+    }
+    select:focus, input[type="month"]:focus { outline: 3px solid rgba(15, 94, 168, .12); border-color: var(--primary-2); }
+    button { cursor: pointer; font-weight: 800; border-color: var(--primary); background: var(--primary); color: #fff; white-space: nowrap; }
+    button.secondary, .file-label { background: #fff; color: var(--primary); border-color: #b8d3ea; }
+    button:hover, .file-label:hover { filter: brightness(.98); }
+    .file-label { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    #csvFile { display: none; }
+
+    .nav-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line);
+    }
+    .nav-left, .nav-right { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-row button { width: auto; min-height: 38px; padding: 8px 12px; }
+    .nav-title { font-size: 1.1rem; font-weight: 900; text-transform: capitalize; }
+
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+    .card .k { color: var(--muted); font-size: .78rem; font-weight: 800; text-transform: uppercase; }
+    .card .v { margin-top: 6px; font-size: 1.55rem; font-weight: 900; color: var(--primary); }
+    .card .s { margin-top: 3px; font-size: .82rem; color: var(--muted); }
+
+    .calendar-shell { overflow: auto; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+    .calendar { min-width: 1060px; display: grid; grid-template-columns: repeat(7, 1fr); }
+    .dow { position: sticky; top: 0; z-index: 4; background: #edf5fb; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); padding: 10px; text-align: center; font-size: .78rem; font-weight: 900; text-transform: uppercase; color: #456273; }
+    .day { min-height: 190px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; padding: 8px; }
+    .day.other-month { background: #f8fafc; color: #9aa9b5; }
+    .day.today { box-shadow: inset 0 0 0 2px var(--primary-2); }
+    .day-number { font-weight: 900; font-size: .93rem; margin-bottom: 7px; display: flex; align-items: center; justify-content: space-between; }
+    .today-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--primary-2); }
+
+    .period { border-radius: 9px; padding: 6px 7px; margin-top: 5px; min-height: 42px; border: 1px solid transparent; }
+    .period.morning { background: var(--morning); border-color: #cfe4f8; }
+    .period.afternoon { background: var(--afternoon); border-color: #f4dfaa; }
+    .period.night { background: var(--night); border-color: #ddd4ff; }
+    .period-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .period-name { font-size: .7rem; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; }
+    .free { font-size: .72rem; font-weight: 800; color: var(--success); }
+    .booking { margin-top: 5px; border-radius: 7px; background: rgba(255,255,255,.82); padding: 5px 6px; border: 1px solid rgba(91, 120, 145, .15); cursor: pointer; }
+    .booking-main { font-size: .76rem; font-weight: 900; line-height: 1.2; }
+    .booking-sub { font-size: .68rem; color: var(--muted); margin-top: 2px; line-height: 1.2; }
+    .conflict { border-color: #f4b7b2 !important; background: var(--danger-soft) !important; }
+    .conflict-tag { display: inline-block; margin-top: 3px; font-size: .62rem; font-weight: 900; color: var(--danger); }
+
+    .empty-state { padding: 52px 20px; text-align: center; color: var(--muted); }
+    .empty-state strong { display:block; color:var(--text); margin-bottom:6px; }
+
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 14px; color: var(--muted); font-size: .82rem; }
+    .legend-item { display:flex; align-items:center; gap:6px; }
+    .swatch { width: 14px; height:14px; border-radius:4px; border:1px solid #ccd7df; }
+
+    .table-wrap { overflow:auto; max-height: 430px; border:1px solid var(--line); border-radius:12px; }
+    table { width:100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 10px 12px; border-bottom:1px solid var(--line); text-align:left; font-size:.84rem; }
+    th { position:sticky; top:0; background:#edf5fb; z-index:2; font-size:.76rem; text-transform:uppercase; color:#4e697b; }
+
+    dialog { border:none; border-radius:18px; padding:0; max-width:560px; width:calc(100% - 32px); box-shadow:0 24px 80px rgba(0,0,0,.22); }
+    dialog::backdrop { background:rgba(11,36,55,.38); }
+    .modal { padding:20px; }
+    .modal h3 { margin:0 0 14px; }
+    .modal-grid { display:grid; grid-template-columns: 130px 1fr; gap:8px 12px; font-size:.9rem; }
+    .modal-grid .label { color:var(--muted); font-weight:800; }
+    .modal-actions { margin-top:18px; display:flex; justify-content:flex-end; }
+    .modal-actions button { width:auto; }
+
+    .notice { margin-top: 10px; font-size: .82rem; color: var(--muted); line-height:1.45; }
+    .hidden { display:none !important; }
+
+    @media (max-width: 1000px) {
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .topbar { align-items:flex-start; flex-direction:column; }
+      .status-wrap { justify-content:flex-start; }
+    }
+    @media (max-width: 620px) {
+      .app { padding: 12px; }
+      .toolbar { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr 1fr; }
+      .nav-row { align-items:flex-start; flex-direction:column; }
+      .modal-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Gestão de Laboratórios e Salas</h1>
+      <p>Consulta de disponibilidade e reservas por laboratório/kit ou professor.</p>
+    </div>
+    <div class="status-wrap">
+      <span id="dataStatus" class="badge warn">● Aguardando dados</span>
+      <span id="lastUpdate" class="badge info">Atualização: —</span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="toolbar">
+      <div class="field">
+        <label for="viewMode">Modo de consulta</label>
+        <select id="viewMode">
+          <option value="lab">Por Kit / Laboratório</option>
+          <option value="professor">Por Professor</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="entityLabel" for="entitySelect">Kit / Laboratório</label>
+        <select id="entitySelect"><option value="">Selecione...</option></select>
+      </div>
+      <div class="field">
+        <label for="monthPicker">Mês</label>
+        <input id="monthPicker" type="month" />
+      </div>
+      <button id="refreshBtn" title="Buscar novamente o CSV publicado">Atualizar dados</button>
+      <!-- <label class="file-label" for="csvFile">Carregar CSV</label> -->
+      <input id="csvFile" type="file" accept=".csv,text/csv" />
+    </div>
+
+    <div class="nav-row">
+      <div class="nav-left">
+        <button class="secondary" id="prevMonth">← Mês anterior</button>
+        <button class="secondary" id="todayBtn">Mês atual</button>
+        <button class="secondary" id="nextMonth">Próximo mês →</button>
+      </div>
+      <div id="monthTitle" class="nav-title"></div>
+      <div class="nav-right">
+        <button class="secondary" id="toggleTable"></button>
+        <!-- Ocultar lista -->
+      </div>
+    </div>
+    <!-- <div class="notice">Fonte configurada: planilha CSV publicada no Google Sheets. Caso o navegador bloqueie a leitura automática, use <strong>Carregar CSV</strong> como alternativa.</div> -->
+  </section>
+
+  <section class="cards">
+    <div class="card"><div class="k">Reservas no mês</div><div class="v" id="cardBookings">0</div><div class="s">intervalos exibidos no filtro atual</div></div>
+    <div class="card"><div class="k">Dias ocupados</div><div class="v" id="cardDays">0</div><div class="s">dias com pelo menos uma reserva</div></div>
+    <div class="card"><div class="k">Períodos ocupados</div><div class="v" id="cardPeriods">0</div><div class="s">manhã, tarde ou noite</div></div>
+    <div class="card"><div class="k">Conflitos detectados</div><div class="v" id="cardConflicts">0</div><div class="s">reservas sobrepostas no mesmo período</div></div>
+  </section>
+
+  <section class="panel">
+    <div id="calendarWrap" class="calendar-shell">
+      <div class="calendar" id="calendar"></div>
+    </div>
+    <div id="emptyState" class="empty-state hidden"><strong>Selecione um filtro</strong>Escolha um laboratório/kit ou professor para visualizar o calendário.</div>
+    <div class="legend">
+      <span class="legend-item"><span class="swatch" style="background:var(--morning)"></span>Manhã</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--afternoon)"></span>Tarde</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--night)"></span>Noite</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--danger-soft);border-color:#f4b7b2"></span>Conflito</span>
+    </div>
+  </section>
+
+  <!-- <section id="tablePanel" class="panel hidden"> -->
+    <section id="tablePanel" class="panel"></section>
+    <h2 style="margin-top:0;font-size:1.05rem;">Reservas do mês</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Professor</th><th>Curso</th><th>Kit / Lab</th><th>Período</th><th>Início</th><th>Fim</th><th>Observação</th></tr></thead>
+        <tbody id="bookingTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<dialog id="bookingDialog">
+  <div class="modal">
+    <h3>Detalhes do agendamento</h3>
+    <div id="modalContent" class="modal-grid"></div>
+    <div class="modal-actions"><button id="closeDialog">Fechar</button></div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRjkbiF5gi1PTPnxr6s1NijQL_K0_c1GyP2Ob05DA9IqM_Lfhm9zO0yiOwv4PpIY6xR_d-E6eOt6akL/pub?output=csv';
+  const PERIODS = ['Manhã', 'Tarde', 'Noite'];
+  const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  let labs = [];
+  let professors = [];
+  let bookings = [];
+  let selectedMonth = new Date();
+
+  const $ = id => document.getElementById(id);
+  const normalize = v => (v ?? '').toString().trim();
+  const lower = v => normalize(v).toLocaleLowerCase('pt-BR');
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else field += c;
+      } else {
+        if (c === '"') quoted = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else if (c !== '\r') field += c;
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function parseDate(value) {
+    const s = normalize(value);
+    if (!s) return null;
+    let m;
+    if ((m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/))) {
+      const d = new Date(+m[3], +m[2]-1, +m[1]);
+      return isNaN(d) ? null : d;
+    }
+    if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) {
+      const d = new Date(+m[1], +m[2]-1, +m[3]);
+      return isNaN(d) ? null : d;
+    }
+    const d = new Date(s);
+    return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  function canonicalPeriod(value) {
+    const v = lower(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (v.includes('manha')) return 'Manhã';
+    if (v.includes('tarde')) return 'Tarde';
+    if (v.includes('noite')) return 'Noite';
+    return normalize(value) || 'Não informado';
+  }
+
+  function processCSV(text) {
+    const rows = parseCSV(text).filter(r => r.some(c => normalize(c)));
+    if (!rows.length) throw new Error('CSV vazio.');
+
+    const maxCols = Math.max(...rows.map(r => r.length));
+    rows.forEach(r => { while (r.length < maxCols) r.push(''); });
+
+    // As três tabelas convivem nas mesmas linhas. Ignoramos cabeçalhos conhecidos.
+    const isLabHeader = v => /^(kit\s*\/\s*lab|kit|lab|laborat[oó]rio|laborat[oó]rios|salas?|ambientes?)$/i.test(normalize(v));
+    const isProfHeader = v => /^(professor|professores|docente|docentes)$/i.test(normalize(v));
+
+    labs = [...new Set(rows.map(r => normalize(r[0])).filter(v => v && !isLabHeader(v)))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    professors = [...new Set(rows.map(r => normalize(r[2])).filter(v => v && !isProfHeader(v)))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+
+    bookings = [];
+    rows.forEach((r, idx) => {
+      const professor = normalize(r[4]);
+      const course = normalize(r[5]);
+      const lab = normalize(r[6]);
+      const weekday = normalize(r[7]);
+      const periodRaw = normalize(r[8]);
+      const start = parseDate(r[9]);
+      const end = parseDate(r[10]);
+      const note = normalize(r[11]);
+
+      const looksHeader = /professor/i.test(professor) && /(curso|course)/i.test(course);
+      if (looksHeader) return;
+      if (!professor && !lab && !start && !end) return;
+      if (!professor || !lab || !start || !end) return;
+
+      bookings.push({
+        id: idx + 1,
+        professor,
+        course,
+        lab,
+        weekday,
+        period: canonicalPeriod(periodRaw),
+        start: start <= end ? start : end,
+        end: start <= end ? end : start,
+        note
+      });
+    });
+
+    // Completa as listas com valores existentes na base de agendamentos.
+    labs = [...new Set([...labs, ...bookings.map(b => b.lab)])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    professors = [...new Set([...professors, ...bookings.map(b => b.professor)])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+
+    populateEntitySelect();
+    renderAll();
+    setStatus(true, `Dados carregados: ${bookings.length} agendamento(s)`);
+    $('lastUpdate').textContent = 'Atualização: ' + new Date().toLocaleString('pt-BR');
+  }
+
+  async function loadRemoteCSV() {
+    setStatus(false, 'Carregando dados...');
+    try {
+      const response = await fetch(CSV_URL, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      processCSV(await response.text());
+    } catch (err) {
+      console.error(err);
+      setStatus(false, 'Leitura automática bloqueada — use Carregar CSV');
+    }
+  }
+
+  function setStatus(ok, text) {
+    const el = $('dataStatus');
+    el.className = 'badge ' + (ok ? 'ok' : 'warn');
+    el.textContent = (ok ? '● ' : '● ') + text;
+  }
+
+  function populateEntitySelect() {
+    const select = $('entitySelect');
+    const current = select.value;
+    const mode = $('viewMode').value;
+    const list = mode === 'lab' ? labs : professors;
+    select.innerHTML = '<option value="">Selecione...</option>' + list.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    if (list.includes(current)) select.value = current;
+    else if (list.length === 1) select.value = list[0];
+  }
+
+  function monthKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  function syncMonthPicker() { $('monthPicker').value = monthKey(selectedMonth); }
+
+  function getSelectedBookingsForMonth() {
+    const mode = $('viewMode').value;
+    const entity = $('entitySelect').value;
+    if (!entity) return [];
+    const start = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth()+1, 0);
+    return bookings.filter(b => {
+      const matchesEntity = mode === 'lab' ? lower(b.lab) === lower(entity) : lower(b.professor) === lower(entity);
+      return matchesEntity && b.start <= end && b.end >= start;
+    });
+  }
+
+  function bookingsForDay(day, monthBookings, period) {
+    return monthBookings.filter(b => b.period === period && b.start <= day && b.end >= day);
+  }
+
+  function renderAll() {
+    renderCalendar();
+    renderCards();
+    renderTable();
+  }
+
+  function renderCalendar() {
+    const cal = $('calendar');
+    const entity = $('entitySelect').value;
+    $('monthTitle').textContent = `${MONTH_NAMES[selectedMonth.getMonth()]} de ${selectedMonth.getFullYear()}`;
+
+    if (!entity) {
+      $('calendarWrap').classList.add('hidden');
+      $('emptyState').classList.remove('hidden');
+      return;
+    }
+    $('calendarWrap').classList.remove('hidden');
+    $('emptyState').classList.add('hidden');
+
+    const monthBookings = getSelectedBookingsForMonth();
+    let html = DAY_NAMES.map(n => `<div class="dow">${n}</div>`).join('');
+    const first = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const gridStart = new Date(first);
+    gridStart.setDate(first.getDate() - first.getDay());
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    for (let i = 0; i < 42; i++) {
+      const day = new Date(gridStart);
+      day.setDate(gridStart.getDate() + i);
+      day.setHours(0,0,0,0);
+      const other = day.getMonth() !== selectedMonth.getMonth();
+      const isToday = day.getTime() === today.getTime();
+      html += `<div class="day ${other?'other-month':''} ${isToday?'today':''}">`;
+      html += `<div class="day-number"><span>${day.getDate()}</span>${isToday?'<span class="today-dot" title="Hoje"></span>':''}</div>`;
+
+      for (const p of PERIODS) {
+        const list = bookingsForDay(day, monthBookings, p);
+        const cls = p === 'Manhã' ? 'morning' : p === 'Tarde' ? 'afternoon' : 'night';
+        html += `<div class="period ${cls} ${list.length > 1 ? 'conflict' : ''}">`;
+        html += `<div class="period-head"><span class="period-name">${p}</span>${list.length===0?'<span class="free">Livre</span>':''}</div>`;
+        list.forEach(b => {
+          const mode = $('viewMode').value;
+          const main = mode === 'lab' ? b.professor : b.lab;
+          const sub = b.course || (mode === 'lab' ? b.lab : b.professor);
+          html += `<div class="booking" data-booking-id="${b.id}"><div class="booking-main">${escapeHtml(main)}</div><div class="booking-sub">${escapeHtml(sub)}</div>${list.length>1?'<span class="conflict-tag">CONFLITO</span>':''}</div>`;
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    cal.innerHTML = html;
+    cal.querySelectorAll('.booking').forEach(el => el.addEventListener('click', () => showBooking(+el.dataset.bookingId)));
+  }
+
+  function renderCards() {
+    const entity = $('entitySelect').value;
+    if (!entity) {
+      ['cardBookings','cardDays','cardPeriods','cardConflicts'].forEach(id => $(id).textContent = '0');
+      return;
+    }
+    const monthBookings = getSelectedBookingsForMonth();
+    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth()+1, 0);
+    const daysSet = new Set();
+    const periodSet = new Set();
+    let conflicts = 0;
+
+    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate()+1)) {
+      PERIODS.forEach(p => {
+        const list = bookingsForDay(new Date(d), monthBookings, p);
+        if (list.length) {
+          daysSet.add(d.toISOString().slice(0,10));
+          periodSet.add(d.toISOString().slice(0,10) + '|' + p);
+          if (list.length > 1) conflicts += list.length - 1;
+        }
+      });
+    }
+    $('cardBookings').textContent = monthBookings.length;
+    $('cardDays').textContent = daysSet.size;
+    $('cardPeriods').textContent = periodSet.size;
+    $('cardConflicts').textContent = conflicts;
+  }
+
+  function renderTable() {
+    const list = getSelectedBookingsForMonth().sort((a,b)=>a.start-b.start || a.period.localeCompare(b.period));
+    $('bookingTableBody').innerHTML = list.length ? list.map(b => `
+      <tr>
+        <td>${escapeHtml(b.professor)}</td><td>${escapeHtml(b.course)}</td><td>${escapeHtml(b.lab)}</td>
+        <td>${escapeHtml(b.period)}</td><td>${fmtDate(b.start)}</td><td>${fmtDate(b.end)}</td><td>${escapeHtml(b.note)}</td>
+      </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Nenhuma reserva encontrada para o filtro atual.</td></tr>';
+  }
+
+  function showBooking(id) {
+    const b = bookings.find(x => x.id === id);
+    if (!b) return;
+    const pairs = [
+      ['Professor', b.professor], ['Curso', b.course || '—'], ['Kit / Lab', b.lab], ['Período', b.period],
+      ['Data de início', fmtDate(b.start)], ['Data de fim', fmtDate(b.end)], ['Dia da semana', b.weekday || '—'], ['Observação', b.note || '—']
+    ];
+    $('modalContent').innerHTML = pairs.map(([k,v]) => `<div class="label">${escapeHtml(k)}</div><div>${escapeHtml(v)}</div>`).join('');
+    $('bookingDialog').showModal();
+  }
+
+  function fmtDate(d) { return d ? d.toLocaleDateString('pt-BR') : '—'; }
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  }
+
+  $('viewMode').addEventListener('change', () => {
+    $('entityLabel').textContent = $('viewMode').value === 'lab' ? 'Kit / Laboratório' : 'Professor';
+    populateEntitySelect();
+    renderAll();
+  });
+  $('entitySelect').addEventListener('change', renderAll);
+  $('monthPicker').addEventListener('change', e => {
+    if (!e.target.value) return;
+    const [y,m] = e.target.value.split('-').map(Number);
+    selectedMonth = new Date(y, m-1, 1);
+    renderAll();
+  });
+  $('prevMonth').addEventListener('click', () => { selectedMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth()-1, 1); syncMonthPicker(); renderAll(); });
+  $('nextMonth').addEventListener('click', () => { selectedMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth()+1, 1); syncMonthPicker(); renderAll(); });
+  $('todayBtn').addEventListener('click', () => { selectedMonth = new Date(); syncMonthPicker(); renderAll(); });
+  $('refreshBtn').addEventListener('click', loadRemoteCSV);
+  $('csvFile').addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try { processCSV(await file.text()); } catch(err) { setStatus(false, 'Erro ao processar CSV'); alert('Não foi possível processar o CSV: ' + err.message); }
+  });
+  $('toggleTable').addEventListener('click', () => {
+    $('tablePanel').classList.toggle('hidden');
+    $('toggleTable').textContent = $('tablePanel').classList.contains('hidden') ? '' : '';
+  });
+  $('closeDialog').addEventListener('click', () => $('bookingDialog').close());
+  $('bookingDialog').addEventListener('click', e => { if (e.target === $('bookingDialog')) $('bookingDialog').close(); });
+
+  syncMonthPicker();
+  renderAll();
+  loadRemoteCSV();
+})();
+</script>
+</body>
+</html>
