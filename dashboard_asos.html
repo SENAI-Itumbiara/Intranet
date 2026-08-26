@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard ASOS e Exames</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-title { font-weight: 600; color: #343a40; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: none; margin-bottom: 20px; border-radius: 10px; }
+        .filter-section { background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .table-container { background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-x: auto; }
+        .status-vencido { background-color: #f8d7da; color: #842029; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 0.85em;}
+        .status-vencendo { background-color: #fff3cd; color: #664d03; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 0.85em;}
+        .status-em-dia { background-color: #d1e7dd; color: #0f5132; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 0.85em;}
+        th { color: #495057; font-weight: 600; }
+        td { vertical-align: middle; }
+    </style>
+</head>
+<body>
+<div class="container mt-4 mb-5">
+    <h2 class="mb-4 header-title">Painel de Controle: ASOS e Exames Ocupacionais</h2>
+
+    <!-- Filters -->
+    <div class="filter-section row g-3">
+        <div class="col-md-4">
+            <label class="form-label text-muted fw-bold">Filtrar por Cargo</label>
+            <select id="filterCargo" class="form-select shadow-sm" onchange="applyFilters()">
+                <option value="">Todos os Cargos</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-muted fw-bold">Filtrar por Exame</label>
+            <select id="filterExame" class="form-select shadow-sm" onchange="applyFilters()">
+                <option value="">Todos os Exames</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label text-muted fw-bold">Status do ASOS</label>
+            <select id="filterStatus" class="form-select shadow-sm" onchange="applyFilters()">
+                <option value="">Todos os Status</option>
+                <option value="Em Dia">Em Dia (Regular)</option>
+                <option value="A Vencer (30 dias)">A Vencer (próximos 30 dias)</option>
+                <option value="Vencido">Vencido</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-center bg-white border-start border-primary border-4">
+                <div class="card-body">
+                    <h6 class="card-title text-muted text-uppercase fw-bold">Total de Exames</h6>
+                    <h2 id="cardTotal" class="text-primary fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-white border-start border-success border-4">
+                <div class="card-body">
+                    <h6 class="card-title text-muted text-uppercase fw-bold">Em Dia</h6>
+                    <h2 id="cardEmDia" class="text-success fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-white border-start border-warning border-4">
+                <div class="card-body">
+                    <h6 class="card-title text-muted text-uppercase fw-bold">A Vencer (30 dias)</h6>
+                    <h2 id="cardVencendo" class="text-warning fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-white border-start border-danger border-4">
+                <div class="card-body">
+                    <h6 class="card-title text-muted text-uppercase fw-bold">Vencidos</h6>
+                    <h2 id="cardVencidos" class="text-danger fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-5">
+            <div class="card p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                <canvas id="statusChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card p-4 h-100">
+                <canvas id="examesChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        <h5 class="mb-3 text-secondary fw-bold">Detalhamento de Colaboradores</h5>
+        <table class="table table-hover mt-3" id="dataTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Cargo</th>
+                    <th>Nome</th>
+                    <th>Exame</th>
+                    <th>Último Pedido</th>
+                    <th>Data Resultado</th>
+                    <th>Periodicidade</th>
+                    <th>Refazer em</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="8" class="text-center text-muted">Carregando dados...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUesdnVUYMZCtrGzVM2iOe1ok5sUpZdSNx5UNVZZHX9WHGEhKn1dNfHjYMDoROO41alPlxc3LtteKU/pub?output=csv';
+    let allData = [];
+    let statusChartInst = null;
+    let examesChartInst = null;
+
+    // Fetch and parse CSV
+    fetch(CSV_URL)
+        .then(response => response.text())
+        .then(csvText => {
+            // First attempt with comma
+            let data = Papa.parse(csvText, { header: true, skipEmptyLines: true }).data;
+            
+            // If it seems it failed to split columns properly (e.g., all in one column), try semicolon
+            if (data.length > 0 && Object.keys(data[0]).length === 1 && Object.keys(data[0])[0].includes(';')) {
+                data = Papa.parse(csvText, { header: true, skipEmptyLines: true, delimiter: ';' }).data;
+            } else if (data.length > 0 && data[0]['CARGO;Nome;Exame;Último Pedido;Data Resultado;Periodicidade;Refazer em']) {
+                // Fallback manually if headers are strictly concatenated
+                data = Papa.parse(csvText, { header: true, skipEmptyLines: true, delimiter: ';' }).data;
+            }
+            
+            processData(data);
+        })
+        .catch(err => {
+            document.querySelector('#dataTable tbody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Erro ao carregar dados. Verifique a conexão com a internet ou as permissões da planilha.</td></tr>';
+            console.error('Fetch error:', err);
+        });
+
+    function parseDateBR(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        dateStr = dateStr.trim();
+        const parts = dateStr.split('/');
+        if(parts.length === 3) {
+            // parts: [DD, MM, YYYY]
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        return null;
+    }
+
+    function determineStatus(refazerEmStr) {
+        const refazerDate = parseDateBR(refazerEmStr);
+        if (!refazerDate || isNaN(refazerDate.getTime())) return 'Desconhecido';
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const diffTime = refazerDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return 'Vencido';
+        } else if (diffDays <= 30) {
+            return 'A Vencer (30 dias)';
+        } else {
+            return 'Em Dia';
+        }
+    }
+
+    function processData(data) {
+        const cargos = new Set();
+        const exames = new Set();
+
+        allData = data.map(row => {
+            // Clean up keys and values (trim whitespaces)
+            const cleanRow = {};
+            for(let key in row) {
+                // Sometimes BOM or quotes are included in headers
+                let cleanKey = key.replace(/['"]+/g, '').trim();
+                cleanRow[cleanKey] = row[key] ? row[key].trim() : '';
+            }
+
+            cleanRow.Status = determineStatus(cleanRow['Refazer em']);
+            
+            if(cleanRow['CARGO']) cargos.add(cleanRow['CARGO']);
+            if(cleanRow['Exame']) exames.add(cleanRow['Exame']);
+            
+            return cleanRow;
+        }).filter(row => row['Nome']); // only keep valid rows with names
+
+        // Populate filters
+        const filterCargo = document.getElementById('filterCargo');
+        Array.from(cargos).sort().forEach(c => {
+            if(c) filterCargo.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+
+        const filterExame = document.getElementById('filterExame');
+        Array.from(exames).sort().forEach(e => {
+            if(e) filterExame.innerHTML += `<option value="${e}">${e}</option>`;
+        });
+
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const fCargo = document.getElementById('filterCargo').value;
+        const fExame = document.getElementById('filterExame').value;
+        const fStatus = document.getElementById('filterStatus').value;
+
+        const filtered = allData.filter(row => {
+            const matchCargo = !fCargo || row['CARGO'] === fCargo;
+            const matchExame = !fExame || row['Exame'] === fExame;
+            const matchStatus = !fStatus || row.Status === fStatus;
+            return matchCargo && matchExame && matchStatus;
+        });
+
+        updateDashboard(filtered);
+    }
+
+    function updateDashboard(data) {
+        // Update Cards
+        const total = data.length;
+        const vencidos = data.filter(d => d.Status === 'Vencido').length;
+        const vencendo = data.filter(d => d.Status === 'A Vencer (30 dias)').length;
+        const emDia = data.filter(d => d.Status === 'Em Dia').length;
+
+        document.getElementById('cardTotal').innerText = total;
+        document.getElementById('cardVencidos').innerText = vencidos;
+        document.getElementById('cardVencendo').innerText = vencendo;
+        document.getElementById('cardEmDia').innerText = emDia;
+
+        // Update Table
+        const tbody = document.querySelector('#dataTable tbody');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nenhum registro encontrado com os filtros selecionados.</td></tr>';
+        } else {
+            data.forEach(row => {
+                let statusClass = 'text-muted';
+                if(row.Status === 'Vencido') statusClass = 'status-vencido';
+                else if(row.Status === 'A Vencer (30 dias)') statusClass = 'status-vencendo';
+                else if(row.Status === 'Em Dia') statusClass = 'status-em-dia';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row['CARGO'] || '-'}</td>
+                    <td><span class="fw-bold">${row['Nome'] || '-'}</span></td>
+                    <td>${row['Exame'] || '-'}</td>
+                    <td>${row['Último Pedido'] || '-'}</td>
+                    <td>${row['Data Resultado'] || '-'}</td>
+                    <td>${row['Periodicidade'] || '-'}</td>
+                    <td>${row['Refazer em'] || '-'}</td>
+                    <td><span class="${statusClass}">${row.Status || 'Indisponível'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Charts
+        updateCharts(vencidos, vencendo, emDia, data);
+    }
+
+    function updateCharts(vencidos, vencendo, emDia, data) {
+        // Status Chart (Doughnut)
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        if(statusChartInst) statusChartInst.destroy();
+        statusChartInst = new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Em Dia', 'A Vencer (30 dias)', 'Vencidos'],
+                datasets: [{
+                    data: [emDia, vencendo, vencidos],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: 'Proporção de Status', font: { size: 16 } }
+                }
+            }
+        });
+
+        // Exames Chart (Bar)
+        const exameCounts = {};
+        data.forEach(d => {
+            const ex = d['Exame'];
+            if(ex) {
+                exameCounts[ex] = (exameCounts[ex] || 0) + 1;
+            }
+        });
+        
+        // Sort to show top exames
+        const sortedExames = Object.entries(exameCounts).sort((a,b) => b[1] - a[1]);
+        const labels = sortedExames.map(item => item[0]);
+        const values = sortedExames.map(item => item[1]);
+
+        const ctxExames = document.getElementById('examesChart').getContext('2d');
+        if(examesChartInst) examesChartInst.destroy();
+        examesChartInst = new Chart(ctxExames, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade',
+                    data: values,
+                    backgroundColor: '#0d6efd',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Quantidade por Tipo de Exame', font: { size: 16 } }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
