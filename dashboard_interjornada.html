@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Interjornada</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --bg: #ecf0f1;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .container { max-width: 1400px; margin: auto; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { margin: 0; color: var(--primary); }
+        
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); align-items: center; flex-wrap: wrap; }
+        .filters .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
+        .filters label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--secondary); }
+        .filters select { padding: 10px; border-radius: 6px; border: 1px solid #bdc3c7; outline: none; }
+        
+        .cards { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .card { flex: 1; min-width: 200px; background: var(--card-bg); padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); }
+        .card h3 { margin: 0 0 10px 0; color: var(--secondary); font-size: 14px; text-transform: uppercase; }
+        .card .value { font-size: 28px; font-weight: bold; color: var(--primary); }
+        
+        .charts { display: flex; flex-wrap: wrap; gap: 20px; }
+        .chart-container { flex: 1; min-width: 600px; background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-container h2 { font-size: 16px; margin-top: 0; color: var(--secondary); text-align: center; margin-bottom: 15px; }
+        canvas { max-height: 350px; }
+        
+        #loading { text-align: center; font-size: 18px; margin: 50px; color: var(--accent); }
+        .table-container { margin-top: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+        th { background-color: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard de Interjornada</h1>
+            <p>Acompanhamento e gestão de horas de interjornada dos colaboradores</p>
+        </div>
+
+        <div id="loading">Carregando dados, por favor aguarde...</div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="f-empresa">Empresa</label>
+                    <select id="f-empresa"><option value="all">Todas</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="f-mes">Mês</label>
+                    <select id="f-mes"><option value="all">Todos</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="f-colaborador">Colaborador</label>
+                    <select id="f-colaborador"><option value="all">Todos</option></select>
+                </div>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>Total de Ocorrências</h3>
+                    <div class="value" id="c-total">0</div>
+                </div>
+                <div class="card">
+                    <h3>Média de Horas (Interjornada)</h3>
+                    <div class="value" id="c-media">0h</div>
+                </div>
+                <div class="card">
+                    <h3>Máximo de Horas</h3>
+                    <div class="value" id="c-maximo">0h</div>
+                </div>
+                <div class="card">
+                    <h3>Colaboradores Envolvidos</h3>
+                    <div class="value" id="c-colab">0</div>
+                </div>
+            </div>
+
+            <div class="charts">
+                <div class="chart-container">
+                    <h2>Evolução Mensal (Média de Horas)</h2>
+                    <canvas id="chartEvolucao"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h2>Top 10 Colaboradores (Maior Média de Horas)</h2>
+                    <canvas id="chartColaborador"></canvas>
+                </div>
+            </div>
+            
+            <div class="charts" style="margin-top: 20px;">
+                <div class="chart-container">
+                    <h2>Ocorrências por Empresa</h2>
+                    <canvas id="chartEmpresa"></canvas>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <h2>Últimas Ocorrências Filtradas</h2>
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Colaborador</th>
+                            <th>Cargo</th>
+                            <th>Data Saída</th>
+                            <th>Data Entrada</th>
+                            <th>Horas Interjornada</th>
+                            <th>Mês</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT234n30GToWMSZYz3mpV2W8qMERYGWbt_IEx4ulwQQ4Dz69KdGnSmPhYH2CbHp-Nj2PH7HrWpeh80d/pub?output=csv";
+        let rawData = [];
+        let filteredData = [];
+        
+        let chartEvolucaoInst = null;
+        let chartColaboradorInst = null;
+        let chartEmpresaInst = null;
+
+        Papa.parse(url, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                rawData = results.data.map(row => {
+                    let horas = 0;
+                    if(row['HORAS INTERJORNADA']) {
+                        let h_str = row['HORAS INTERJORNADA'].toString();
+                        if(h_str.includes(':')) {
+                            let parts = h_str.split(':');
+                            horas = parseInt(parts[0] || 0) + parseInt(parts[1] || 0)/60;
+                        } else {
+                            horas = parseFloat(h_str.replace(',','.'));
+                        }
+                    }
+                    
+                    return {
+                        empresa: row['EMPRESA'] || 'N/A',
+                        nome: row['NOME'] || 'N/A',
+                        cargo: row['CARGO'] || 'N/A',
+                        mes: row['Mês'] || row['MÊS_'] || 'N/A',
+                        horas: isNaN(horas) ? 0 : horas,
+                        horasStr: row['HORAS INTERJORNADA'] || '0',
+                        dataSaida: row['DATA SAIDA'] || '',
+                        dataEntrada: row['DATA ENTRADA'] || ''
+                    };
+                });
+                
+                filteredData = [...rawData];
+                initDashboard();
+            },
+            error: function(err) {
+                document.getElementById('loading').innerText = "Erro ao carregar dados: " + err;
+            }
+        });
+
+        function initDashboard() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+
+            populateFilters();
+            
+            document.getElementById('f-empresa').addEventListener('change', applyFilters);
+            document.getElementById('f-mes').addEventListener('change', applyFilters);
+            document.getElementById('f-colaborador').addEventListener('change', applyFilters);
+            
+            updateDashboard();
+        }
+
+        function populateFilters() {
+            const empresas = [...new Set(rawData.map(d => d.empresa))].filter(Boolean).sort();
+            const meses = [...new Set(rawData.map(d => d.mes))].filter(Boolean).sort();
+            const colaboradores = [...new Set(rawData.map(d => d.nome))].filter(Boolean).sort();
+
+            const fEmpresa = document.getElementById('f-empresa');
+            empresas.forEach(e => fEmpresa.add(new Option(e, e)));
+
+            const fMes = document.getElementById('f-mes');
+            meses.forEach(m => fMes.add(new Option(m, m)));
+
+            const fColaborador = document.getElementById('f-colaborador');
+            colaboradores.forEach(c => fColaborador.add(new Option(c, c)));
+        }
+
+        function applyFilters() {
+            const empresa = document.getElementById('f-empresa').value;
+            const mes = document.getElementById('f-mes').value;
+            const colaborador = document.getElementById('f-colaborador').value;
+
+            filteredData = rawData.filter(d => {
+                return (empresa === 'all' || d.empresa === empresa) &&
+                       (mes === 'all' || d.mes === mes) &&
+                       (colaborador === 'all' || d.nome === colaborador);
+            });
+            
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            updateCards();
+            updateCharts();
+            updateTable();
+        }
+
+        function updateCards() {
+            document.getElementById('c-total').innerText = filteredData.length;
+            
+            const totalHoras = filteredData.reduce((acc, curr) => acc + curr.horas, 0);
+            const media = filteredData.length ? (totalHoras / filteredData.length).toFixed(2) : 0;
+            document.getElementById('c-media').innerText = media + 'h';
+            
+            const maximo = filteredData.length ? Math.max(...filteredData.map(d => d.horas)).toFixed(2) : 0;
+            document.getElementById('c-maximo').innerText = maximo + 'h';
+            
+            const colabs = new Set(filteredData.map(d => d.nome)).size;
+            document.getElementById('c-colab').innerText = colabs;
+        }
+
+        function updateCharts() {
+            // Evolução Mensal
+            const mesesMap = {};
+            filteredData.forEach(d => {
+                if(!mesesMap[d.mes]) mesesMap[d.mes] = { soma: 0, count: 0 };
+                mesesMap[d.mes].soma += d.horas;
+                mesesMap[d.mes].count += 1;
+            });
+            
+            const mesesLabels = Object.keys(mesesMap).sort();
+            const mediaMeses = mesesLabels.map(m => (mesesMap[m].soma / mesesMap[m].count).toFixed(2));
+            
+            if(chartEvolucaoInst) chartEvolucaoInst.destroy();
+            const ctxEv = document.getElementById('chartEvolucao').getContext('2d');
+            chartEvolucaoInst = new Chart(ctxEv, {
+                type: 'line',
+                data: {
+                    labels: mesesLabels,
+                    datasets: [{
+                        label: 'Média de Horas',
+                        data: mediaMeses,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                }
+            });
+
+            // Top Colaboradores (Média de horas)
+            const colabMap = {};
+            filteredData.forEach(d => {
+                if(!colabMap[d.nome]) colabMap[d.nome] = {soma: 0, count: 0};
+                colabMap[d.nome].soma += d.horas;
+                colabMap[d.nome].count += 1;
+            });
+            
+            const sortedColabs = Object.entries(colabMap).map(e => [e[0], e[1].soma / e[1].count]).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            
+            if(chartColaboradorInst) chartColaboradorInst.destroy();
+            const ctxCol = document.getElementById('chartColaborador').getContext('2d');
+            chartColaboradorInst = new Chart(ctxCol, {
+                type: 'bar',
+                data: {
+                    labels: sortedColabs.map(c => c[0]),
+                    datasets: [{
+                        label: 'Média de Horas',
+                        data: sortedColabs.map(c => c[1].toFixed(2)),
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y'
+                }
+            });
+            
+            // Distribuicao Empresa
+            const empMap = {};
+            filteredData.forEach(d => {
+                if(!empMap[d.empresa]) empMap[d.empresa] = 0;
+                empMap[d.empresa] += 1;
+            });
+            
+            if(chartEmpresaInst) chartEmpresaInst.destroy();
+            const ctxEmp = document.getElementById('chartEmpresa').getContext('2d');
+            chartEmpresaInst = new Chart(ctxEmp, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(empMap),
+                    datasets: [{
+                        data: Object.values(empMap),
+                        backgroundColor: ['#2ecc71', '#f1c40f', '#9b59b6', '#e67e22', '#34495e', '#1abc9c', '#e74c3c']
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function updateTable() {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            
+            // Exibir no máximo as últimas 20 ocorrências para não travar
+            const tableData = filteredData.slice(0, 20);
+            
+            tableData.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.empresa}</td>
+                    <td>${d.nome}</td>
+                    <td>${d.cargo}</td>
+                    <td>${d.dataSaida}</td>
+                    <td>${d.dataEntrada}</td>
+                    <td>${d.horasStr}</td>
+                    <td>${d.mes}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            if(filteredData.length === 0) {
+                 const tr = document.createElement('tr');
+                 tr.innerHTML = `<td colspan="7" style="text-align:center;">Nenhum dado encontrado para os filtros selecionados.</td>`;
+                 tbody.appendChild(tr);
+            }
+        }
+    </script>
+</body>
+</html>
