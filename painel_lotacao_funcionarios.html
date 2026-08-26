@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Lotação de Funcionários</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f8f9fa; color: #212529; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .dashboard-header { background-color: #ffffff; padding: 20px; border-bottom: 1px solid #dee2e6; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card { border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; margin-bottom: 20px; }
+        .card:hover { transform: translateY(-5px); }
+        .card-title { font-size: 0.9rem; text-transform: uppercase; color: #6c757d; font-weight: bold; }
+        .card-text { font-size: 2rem; font-weight: 700; color: #0d6efd; }
+        .table-responsive { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        th { background-color: #f1f3f5 !important; }
+        #loading { text-align: center; padding: 50px; font-size: 1.5rem; color: #6c757d; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .filter-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+    <h2 class="m-0">Lotação de Funcionários</h2>
+    <span class="badge bg-primary" id="totalBadge">Carregando...</span>
+</div>
+
+<div class="container-fluid px-4">
+    <div id="loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2">Carregando e processando dados...</p>
+    </div>
+
+    <div id="dashboard" style="display: none;">
+        <!-- Filtros -->
+        <div class="filter-section row g-3">
+            <div class="col-md-3">
+                <label for="searchNome" class="form-label fw-bold">Buscar por Nome</label>
+                <input type="text" class="form-control" id="searchNome" placeholder="Digite o nome...">
+            </div>
+            <div class="col-md-2">
+                <label for="filterUnidade" class="form-label fw-bold">Unidade Operacional</label>
+                <select class="form-select" id="filterUnidade"><option value="">Todas</option></select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterCargo" class="form-label fw-bold">Cargo</label>
+                <select class="form-select" id="filterCargo"><option value="">Todos</option></select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterSituacao" class="form-label fw-bold">Situação</label>
+                <select class="form-select" id="filterSituacao"><option value="">Todas</option></select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterSexo" class="form-label fw-bold">Sexo</label>
+                <select class="form-select" id="filterSexo"><option value="">Todos</option></select>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total de Colaboradores</h5>
+                        <p class="card-text" id="cardTotal">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Homens</h5>
+                        <p class="card-text text-primary" id="cardHomens">0 (0%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Mulheres</h5>
+                        <p class="card-text" style="color: #d63384;" id="cardMulheres">0 (0%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Unidade com Mais Colaboradores</h5>
+                        <p class="card-text text-success" style="font-size: 1.2rem; margin-top: 15px;" id="cardTopUnidade">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 bg-white">
+                    <div class="card-header bg-white fw-bold">Colaboradores por Unidade Operacional</div>
+                    <div class="card-body chart-container">
+                        <canvas id="unidadeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 bg-white">
+                    <div class="card-header bg-white fw-bold">Distribuição por Sexo</div>
+                    <div class="card-body chart-container">
+                        <canvas id="sexoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 bg-white">
+                    <div class="card-header bg-white fw-bold">Situação</div>
+                    <div class="card-body chart-container">
+                        <canvas id="situacaoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-responsive mb-5">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nome</th>
+                        <th>Admissão</th>
+                        <th>Tipo Salário</th>
+                        <th>CH</th>
+                        <th>Descrição Cargo</th>
+                        <th>CARGO</th>
+                        <th>Situação</th>
+                        <th>Unidade Operacional</th>
+                        <th>Área</th>
+                        <th>SEXO</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Registros vão aqui -->
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span id="pageInfo" class="text-muted">Mostrando 0 registros</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" id="btnPrev">Anterior</button>
+                    <span id="pageNumber" class="mx-2 fw-bold">1</span>
+                    <button class="btn btn-sm btn-outline-secondary" id="btnNext">Próxima</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZALwCO2Vg8K1TmOkf0Y4l7iSAduHAn9SFR16mr3BviFJnxqbf-Tt8OgLgu-dQ0VeNIVdBVXv_ZNG9/pub?output=csv";
+    
+    let allData = [];
+    let filteredData = [];
+    
+    // Configurações de paginação
+    let currentPage = 1;
+    const itemsPerPage = 50;
+
+    // Gráficos
+    let unidadeChart, sexoChart, situacaoChart;
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", () => {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                allData = results.data.map(row => {
+                    // Normalização de chaves caso a planilha tenha espaços no cabeçalho
+                    const normalizedRow = {};
+                    for (let key in row) {
+                        normalizedRow[key.trim()] = row[key];
+                    }
+                    return normalizedRow;
+                });
+                
+                filteredData = [...allData];
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                populateFilters();
+                updateDashboard();
+                setupEventListeners();
+            },
+            error: function(err) {
+                document.getElementById('loading').innerHTML = `<div class="alert alert-danger">Erro ao carregar dados: ${err.message}</div>`;
+            }
+        });
+    });
+
+    function populateFilters() {
+        const unidades = [...new Set(allData.map(d => d['Unidade Operacional']).filter(Boolean))].sort();
+        const cargos = [...new Set(allData.map(d => d['CARGO']).filter(Boolean))].sort();
+        const situacoes = [...new Set(allData.map(d => d['Situação']).filter(Boolean))].sort();
+        const sexos = [...new Set(allData.map(d => d['SEXO']).filter(Boolean))].sort();
+
+        const addOptions = (id, values) => {
+            const select = document.getElementById(id);
+            values.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                select.appendChild(opt);
+            });
+        };
+
+        addOptions('filterUnidade', unidades);
+        addOptions('filterCargo', cargos);
+        addOptions('filterSituacao', situacoes);
+        addOptions('filterSexo', sexos);
+    }
+
+    function setupEventListeners() {
+        const filterElements = ['searchNome', 'filterUnidade', 'filterCargo', 'filterSituacao', 'filterSexo'];
+        filterElements.forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                currentPage = 1;
+                applyFilters();
+            });
+        });
+
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            if (currentPage * itemsPerPage < filteredData.length) {
+                currentPage++;
+                renderTable();
+            }
+        });
+    }
+
+    function applyFilters() {
+        const nome = document.getElementById('searchNome').value.toLowerCase();
+        const unidade = document.getElementById('filterUnidade').value;
+        const cargo = document.getElementById('filterCargo').value;
+        const situacao = document.getElementById('filterSituacao').value;
+        const sexo = document.getElementById('filterSexo').value;
+
+        filteredData = allData.filter(row => {
+            const matchNome = (row['Nome'] || '').toLowerCase().includes(nome);
+            const matchUnidade = unidade ? row['Unidade Operacional'] === unidade : true;
+            const matchCargo = cargo ? row['CARGO'] === cargo : true;
+            const matchSituacao = situacao ? row['Situação'] === situacao : true;
+            const matchSexo = sexo ? row['SEXO'] === sexo : true;
+
+            return matchNome && matchUnidade && matchCargo && matchSituacao && matchSexo;
+        });
+
+        updateDashboard();
+    }
+
+    function updateDashboard() {
+        updateCards();
+        updateCharts();
+        renderTable();
+    }
+
+    function updateCards() {
+        const total = filteredData.length;
+        document.getElementById('cardTotal').textContent = total.toLocaleString('pt-BR');
+        document.getElementById('totalBadge').textContent = `${total} Registros`;
+
+        if (total === 0) {
+            document.getElementById('cardHomens').textContent = "0 (0%)";
+            document.getElementById('cardMulheres').textContent = "0 (0%)";
+            document.getElementById('cardTopUnidade').textContent = "-";
+            return;
+        }
+
+        // Homens / Mulheres
+        let homens = 0; let mulheres = 0;
+        const unCount = {};
+
+        filteredData.forEach(row => {
+            const s = (row['SEXO'] || '').toUpperCase().trim();
+            if (s === 'M' || s === 'MASCULINO') homens++;
+            else if (s === 'F' || s === 'FEMININO') mulheres++;
+
+            const un = row['Unidade Operacional'];
+            if (un) {
+                unCount[un] = (unCount[un] || 0) + 1;
+            }
+        });
+
+        const percH = ((homens / total) * 100).toFixed(1);
+        const percM = ((mulheres / total) * 100).toFixed(1);
+
+        document.getElementById('cardHomens').textContent = `${homens.toLocaleString('pt-BR')} (${percH}%)`;
+        document.getElementById('cardMulheres').textContent = `${mulheres.toLocaleString('pt-BR')} (${percM}%)`;
+
+        // Unidade com mais colaboradores
+        let maxUnidade = "-";
+        let maxCount = 0;
+        for (let [un, count] of Object.entries(unCount)) {
+            if (count > maxCount) {
+                maxCount = count;
+                maxUnidade = un;
+            }
+        }
+        document.getElementById('cardTopUnidade').textContent = maxUnidade !== "-" ? `${maxUnidade} (${maxCount})` : "-";
+    }
+
+    function updateCharts() {
+        // Dados Sexo
+        let homens = 0; let mulheres = 0; let outros = 0;
+        // Dados Unidade
+        const unCount = {};
+        // Dados Situacao
+        const sitCount = {};
+
+        filteredData.forEach(row => {
+            const s = (row['SEXO'] || '').toUpperCase().trim();
+            if (s === 'M' || s === 'MASCULINO') homens++;
+            else if (s === 'F' || s === 'FEMININO') mulheres++;
+            else outros++;
+
+            const un = row['Unidade Operacional'] || 'Não Informada';
+            unCount[un] = (unCount[un] || 0) + 1;
+
+            const sit = row['Situação'] || 'Não Informada';
+            sitCount[sit] = (sitCount[sit] || 0) + 1;
+        });
+
+        // Atualizar ou Criar Gráfico de Sexo
+        if (sexoChart) sexoChart.destroy();
+        sexoChart = new Chart(document.getElementById('sexoChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Masculino', 'Feminino', 'Outros/NI'],
+                datasets: [{
+                    data: [homens, mulheres, outros],
+                    backgroundColor: ['#0d6efd', '#d63384', '#adb5bd']
+                }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Atualizar ou Criar Gráfico de Unidades (Top 10 para não poluir)
+        const sortedUnidades = Object.entries(unCount).sort((a,b) => b[1] - a[1]).slice(0, 10);
+        if (unidadeChart) unidadeChart.destroy();
+        unidadeChart = new Chart(document.getElementById('unidadeChart'), {
+            type: 'bar',
+            data: {
+                labels: sortedUnidades.map(u => u[0]),
+                datasets: [{
+                    label: 'Colaboradores',
+                    data: sortedUnidades.map(u => u[1]),
+                    backgroundColor: '#0dcaf0'
+                }]
+            },
+            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+
+        // Atualizar ou Criar Gráfico de Situação
+        if (situacaoChart) situacaoChart.destroy();
+        situacaoChart = new Chart(document.getElementById('situacaoChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(sitCount),
+                datasets: [{
+                    data: Object.values(sitCount),
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#20c997']
+                }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+
+        pageData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row['Matrícula'] || '-'}</td>
+                <td class="fw-bold">${row['Nome'] || '-'}</td>
+                <td>${row['Admissão'] || '-'}</td>
+                <td>${row['Tipo Salário'] || '-'}</td>
+                <td>${row['CH'] || '-'}</td>
+                <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${row['Descrição Cargo'] || ''}">${row['Descrição Cargo'] || '-'}</td>
+                <td><span class="badge bg-secondary">${row['CARGO'] || '-'}</span></td>
+                <td><span class="badge ${row['Situação'] === 'Ativo' || row['Situação'] === 'ATIVO' ? 'bg-success' : 'bg-warning text-dark'}">${row['Situação'] || '-'}</span></td>
+                <td>${row['Unidade Operacional'] || '-'}</td>
+                <td>${row['Área'] || '-'}</td>
+                <td>${row['SEXO'] || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('pageNumber').textContent = currentPage;
+        document.getElementById('pageInfo').textContent = `Mostrando ${start + 1} a ${Math.min(end, filteredData.length)} de ${filteredData.length} registros`;
+
+        document.getElementById('btnPrev').disabled = currentPage === 1;
+        document.getElementById('btnNext').disabled = end >= filteredData.length;
+    }
+</script>
+
+</body>
+</html>
