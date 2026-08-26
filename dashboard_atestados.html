@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Atestados - Dashboard</title>
+    <!-- Bootstrap CSS for Light Theme & Layout -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .card-kpi {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .card-kpi:hover {
+            transform: translateY(-5px);
+        }
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .icon-blue { background-color: #e0f2fe; color: #0284c7; }
+        .icon-red { background-color: #fee2e2; color: #dc2626; }
+        .icon-green { background-color: #dcfce7; color: #16a34a; }
+        .icon-purple { background-color: #f3e8ff; color: #9333ea; }
+        
+        .chart-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            height: 350px;
+        }
+        .table-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h5.chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        #loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <h4 class="mt-3 text-secondary">Carregando dados da base...</h4>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-file-medical me-2 text-primary"></i>Gestão de Atestados</a>
+            <span class="text-muted small" id="lastUpdate"></span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid px-4 py-4">
+        
+        <!-- KPIs Row -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card card-kpi h-100 py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">Total de Atestados</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark" id="kpi-total">0</div>
+                        </div>
+                        <div class="icon-box icon-blue"><i class="fa-solid fa-file-signature"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card card-kpi h-100 py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">Dias de Afastamento (Soma)</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark" id="kpi-dias">0</div>
+                        </div>
+                        <div class="icon-box icon-red"><i class="fa-solid fa-calendar-xmark"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card card-kpi h-100 py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">CID Mais Recorrente</div>
+                            <div class="h4 mb-0 font-weight-bold text-dark" id="kpi-cid">-</div>
+                        </div>
+                        <div class="icon-box icon-purple"><i class="fa-solid fa-stethoscope"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card card-kpi h-100 py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">Status Predominante</div>
+                            <div class="h5 mb-0 font-weight-bold text-dark" id="kpi-status">-</div>
+                        </div>
+                        <div class="icon-box icon-green"><i class="fa-solid fa-clipboard-check"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h5 class="chart-title">Atestados por Situação do Processo</h5>
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h5 class="chart-title">Top 5 CIDs (Qtd Atestados)</h5>
+                    <canvas id="chartCid"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <h5 class="chart-title">Atestados por Mês (Baseado na Data do Atestado)</h5>
+                    <canvas id="chartMes"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">Top 5 Gerentes (Qtd Atestados)</h5>
+                    <canvas id="chartGerente"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="table-container">
+                    <h5 class="chart-title mb-3">Detalhamento dos Registros (Últimos 50)</h5>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover table-sm align-middle" id="dataTable">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Funcionário</th>
+                                    <th>Gerente</th>
+                                    <th>Data Atestado</th>
+                                    <th>Dias</th>
+                                    <th>CID</th>
+                                    <th>Situação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Moment.js for date handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/pt-br.min.js"></script>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDZx7H335crlADFXyL9s4BOuPPUgr-PepYvrnmgjKYfkOih_6lXMnL6TK-2Wnqi1sdF1l7m20DDoI9/pub?output=csv';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+        });
+
+        function fetchData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('lastUpdate').innerText = "Atualizado em: " + moment().format('DD/MM/YYYY HH:mm');
+                    processData(data);
+                },
+                error: function(err) {
+                    console.error("Erro ao carregar CSV:", err);
+                    alert("Não foi possível carregar os dados. Verifique o console para mais detalhes.");
+                    document.getElementById('loading').style.display = 'none';
+                }
+            });
+        }
+
+        function processData(data) {
+            // KPIs
+            let totalAtestados = data.length;
+            let totalDias = 0;
+            
+            let cidCount = {};
+            let statusCount = {};
+            let gerenteCount = {};
+            let monthCount = {};
+
+            data.forEach(row => {
+                // Parse Dias
+                let diasStr = row['Quantidade de dias de afastamento'];
+                let dias = parseInt(diasStr) || 0;
+                totalDias += dias;
+
+                // Parse CID
+                let cid = row['Código do CID'] ? row['Código do CID'].trim() : 'N/I';
+                cidCount[cid] = (cidCount[cid] || 0) + 1;
+
+                // Parse Status
+                let status = row['Situação do processo'] || 'Não Informado';
+                statusCount[status] = (statusCount[status] || 0) + 1;
+
+                // Parse Gerente
+                let gerente = row['Nome do gerente'] || 'Não Informado';
+                gerenteCount[gerente] = (gerenteCount[gerente] || 0) + 1;
+
+                // Parse Date for Month chart
+                let dateStr = row['Data do atestado'];
+                if(dateStr) {
+                    // Try to parse common Brazilian format DD/MM/YYYY or YYYY-MM-DD
+                    let m = moment(dateStr, ['DD/MM/YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']);
+                    if(m.isValid()) {
+                        let monthKey = m.format('YYYY-MM'); // e.g. 2023-01
+                        monthCount[monthKey] = (monthCount[monthKey] || 0) + 1;
+                    }
+                }
+            });
+
+            // Calculate Top CID
+            let topCid = '-';
+            let maxCid = 0;
+            for(let c in cidCount) {
+                if(cidCount[c] > maxCid && c !== 'N/I' && c !== '') {
+                    maxCid = cidCount[c];
+                    topCid = c;
+                }
+            }
+
+            // Calculate Top Status
+            let topStatus = '-';
+            let maxStatus = 0;
+            for(let s in statusCount) {
+                if(statusCount[s] > maxStatus) {
+                    maxStatus = statusCount[s];
+                    topStatus = s;
+                }
+            }
+
+            // Update KPI DOM
+            document.getElementById('kpi-total').innerText = totalAtestados;
+            document.getElementById('kpi-dias').innerText = totalDias;
+            document.getElementById('kpi-cid').innerText = topCid;
+            document.getElementById('kpi-status').innerText = topStatus;
+
+            // Render Charts
+            renderChartStatus(statusCount);
+            renderChartCid(cidCount);
+            renderChartGerente(gerenteCount);
+            renderChartMes(monthCount);
+
+            // Populate Table
+            populateTable(data);
+        }
+
+        function sortDict(dict, limit=5) {
+            let items = Object.keys(dict).map(key => { return [key, dict[key]] });
+            items.sort((first, second) => { return second[1] - first[1] });
+            return items.slice(0, limit);
+        }
+
+        function renderChartStatus(statusCount) {
+            const ctx = document.getElementById('chartStatus').getContext('2d');
+            const sorted = sortDict(statusCount, 10);
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sorted.map(item => item[0]),
+                    datasets: [{
+                        data: sorted.map(item => item[1]),
+                        backgroundColor: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
+                            '#8b5cf6', '#06b6d4', '#64748b', '#f43f5e'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+
+        function renderChartCid(cidCount) {
+            const ctx = document.getElementById('chartCid').getContext('2d');
+            // Filter out empty/invalid
+            let filteredCid = {};
+            for(let c in cidCount) if(c && c !== 'N/I' && c !== 'null') filteredCid[c] = cidCount[c];
+            
+            const sorted = sortDict(filteredCid, 5);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(item => item[0]),
+                    datasets: [{
+                        label: 'Qtd de Atestados',
+                        data: sorted.map(item => item[1]),
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderChartGerente(gerenteCount) {
+            const ctx = document.getElementById('chartGerente').getContext('2d');
+            const sorted = sortDict(gerenteCount, 5);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(item => item[0].split(' ')[0]), // Show only first name for space
+                    datasets: [{
+                        label: 'Atestados',
+                        data: sorted.map(item => item[1]),
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderChartMes(monthCount) {
+            const ctx = document.getElementById('chartMes').getContext('2d');
+            
+            // Sort keys chronologically
+            let keys = Object.keys(monthCount).sort();
+            // Take last 12 months
+            keys = keys.slice(-12);
+            
+            let dataArr = keys.map(k => monthCount[k]);
+            let labels = keys.map(k => moment(k, 'YYYY-MM').format('MMM/YY').toUpperCase());
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Qtd de Atestados',
+                        data: dataArr,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function populateTable(data) {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            
+            // Render at most 50 recent (or just last 50 array items for simplicity)
+            let limit = Math.min(data.length, 50);
+            let displayData = data.slice(-limit).reverse(); // show latest assuming appended
+
+            displayData.forEach(row => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-muted text-truncate" style="max-width:80px;" title="${row['Identificador'] || '-'}">${row['Identificador'] || '-'}</td>
+                    <td>${row['Nome do Funcionário'] || '-'}</td>
+                    <td>${row['Nome do gerente'] || '-'}</td>
+                    <td>${row['Data do atestado'] || '-'}</td>
+                    <td><span class="badge bg-secondary">${row['Quantidade de dias de afastamento'] || '0'}</span></td>
+                    <td>${row['Código do CID'] || '-'}</td>
+                    <td><span class="badge bg-info text-dark">${row['Situação do processo'] || '-'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
