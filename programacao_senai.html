@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Programação - SENAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        senai: {
+                            light: '#f0f9ff',
+                            DEFAULT: '#0284c7',
+                            dark: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .table-container { max-height: 500px; overflow-y: auto; }
+        th { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
+    <div class="max-w-[1600px] mx-auto space-y-6">
+        <!-- Header -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-senai-dark">Programação de Cursos</h1>
+                <p class="text-gray-500 mt-1">Acompanhamento de Turmas - Escola SENAI Itumbiara, UI Quirinópolis - DR-GO</p>
+            </div>
+            <div id="loading" class="px-4 py-2 bg-blue-50 text-senai font-semibold rounded-md animate-pulse">
+                Carregando dados e construindo painel...
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-senai" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                <h2 class="text-xl font-semibold text-senai-dark">Filtros de Análise</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div class="xl:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Curso</label>
+                    <input type="text" id="filter-nome" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border" placeholder="Digite para buscar...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="filter-status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todos</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unidade Operacional</label>
+                    <select id="filter-unidade" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Modalidade</label>
+                    <select id="filter-modalidade" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                    <select id="filter-area" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Público / Empresa</label>
+                    <select id="filter-publico" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todos</option></select>
+                </div>
+                
+                <div class="xl:col-span-5 flex items-center mt-6">
+                    <div class="flex items-center bg-blue-50 px-4 py-2 rounded-md border border-blue-100">
+                        <input type="checkbox" id="filter-proximos" class="h-4 w-4 text-senai focus:ring-senai border-gray-300 rounded cursor-pointer">
+                        <label for="filter-proximos" class="ml-2 block text-sm text-senai-dark font-semibold cursor-pointer">
+                            Cursos de Início Próximo 
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Macro Cards -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <!-- Itumbiara -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-t-4 border-t-senai relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-senai-dark mb-5 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Itumbiara
+                </h2>
+                
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ano Completo</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Previstas Ano</p><p class="text-xl font-bold text-gray-700" id="itu-previstas">-</p></div>
+                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Não Iniciados</p><p class="text-xl font-bold text-gray-700" id="itu-nao-iniciados">-</p></div>
+                    <div class="bg-blue-50 p-3 rounded-md text-center border border-blue-100"><p class="text-[10px] text-blue-600 font-semibold uppercase">Andamento</p><p class="text-xl font-bold text-blue-700" id="itu-andamento">-</p></div>
+                    <div class="bg-green-50 p-3 rounded-md text-center border border-green-100"><p class="text-[10px] text-green-600 font-semibold uppercase">Concluídos</p><p class="text-xl font-bold text-green-600" id="itu-concluidos">-</p></div>
+                    <div class="bg-red-50 p-3 rounded-md text-center border border-red-100"><p class="text-[10px] text-red-600 font-semibold uppercase">Cancelados</p><p class="text-xl font-bold text-red-500" id="itu-cancelados">-</p></div>
+                </div>
+
+                <h3 class="text-xs font-bold text-senai uppercase tracking-wider mb-2">Painel de Próximos 30 Dias</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
+                        <p class="text-xs text-senai-dark font-semibold uppercase">Cursos</p>
+                        <p class="text-3xl font-black text-senai" id="itu-30d-cursos">-</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
+                        <p class="text-xs text-senai-dark font-semibold uppercase">Vagas Disp.</p>
+                        <p class="text-3xl font-black text-senai" id="itu-30d-vagas">-</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
+                        <p class="text-xs text-senai-dark font-semibold uppercase">Matrículas</p>
+                        <p class="text-3xl font-black text-senai" id="itu-30d-mat">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quirinópolis -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-t-4 border-t-sky-500 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-senai-dark mb-5 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Quirinópolis
+                </h2>
+                
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ano Completo</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Previstas Ano</p><p class="text-xl font-bold text-gray-700" id="qui-previstas">-</p></div>
+                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Não Iniciados</p><p class="text-xl font-bold text-gray-700" id="qui-nao-iniciados">-</p></div>
+                    <div class="bg-sky-50 p-3 rounded-md text-center border border-sky-100"><p class="text-[10px] text-sky-600 font-semibold uppercase">Andamento</p><p class="text-xl font-bold text-sky-700" id="qui-andamento">-</p></div>
+                    <div class="bg-green-50 p-3 rounded-md text-center border border-green-100"><p class="text-[10px] text-green-600 font-semibold uppercase">Concluídos</p><p class="text-xl font-bold text-green-600" id="qui-concluidos">-</p></div>
+                    <div class="bg-red-50 p-3 rounded-md text-center border border-red-100"><p class="text-[10px] text-red-600 font-semibold uppercase">Cancelados</p><p class="text-xl font-bold text-red-500" id="qui-cancelados">-</p></div>
+                </div>
+
+                <h3 class="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2">Painel de Próximos 30 Dias</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-semibold uppercase">Cursos</p>
+                        <p class="text-3xl font-black text-slate-700" id="qui-30d-cursos">-</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-semibold uppercase">Vagas Disp.</p>
+                        <p class="text-3xl font-black text-slate-700" id="qui-30d-vagas">-</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-semibold uppercase">Matrículas</p>
+                        <p class="text-3xl font-black text-slate-700" id="qui-30d-mat">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Dados -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-senai-dark">Detalhamento das Turmas</h2>
+                <span id="table-count" class="text-sm font-semibold bg-gray-100 text-gray-600 py-1 px-3 rounded-full">0 registros encontrados</span>
+            </div>
+            <div class="table-container rounded-md border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                        <tr id="table-head">
+                            <!-- Headers populated dynamically -->
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-gray-100 whitespace-nowrap">
+                        <!-- Rows populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Distribuição por Área</h3>
+                <div class="relative h-[300px]">
+                    <canvas id="chartArea"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Status das Turmas</h3>
+                <div class="relative h-[300px]">
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
+                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Evolução de Início de Turmas</h3>
+                <div class="relative h-[300px]">
+                    <canvas id="chartTimeline"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // App State
+        let rawData = [];
+        let filteredData = [];
+        let charts = {};
+        
+        // Colunas Exigidas da Tabela
+        const tableCols = [
+            'Status', 'Cursos', 'Evento', 'Modalidade', 'Público / Empresa', 'Unidade Operacional', 
+            'Cidade', 'Area', 'Pasta', 'CH', 'Início', 'Término', 'Posição até', 'Horário', 
+            'Valor Total', 'Valor Boleto', 'Valor Cartão', 'Vagas', 'Break-Even', 'Mat ativa', 
+            'Mat. Pré', 'Mat Tot', 'Concluintes', 'Desistentes', 'Evadido', 'Retido', 'TotalTurma'
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initTableHeaders();
+            loadCSV();
+            setupFilters();
+        });
+
+        function initTableHeaders() {
+            const tr = document.getElementById('table-head');
+            tableCols.forEach(col => {
+                const th = document.createElement('th');
+                th.className = 'px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider bg-gray-50';
+                th.textContent = col;
+                tr.appendChild(th);
+            });
+        }
+
+        function loadCSV() {
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQW3rVnWsJZ4Q5uoYdZWCZZ_jlQkfAmmygI2qfQjzsJE77ntk4K2MaZvDFwpT3qGLVXJFgLQnbUiyLf/pub?output=csv';
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    document.getElementById('loading').style.display = 'none';
+                    rawData = results.data;
+                    populateFilterOptions();
+                    applyFilters();
+                },
+                error: function(err) {
+                    document.getElementById('loading').className = "px-4 py-2 bg-red-50 text-red-600 font-semibold rounded-md";
+                    document.getElementById('loading').textContent = "Erro ao carregar dados da planilha.";
+                    console.error("Erro PapaParse:", err);
+                }
+            });
+        }
+
+        function getUniqueValues(key) {
+            const vals = new Set();
+            rawData.forEach(row => {
+                if(row[key]) vals.add(row[key].trim());
+            });
+            return Array.from(vals).sort();
+        }
+
+        function populateFilterOptions() {
+            const populate = (id, key) => {
+                const select = document.getElementById(id);
+                getUniqueValues(key).forEach(val => {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.textContent = val;
+                    select.appendChild(opt);
+                });
+            };
+            populate('filter-status', 'Status');
+            populate('filter-unidade', 'Unidade Operacional');
+            populate('filter-modalidade', 'Modalidade');
+            populate('filter-area', 'Area');
+            populate('filter-publico', 'Público / Empresa');
+        }
+
+        function setupFilters() {
+            const filterIds = ['filter-nome', 'filter-status', 'filter-unidade', 'filter-modalidade', 'filter-area', 'filter-publico', 'filter-proximos'];
+            filterIds.forEach(id => {
+                document.getElementById(id).addEventListener('input', applyFilters);
+            });
+        }
+
+        function parseDate(dateStr) {
+            if(!dateStr) return null;
+            const parts = dateStr.split('/');
+            if(parts.length === 3) {
+                let year = parseInt(parts[2]);
+                if(year < 100) year += 2000;
+                return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+            }
+            return null;
+        }
+
+        function applyFilters() {
+            const fNome = document.getElementById('filter-nome').value.toLowerCase();
+            const fStatus = document.getElementById('filter-status').value;
+            const fUnidade = document.getElementById('filter-unidade').value;
+            const fModalidade = document.getElementById('filter-modalidade').value;
+            const fArea = document.getElementById('filter-area').value;
+            const fPublico = document.getElementById('filter-publico').value;
+            const fProximos = document.getElementById('filter-proximos').checked;
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const limitPast = new Date(today); limitPast.setDate(today.getDate() - 10);
+            const limitFuture = new Date(today); limitFuture.setDate(today.getDate() + 30);
+
+            filteredData = rawData.filter(row => {
+                if(fNome && (!row['Cursos'] || !row['Cursos'].toLowerCase().includes(fNome))) return false;
+                if(fStatus && row['Status'] !== fStatus) return false;
+                if(fUnidade && row['Unidade Operacional'] !== fUnidade) return false;
+                if(fModalidade && row['Modalidade'] !== fModalidade) return false;
+                if(fArea && row['Area'] !== fArea) return false;
+                if(fPublico && row['Público / Empresa'] !== fPublico) return false;
+
+                const dInicio = parseDate(row['Início']);
+                if(fProximos) {
+                    if(!dInicio) return false;
+                    if(dInicio < limitPast || dInicio > limitFuture) return false;
+                }
+
+                return true;
+            });
+
+            updateDashboard();
+        }
+
+        function isNext30Days(dInicio) {
+            if(!dInicio) return false;
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const future = new Date(today); future.setDate(today.getDate() + 30);
+            return dInicio >= today && dInicio <= future;
+        }
+
+        function updateDashboard() {
+            updateMacroCards();
+            renderTable();
+            renderCharts();
+        }
+
+        function updateMacroCards() {
+            const calcMacros = (cityKeywords) => {
+                const cityData = filteredData.filter(r => {
+                    const cid = (r['Cidade'] || '').toLowerCase();
+                    const uni = (r['Unidade Operacional'] || '').toLowerCase();
+                    return cityKeywords.some(kw => cid.includes(kw) || uni.includes(kw));
+                });
+
+                let naoIniciados = 0, andamento = 0, concluidos = 0, cancelados = 0;
+                let p30Cursos = 0, p30Vagas = 0, p30Mat = 0;
+
+                cityData.forEach(r => {
+                    const status = (r['Status'] || '').toLowerCase();
+                    if(status.includes('iniciar') || status.includes('previst')) naoIniciados++;
+                    else if(status.includes('andamento') || status.includes('execu')) andamento++;
+                    else if(status.includes('concluíd') || status.includes('realizad') || status.includes('encerrad')) concluidos++;
+                    else if(status.includes('cancelad')) cancelados++;
+
+                    const dInicio = parseDate(r['Início']);
+                    if(isNext30Days(dInicio)) {
+                        p30Cursos++;
+                        p30Vagas += parseInt(r['Vagas'] || 0) || 0;
+                        p30Mat += parseInt(r['Mat Tot'] || r['Mat ativa'] || 0) || 0;
+                    }
+                });
+
+                return {
+                    previstas: cityData.length,
+                    naoIniciados, andamento, concluidos, cancelados,
+                    p30Cursos, p30Vagas, p30Mat
+                };
+            };
+
+            const itumbiara = calcMacros(['itumbiara']);
+            const quirinopolis = calcMacros(['quirinópolis', 'quirinopolis']);
+
+            // Atualiza DOM - Itumbiara
+            document.getElementById('itu-previstas').textContent = itumbiara.previstas;
+            document.getElementById('itu-nao-iniciados').textContent = itumbiara.naoIniciados;
+            document.getElementById('itu-andamento').textContent = itumbiara.andamento;
+            document.getElementById('itu-concluidos').textContent = itumbiara.concluidos;
+            document.getElementById('itu-cancelados').textContent = itumbiara.cancelados;
+            document.getElementById('itu-30d-cursos').textContent = itumbiara.p30Cursos;
+            document.getElementById('itu-30d-vagas').textContent = itumbiara.p30Vagas;
+            document.getElementById('itu-30d-mat').textContent = itumbiara.p30Mat;
+
+            // Atualiza DOM - Quirinópolis
+            document.getElementById('qui-previstas').textContent = quirinopolis.previstas;
+            document.getElementById('qui-nao-iniciados').textContent = quirinopolis.naoIniciados;
+            document.getElementById('qui-andamento').textContent = quirinopolis.andamento;
+            document.getElementById('qui-concluidos').textContent = quirinopolis.concluidos;
+            document.getElementById('qui-cancelados').textContent = quirinopolis.cancelados;
+            document.getElementById('qui-30d-cursos').textContent = quirinopolis.p30Cursos;
+            document.getElementById('qui-30d-vagas').textContent = quirinopolis.p30Vagas;
+            document.getElementById('qui-30d-mat').textContent = quirinopolis.p30Mat;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            document.getElementById('table-count').textContent = `${filteredData.length} registros encontrados`;
+
+            const displayData = filteredData.slice(0, 500); 
+
+            displayData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50 transition-colors";
+                
+                tableCols.forEach(col => {
+                    const td = document.createElement('td');
+                    td.className = 'px-4 py-3 text-sm text-gray-700 max-w-[200px] truncate';
+                    td.title = row[col] || '';
+                    
+                    if(col === 'Status') {
+                        const st = (row[col] || '').toLowerCase();
+                        let color = 'bg-gray-100 text-gray-700 border-gray-200';
+                        if(st.includes('andamento') || st.includes('execuç')) color = 'bg-blue-50 text-blue-700 border-blue-200';
+                        else if(st.includes('iniciar') || st.includes('previst')) color = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                        else if(st.includes('conclu') || st.includes('realizad')) color = 'bg-green-50 text-green-700 border-green-200';
+                        else if(st.includes('cancel')) color = 'bg-red-50 text-red-700 border-red-200';
+                        
+                        td.innerHTML = `<span class="px-2 py-1 rounded-md text-xs font-semibold border ${color}">${row[col] || '-'}</span>`;
+                    } else {
+                        td.textContent = row[col] || '-';
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCharts() {
+            const areaCount = {};
+            filteredData.forEach(r => {
+                const a = r['Area'] || 'Não definida';
+                areaCount[a] = (areaCount[a] || 0) + 1;
+            });
+            const areaSorted = Object.entries(areaCount).sort((a,b) => b[1] - a[1]).slice(0, 10);
+
+            updateChart('chartArea', 'bar', {
+                labels: areaSorted.map(i => i[0]),
+                datasets: [{
+                    label: 'Quantidade de Cursos',
+                    data: areaSorted.map(i => i[1]),
+                    backgroundColor: '#0284c7',
+                    borderRadius: 4
+                }]
+            });
+
+            const statusCount = {};
+            filteredData.forEach(r => {
+                const s = r['Status'] || 'Sem Status';
+                statusCount[s] = (statusCount[s] || 0) + 1;
+            });
+            
+            updateChart('chartStatus', 'doughnut', {
+                labels: Object.keys(statusCount),
+                datasets: [{
+                    data: Object.values(statusCount),
+                    backgroundColor: ['#eab308', '#3b82f6', '#22c55e', '#ef4444', '#94a3b8'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            });
+
+            const monthCount = {};
+            filteredData.forEach(r => {
+                const d = parseDate(r['Início']);
+                if(d) {
+                    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+                    monthCount[key] = (monthCount[key] || 0) + 1;
+                }
+            });
+            const sortedMonths = Object.keys(monthCount).sort();
+            
+            updateChart('chartTimeline', 'bar', {
+                labels: sortedMonths,
+                datasets: [{
+                    label: 'Início de Turmas',
+                    data: sortedMonths.map(m => monthCount[m]),
+                    backgroundColor: '#0ea5e9',
+                    borderRadius: 4
+                }]
+            });
+        }
+
+        function updateChart(canvasId, type, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if(charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: type === 'doughnut' ? 'right' : 'top'
+                        }
+                    },
+                    scales: type !== 'doughnut' ? {
+                        y: { beginAtZero: true }
+                    } : {}
+                }
+            });
+        }
+    </script>
+</body>
+</html>
