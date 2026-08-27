@@ -238,7 +238,7 @@
     <h2 style="margin-top:0;font-size:1.05rem;">Reservas do mês</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Professor</th><th>Curso</th><th>Kit / Lab</th><th>Período</th><th>Início</th><th>Fim</th><th>Observação</th></tr></thead>
+        <thead><tr><th>Professor</th><th>Curso</th><th>Kit / Lab</th><th>Dia da semana</th><th>Período</th><th>Início</th><th>Fim</th><th>Observação</th></tr></thead>
         <tbody id="bookingTableBody"></tbody>
       </table>
     </div>
@@ -481,9 +481,15 @@
       const isToday = day.getTime() === today.getTime();
       html += `<div class="day ${other?'other-month':''} ${isToday?'today':''}">`;
       html += `<div class="day-number"><span>${day.getDate()}</span>${isToday?'<span class="today-dot" title="Hoje"></span>':''}</div>`;
+ 
 
+        // controla os vários cards de cada dia
       for (const p of PERIODS) {
         const list = bookingsForDay(day, monthBookings, p);
+
+          // Se não houver agendamento neste período, não exibe nenhum card.
+            if (list.length === 0) continue;
+
         const cls = p === 'Manhã' ? 'morning' : p === 'Tarde' ? 'afternoon' : 'night';
         html += `<div class="period ${cls} ${list.length > 1 ? 'conflict' : ''}">`;
         html += `<div class="period-head"><span class="period-name">${p}</span>${list.length===0?'<span class="free">Livre</span>':''}</div>`;
@@ -534,7 +540,7 @@
     const list = getSelectedBookingsForMonth().sort((a,b)=>a.start-b.start || a.period.localeCompare(b.period));
     $('bookingTableBody').innerHTML = list.length ? list.map(b => `
       <tr>
-        <td>${escapeHtml(b.professor)}</td><td>${escapeHtml(b.course)}</td><td>${escapeHtml(b.lab)}</td>
+        <td>${escapeHtml(b.professor)}</td><td>${escapeHtml(b.course)}</td><td>${escapeHtml(b.lab)}</td><td>${escapeHtml(b.weekday)}</td>
         <td>${escapeHtml(b.period)}</td><td>${fmtDate(b.start)}</td><td>${fmtDate(b.end)}</td><td>${escapeHtml(b.note)}</td>
       </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Nenhuma reserva encontrada para o filtro atual.</td></tr>';
   }
