@@ -480,8 +480,8 @@
       const other = day.getMonth() !== selectedMonth.getMonth();
       const isToday = day.getTime() === today.getTime();
       html += `<div class="day ${other?'other-month':''} ${isToday?'today':''}">`;
-      html += `<div class="day-number"><span>${day.getDate()}</span>${isToday?'<span class="today-dot" title="Hoje"></span>':''}</div>`;
- 
+      // html += `<div class="day-number"><span>${day.getDate()}</span>${isToday?'<span class="today-dot" title="Hoje"></span>':''}</div>`;
+     html += `<div class="day-number"><span>${day.getDate()} - ${DAY_NAMES[day.getDay()].toLowerCase()}</span>${isToday?'<span class="today-dot" title="Hoje"></span>':''}</div>`;
 
         // controla os vários cards de cada dia
       for (const p of PERIODS) {
