@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Gestão de Regência Docente</title>
+  <style>
+    :root{
+      --bg:#f4f8fc;
+      --surface:#ffffff;
+      --surface-2:#f8fbff;
+      --border:#dce7f2;
+      --text:#17324d;
+      --muted:#6d8296;
+      --blue:#1769aa;
+      --blue-2:#0f5b96;
+      --blue-soft:#e8f3fb;
+      --orange:#f28c28;
+      --orange-soft:#fff2e5;
+      --red:#d94a4a;
+      --red-soft:#fdeaea;
+      --green:#2b8a66;
+      --shadow:0 8px 26px rgba(30,72,112,.08);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#f8fbfe 0,#f3f7fb 100%);
+      min-height:100vh;
+    }
+
+    .app{
+      width:min(1480px, calc(100% - 32px));
+      margin:0 auto;
+      padding:28px 0 42px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:24px;
+      margin-bottom:18px;
+    }
+
+    .title-wrap h1{
+      margin:0;
+      font-size:clamp(24px,3vw,36px);
+      letter-spacing:-.03em;
+      color:#123a5f;
+    }
+
+    .title-wrap p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border:1px solid var(--border);
+      background:var(--surface);
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+      box-shadow:var(--shadow);
+      white-space:nowrap;
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#a7b6c4;
+    }
+
+    .status-badge.ok .status-dot{background:var(--green)}
+    .status-badge.error .status-dot{background:var(--red)}
+
+    .panel{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .filters{
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .filter-grid{
+      display:grid;
+      grid-template-columns:minmax(170px,.8fr) minmax(140px,.65fr) minmax(240px,1.35fr) auto;
+      gap:14px;
+      align-items:end;
+    }
+
+    .field label{
+      display:block;
+      margin:0 0 7px;
+      font-size:12px;
+      font-weight:700;
+      color:#5f7890;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    select,input{
+      width:100%;
+      height:44px;
+      border:1px solid #cfdeeb;
+      border-radius:11px;
+      background:#fff;
+      color:var(--text);
+      padding:0 12px;
+      font:inherit;
+      outline:none;
+      transition:.18s ease;
+    }
+
+    select:focus,input:focus{
+      border-color:#73a9d1;
+      box-shadow:0 0 0 4px rgba(23,105,170,.09);
+    }
+
+    button{
+      height:44px;
+      border:0;
+      border-radius:11px;
+      padding:0 16px;
+      font:inherit;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    .btn-secondary{
+      color:var(--blue);
+      background:var(--blue-soft);
+    }
+
+    .btn-secondary:hover{background:#dceefb}
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .card{
+      min-height:126px;
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card::after{
+      content:"";
+      position:absolute;
+      width:86px;
+      height:86px;
+      right:-24px;
+      top:-24px;
+      border-radius:50%;
+      background:var(--blue-soft);
+    }
+
+    .card-label{
+      position:relative;
+      z-index:1;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.055em;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .card-value{
+      position:relative;
+      z-index:1;
+      margin-top:12px;
+      font-size:clamp(25px,3vw,34px);
+      font-weight:800;
+      letter-spacing:-.035em;
+      color:#173d62;
+    }
+
+    .card-detail{
+      position:relative;
+      z-index:1;
+      margin-top:5px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .section{
+      margin-bottom:18px;
+      overflow:hidden;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      padding:18px 20px 12px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:18px;
+      color:#173d62;
+    }
+
+    .section-title p{
+      margin:5px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:10px 14px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .legend-item{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .legend-swatch{
+      width:10px;
+      height:10px;
+      border-radius:3px;
+    }
+
+    .legend-swatch.blue{background:var(--blue)}
+    .legend-swatch.orange{background:var(--orange)}
+    .legend-swatch.red{background:var(--red)}
+
+    .chart-shell{
+      padding:4px 20px 20px;
+    }
+
+    .chart-scale{
+      display:grid;
+      grid-template-columns:minmax(160px,260px) 1fr 64px;
+      gap:14px;
+      align-items:end;
+      color:#8999a9;
+      font-size:10px;
+      margin-bottom:6px;
+    }
+
+    .scale-track{
+      position:relative;
+      height:18px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .scale-tick{
+      position:absolute;
+      bottom:3px;
+      transform:translateX(-50%);
+    }
+
+    .bar-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:620px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .bar-row{
+      display:grid;
+      grid-template-columns:minmax(160px,260px) 1fr 64px;
+      gap:14px;
+      align-items:center;
+      min-height:34px;
+    }
+
+    .bar-name{
+      font-size:12px;
+      font-weight:650;
+      line-height:1.2;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .bar-track{
+      height:18px;
+      border-radius:6px;
+      background:#eef4f8;
+      position:relative;
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px #e6eef5;
+    }
+
+    .guide{
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:1px;
+      background:rgba(74,102,127,.2);
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .guide.g70{border-left:1px dashed rgba(217,74,74,.55); background:transparent}
+    .guide.g85{border-left:1px dashed rgba(242,140,40,.55); background:transparent}
+
+    .bar-fill{
+      position:absolute;
+      inset:0 auto 0 0;
+      border-radius:6px;
+      min-width:2px;
+      transition:width .35s ease;
+      z-index:1;
+    }
+
+    .bar-fill.blue{background:var(--blue)}
+    .bar-fill.orange{background:var(--orange)}
+    .bar-fill.red{background:var(--red)}
+
+    .bar-value{
+      text-align:right;
+      font-size:12px;
+      font-weight:800;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-top:1px solid var(--border);
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:1120px;
+      font-size:12px;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#f5f9fd;
+      color:#476984;
+      padding:12px 13px;
+      text-align:right;
+      border-bottom:1px solid var(--border);
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    thead th:first-child{
+      text-align:left;
+      left:0;
+      z-index:3;
+    }
+
+    tbody td{
+      padding:12px 13px;
+      text-align:right;
+      border-bottom:1px solid #edf2f6;
+      font-variant-numeric:tabular-nums;
+      color:#31506a;
+      background:#fff;
+    }
+
+    tbody tr:hover td{background:#f9fcff}
+    tbody td:first-child{
+      text-align:left;
+      position:sticky;
+      left:0;
+      z-index:1;
+      font-weight:700;
+      color:#1f425f;
+    }
+    tbody tr:hover td:first-child{background:#f9fcff}
+
+    .pct-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:58px;
+      padding:5px 8px;
+      border-radius:999px;
+      font-weight:800;
+    }
+
+    .pct-badge.blue{background:var(--blue-soft);color:var(--blue-2)}
+    .pct-badge.orange{background:var(--orange-soft);color:#b86412}
+    .pct-badge.red{background:var(--red-soft);color:#b23636}
+
+    .note{
+      padding:12px 18px 15px;
+      font-size:11px;
+      color:var(--muted);
+      background:#fbfdff;
+    }
+
+    .empty{
+      padding:38px 18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .loading-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(245,249,252,.82);
+      backdrop-filter:blur(3px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:100;
+    }
+
+    .loading-overlay.hidden{display:none}
+
+    .loader-box{
+      min-width:260px;
+      padding:24px;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 18px 50px rgba(31,69,102,.14);
+      text-align:center;
+    }
+
+    .spinner{
+      width:30px;
+      height:30px;
+      margin:0 auto 12px;
+      border:3px solid #dceaf5;
+      border-top-color:var(--blue);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .error-box{
+      display:none;
+      padding:18px;
+      margin-bottom:18px;
+      border:1px solid #f0c5c5;
+      border-radius:14px;
+      background:#fff4f4;
+      color:#8d3333;
+      font-size:13px;
+    }
+
+    .error-box.show{display:block}
+    .error-box button{
+      margin-top:10px;
+      background:#fff;
+      color:#a83e3e;
+      border:1px solid #efcaca;
+      height:38px;
+    }
+
+    .footer{
+      margin-top:16px;
+      text-align:center;
+      font-size:11px;
+      color:#8b9aaa;
+    }
+
+    @media(max-width:980px){
+      .filter-grid{grid-template-columns:1fr 1fr}
+      .filter-grid .field:nth-child(3){grid-column:1 / -1}
+      .filter-grid button{width:100%}
+      .cards{grid-template-columns:repeat(2,1fr)}
+    }
+
+    @media(max-width:700px){
+      .app{width:min(100% - 20px,1480px);padding-top:18px}
+      .topbar{flex-direction:column;gap:12px}
+      .filter-grid{grid-template-columns:1fr}
+      .filter-grid .field:nth-child(3){grid-column:auto}
+      .cards{grid-template-columns:1fr 1fr;gap:10px}
+      .card{min-height:112px;padding:15px}
+      .section-head{flex-direction:column}
+      .legend{justify-content:flex-start}
+      .chart-scale,.bar-row{grid-template-columns:120px 1fr 54px;gap:8px}
+      .bar-name{font-size:11px}
+    }
+
+    @media(max-width:480px){
+      .cards{grid-template-columns:1fr}
+      .chart-shell{padding-left:12px;padding-right:12px}
+      .chart-scale,.bar-row{grid-template-columns:96px 1fr 50px}
+      .section-head{padding-left:14px;padding-right:14px}
+    }
+  </style>
+</head>
+<body>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loader-box">
+      <div class="spinner"></div>
+      <strong>Carregando dados</strong>
+      <div style="margin-top:6px;font-size:12px;color:#71869a">Lendo a planilha publicada...</div>
+    </div>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1>Gestão de Regência Docente</h1>
+        <p id="periodText">Acompanhamento mensal de carga horária e dedicação docente</p>
+      </div>
+      <div id="statusBadge" class="status-badge">
+        <span class="status-dot"></span>
+        <span id="statusText">Carregando base...</span>
+      </div>
+    </header>
+
+    <div id="errorBox" class="error-box">
+      <strong>Não foi possível carregar a planilha.</strong>
+      <div id="errorText" style="margin-top:4px"></div>
+      <button type="button" onclick="loadData()">Tentar novamente</button>
+    </div>
+
+    <section class="panel filters">
+      <div class="filter-grid">
+        <div class="field">
+          <label for="monthFilter">Mês de referência</label>
+          <select id="monthFilter"></select>
+        </div>
+        <div class="field">
+          <label for="yearFilter">Ano de referência</label>
+          <select id="yearFilter"></select>
+        </div>
+        <div class="field">
+          <label for="teacherFilter">Colaborador</label>
+          <input id="teacherFilter" type="search" list="teacherList" placeholder="Todos os colaboradores" autocomplete="off" />
+          <datalist id="teacherList"></datalist>
+        </div>
+        <button id="clearTeacher" class="btn-secondary" type="button">Limpar colaborador</button>
+      </div>
+    </section>
+
+    <section class="cards" aria-label="Indicadores principais">
+      <article class="panel card">
+        <div class="card-label">Maior regência</div>
+        <div id="maxValue" class="card-value">—</div>
+        <div id="maxDetail" class="card-detail">—</div>
+      </article>
+      <article class="panel card">
+        <div class="card-label">Menor regência</div>
+        <div id="minValue" class="card-value">—</div>
+        <div id="minDetail" class="card-detail">—</div>
+      </article>
+      <article class="panel card">
+        <div class="card-label">Regência média</div>
+        <div id="avgValue" class="card-value">—</div>
+        <div id="avgDetail" class="card-detail">Percentual médio do período</div>
+      </article>
+      <article class="panel card">
+        <div class="card-label">Colaboradores avaliados</div>
+        <div id="countValue" class="card-value">—</div>
+        <div id="countDetail" class="card-detail">Docentes com base válida</div>
+      </article>
+    </section>
+
+    <section class="panel section">
+      <div class="section-head">
+        <div class="section-title">
+          <h2>Regência por colaborador</h2>
+          <p>Percentual realizado em relação à carga horária esperada do mês</p>
+        </div>
+        <div class="legend" aria-label="Legenda do gráfico">
+          <span class="legend-item"><span class="legend-swatch blue"></span> 85% ou mais</span>
+          <span class="legend-item"><span class="legend-swatch orange"></span> 70% a 84,9%</span>
+          <span class="legend-item"><span class="legend-swatch red"></span> abaixo de 70%</span>
+        </div>
+      </div>
+      <div id="chartShell" class="chart-shell"></div>
+    </section>
+
+    <section class="panel section">
+      <div class="section-head">
+        <div class="section-title">
+          <h2>Distribuição da carga horária</h2>
+          <p>Todos os indicadores abaixo são percentuais sobre a carga horária esperada (Dias úteis × Carga horária diária)</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Docente</th>
+              <th>Regência</th>
+              <th>Ministrar aula</th>
+              <th>Ações pedagógicas</th>
+              <th>Apoio administrativo</th>
+              <th>Ações de secretária</th>
+              <th>Atividade de docência</th>
+              <th>Inspeção de alunos</th>
+              <th>Vender e divulgar produtos</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="note">
+        Regência real = soma das colunas F a S. “Ações de secretária” considera as colunas P e Q, que são as colunas restantes sem outro agrupamento informado.
+      </div>
+    </section>
+
+    <div class="footer">Dashboard em arquivo único • Fonte de dados: Google Sheets publicado em CSV</div>
+  </main>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDwTScZwdPbY9reWyBqZOztjN0oqqvU7KcBzZZGDEzH3Grx2aXcZEe-3NFIZPYRLSscjYyh38-ZVZ3/pub?output=csv";
+
+    const monthNames = [
+      "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    let rawRows = [];
+    let dataset = [];
+
+    function normalizeText(value){
+      return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function monthNumber(value){
+      const t = normalizeText(value);
+      if(!t) return null;
+
+      const n = Number(t.replace(/[^\d]/g, ""));
+      if(Number.isInteger(n) && n >= 1 && n <= 12 && /^[^\p{L}]*\d+[^\p{L}]*$/u.test(t)) return n;
+
+      const map = {
+        "jan":1,"janeiro":1,
+        "fev":2,"fevereiro":2,
+        "mar":3,"marco":3,
+        "abr":4,"abril":4,
+        "mai":5,"maio":5,
+        "jun":6,"junho":6,
+        "jul":7,"julho":7,
+        "ago":8,"agosto":8,
+        "set":9,"setembro":9,
+        "out":10,"outubro":10,
+        "nov":11,"novembro":11,
+        "dez":12,"dezembro":12
+      };
+      if(map[t]) return map[t];
+
+      const short = t.slice(0,3);
+      return map[short] ?? null;
+    }
+
+    function parseNumber(value){
+      if(value === null || value === undefined) return 0;
+      let s = String(value).trim();
+      if(!s) return 0;
+
+      // Suporta duração em formato HH:MM ou HH:MM:SS.
+      if(/^-?\d{1,4}:\d{1,2}(:\d{1,2})?$/.test(s)){
+        const neg = s.startsWith("-");
+        if(neg) s = s.slice(1);
+        const parts = s.split(":").map(Number);
+        const hours = parts[0] + (parts[1] || 0) / 60 + (parts[2] || 0) / 3600;
+        return neg ? -hours : hours;
+      }
+
+      s = s.replace(/\s/g, "").replace(/%/g, "");
+      if(s.includes(",") && s.includes(".")){
+        if(s.lastIndexOf(",") > s.lastIndexOf(".")){
+          s = s.replace(/\./g, "").replace(",", ".");
+        }else{
+          s = s.replace(/,/g, "");
+        }
+      }else if(s.includes(",")){
+        s = s.replace(/\./g, "").replace(",", ".");
+      }
+
+      const n = Number(s.replace(/[^\d.+-]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function parseCSV(text){
+      const rows = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+
+      for(let i = 0; i < text.length; i++){
+        const c = text[i];
+
+        if(quoted){
+          if(c === '"' && text[i + 1] === '"'){
+            field += '"';
+            i++;
+          }else if(c === '"'){
+            quoted = false;
+          }else{
+            field += c;
+          }
+        }else{
+          if(c === '"'){
+            quoted = true;
+          }else if(c === ","){
+            row.push(field);
+            field = "";
+          }else if(c === "\n"){
+            row.push(field.replace(/\r$/, ""));
+            rows.push(row);
+            row = [];
+            field = "";
+          }else{
+            field += c;
+          }
+        }
+      }
+
+      if(field.length || row.length){
+        row.push(field.replace(/\r$/, ""));
+        rows.push(row);
+      }
+
+      return rows.filter(r => r.some(v => String(v).trim() !== ""));
+    }
+
+    function rowToRecord(row){
+      const month = monthNumber(row[0]);
+      const year = parseInt(String(row[1] ?? "").replace(/\D/g, ""), 10);
+      const teacher = String(row[2] ?? "").trim();
+      const days = parseNumber(row[3]);
+      const daily = parseNumber(row[4]);
+      const expected = days * daily;
+
+      const hours = [];
+      for(let i = 5; i <= 18; i++) hours.push(parseNumber(row[i]));
+
+      const real = hours.reduce((a,b) => a + b, 0);
+
+      return {
+        month,
+        year,
+        teacher,
+        days,
+        daily,
+        expected,
+        real,
+        teach: hours[0] + hours[1],              // F + G
+        pedagogy: hours[2] + hours[3] + hours[4], // H + I + J
+        admin: hours[5] + hours[6] + hours[7] + hours[8], // K + L + M + N
+        teachingActivity: hours[9],               // O
+        secretary: hours[10] + hours[11],         // P + Q
+        inspection: hours[12],                    // R
+        sales: hours[13]                          // S
+      };
+    }
+
+    function isValidDataRow(r){
+      return r.teacher && Number.isInteger(r.month) && Number.isInteger(r.year) && r.year > 1900;
+    }
+
+    function aggregate(records){
+      const grouped = new Map();
+
+      records.forEach(r => {
+        const key = r.teacher;
+        if(!grouped.has(key)){
+          grouped.set(key, {
+            teacher:r.teacher,
+            expected:0,
+            real:0,
+            teach:0,
+            pedagogy:0,
+            admin:0,
+            secretary:0,
+            teachingActivity:0,
+            inspection:0,
+            sales:0
+          });
+        }
+        const g = grouped.get(key);
+        g.expected += r.expected;
+        g.real += r.real;
+        g.teach += r.teach;
+        g.pedagogy += r.pedagogy;
+        g.admin += r.admin;
+        g.secretary += r.secretary;
+        g.teachingActivity += r.teachingActivity;
+        g.inspection += r.inspection;
+        g.sales += r.sales;
+      });
+
+      return Array.from(grouped.values())
+        .filter(r => r.expected > 0)
+        .map(r => ({
+          ...r,
+          regency: pct(r.real, r.expected),
+          teachPct: pct(r.teach, r.expected),
+          pedagogyPct: pct(r.pedagogy, r.expected),
+          adminPct: pct(r.admin, r.expected),
+          secretaryPct: pct(r.secretary, r.expected),
+          teachingActivityPct: pct(r.teachingActivity, r.expected),
+          inspectionPct: pct(r.inspection, r.expected),
+          salesPct: pct(r.sales, r.expected)
+        }));
+    }
+
+    function pct(value, total){
+      return total > 0 ? (value / total) * 100 : 0;
+    }
+
+    function fmtPct(value){
+      return Number(value || 0).toLocaleString("pt-BR", {
+        minimumFractionDigits:1,
+        maximumFractionDigits:1
+      }) + "%";
+    }
+
+    function fmtInt(value){
+      return Number(value || 0).toLocaleString("pt-BR", {maximumFractionDigits:0});
+    }
+
+    function thresholdClass(value){
+      if(value < 70) return "red";
+      if(value < 85) return "orange";
+      return "blue";
+    }
+
+    function escapeHTML(value){
+      return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function populateYearsAndMonths(){
+      const yearSelect = document.getElementById("yearFilter");
+      const years = [...new Set(dataset.map(r => r.year))].sort((a,b) => b - a);
+
+      yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+
+      // Prioriza o mês/ano atual se existir; caso contrário usa o período mais recente da base.
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      const hasCurrent = dataset.some(r => r.year === currentYear && r.month === currentMonth);
+
+      let target;
+      if(hasCurrent){
+        target = {year:currentYear, month:currentMonth};
+      }else{
+        target = dataset
+          .map(r => ({year:r.year, month:r.month}))
+          .sort((a,b) => b.year - a.year || b.month - a.month)[0];
+      }
+
+      if(target){
+        yearSelect.value = String(target.year);
+        populateMonths(target.year, target.month);
+      }
+    }
+
+    function populateMonths(year, preferredMonth){
+      const monthSelect = document.getElementById("monthFilter");
+      const months = [...new Set(dataset.filter(r => r.year === Number(year)).map(r => r.month))]
+        .sort((a,b) => a - b);
+
+      monthSelect.innerHTML = months
+        .map(m => `<option value="${m}">${monthNames[m]}</option>`)
+        .join("");
+
+      const selected = months.includes(Number(preferredMonth))
+        ? Number(preferredMonth)
+        : months[months.length - 1];
+
+      if(selected) monthSelect.value = String(selected);
+    }
+
+    function populateTeachers(){
+      const list = document.getElementById("teacherList");
+      const teachers = [...new Set(dataset.map(r => r.teacher))].sort((a,b) => a.localeCompare(b,"pt-BR"));
+      list.innerHTML = teachers.map(name => `<option value="${escapeHTML(name)}"></option>`).join("");
+    }
+
+    function currentFiltered(){
+      const year = Number(document.getElementById("yearFilter").value);
+      const month = Number(document.getElementById("monthFilter").value);
+      const search = normalizeText(document.getElementById("teacherFilter").value);
+
+      let rows = dataset.filter(r => r.year === year && r.month === month);
+      if(search){
+        rows = rows.filter(r => normalizeText(r.teacher).includes(search));
+      }
+
+      return aggregate(rows).sort((a,b) => b.regency - a.regency || a.teacher.localeCompare(b.teacher,"pt-BR"));
+    }
+
+    function render(){
+      const rows = currentFiltered();
+      const year = Number(document.getElementById("yearFilter").value);
+      const month = Number(document.getElementById("monthFilter").value);
+
+      document.getElementById("periodText").textContent =
+        `${monthNames[month] || "Período"} de ${year || "—"} • acompanhamento mensal de carga horária e dedicação docente`;
+
+      renderCards(rows);
+      renderChart(rows);
+      renderTable(rows);
+    }
+
+    function renderCards(rows){
+      const maxValue = document.getElementById("maxValue");
+      const minValue = document.getElementById("minValue");
+      const avgValue = document.getElementById("avgValue");
+      const countValue = document.getElementById("countValue");
+
+      if(!rows.length){
+        maxValue.textContent = minValue.textContent = avgValue.textContent = "—";
+        countValue.textContent = "0";
+        document.getElementById("maxDetail").textContent = "Sem dados para o filtro";
+        document.getElementById("minDetail").textContent = "Sem dados para o filtro";
+        document.getElementById("avgDetail").textContent = "Percentual médio do período";
+        document.getElementById("countDetail").textContent = "Docentes com base válida";
+        return;
+      }
+
+      const max = rows.reduce((a,b) => b.regency > a.regency ? b : a);
+      const min = rows.reduce((a,b) => b.regency < a.regency ? b : a);
+      const avg = rows.reduce((s,r) => s + r.regency, 0) / rows.length;
+
+      maxValue.textContent = fmtPct(max.regency);
+      minValue.textContent = fmtPct(min.regency);
+      avgValue.textContent = fmtPct(avg);
+      countValue.textContent = fmtInt(rows.length);
+
+      document.getElementById("maxDetail").textContent = max.teacher;
+      document.getElementById("minDetail").textContent = min.teacher;
+      document.getElementById("avgDetail").textContent = "Média dos colaboradores filtrados";
+      document.getElementById("countDetail").textContent = rows.length === 1 ? "Colaborador avaliado" : "Colaboradores avaliados";
+    }
+
+    function renderChart(rows){
+      const shell = document.getElementById("chartShell");
+
+      if(!rows.length){
+        shell.innerHTML = `<div class="empty">Nenhum colaborador encontrado para os filtros selecionados.</div>`;
+        return;
+      }
+
+      const maxRegency = Math.max(...rows.map(r => r.regency), 100);
+      const scaleMax = Math.max(100, Math.ceil(maxRegency / 10) * 10);
+      const p70 = Math.min(100, (70 / scaleMax) * 100);
+      const p85 = Math.min(100, (85 / scaleMax) * 100);
+
+      const ticks = [];
+      const tickStep = scaleMax <= 120 ? 20 : 25;
+      for(let t = 0; t <= scaleMax; t += tickStep){
+        ticks.push(`<span class="scale-tick" style="left:${(t/scaleMax)*100}%">${t}%</span>`);
+      }
+      if(scaleMax % tickStep !== 0){
+        ticks.push(`<span class="scale-tick" style="left:100%">${scaleMax}%</span>`);
+      }
+
+      const bars = rows.map(r => {
+        const width = Math.max(0, Math.min(100, (r.regency / scaleMax) * 100));
+        const cls = thresholdClass(r.regency);
+        return `
+          <div class="bar-row" title="${escapeHTML(r.teacher)} — ${fmtPct(r.regency)}">
+            <div class="bar-name">${escapeHTML(r.teacher)}</div>
+            <div class="bar-track">
+              <span class="guide g70" style="left:${p70}%"></span>
+              <span class="guide g85" style="left:${p85}%"></span>
+              <span class="bar-fill ${cls}" style="width:${width}%"></span>
+            </div>
+            <div class="bar-value">${fmtPct(r.regency)}</div>
+          </div>`;
+      }).join("");
+
+      shell.innerHTML = `
+        <div class="chart-scale">
+          <div></div>
+          <div class="scale-track">${ticks.join("")}</div>
+          <div></div>
+        </div>
+        <div class="bar-list">${bars}</div>`;
+    }
+
+    function renderTable(rows){
+      const body = document.getElementById("tableBody");
+
+      if(!rows.length){
+        body.innerHTML = `<tr><td colspan="9" class="empty">Nenhum dado disponível para os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = rows.map(r => {
+        const cls = thresholdClass(r.regency);
+        return `
+          <tr>
+            <td>${escapeHTML(r.teacher)}</td>
+            <td><span class="pct-badge ${cls}">${fmtPct(r.regency)}</span></td>
+            <td>${fmtPct(r.teachPct)}</td>
+            <td>${fmtPct(r.pedagogyPct)}</td>
+            <td>${fmtPct(r.adminPct)}</td>
+            <td>${fmtPct(r.secretaryPct)}</td>
+            <td>${fmtPct(r.teachingActivityPct)}</td>
+            <td>${fmtPct(r.inspectionPct)}</td>
+            <td>${fmtPct(r.salesPct)}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function showStatus(ok, text){
+      const badge = document.getElementById("statusBadge");
+      badge.classList.remove("ok","error");
+      if(ok === true) badge.classList.add("ok");
+      if(ok === false) badge.classList.add("error");
+      document.getElementById("statusText").textContent = text;
+    }
+
+    async function loadData(){
+      const loading = document.getElementById("loadingOverlay");
+      const errorBox = document.getElementById("errorBox");
+      loading.classList.remove("hidden");
+      errorBox.classList.remove("show");
+      showStatus(null, "Carregando base...");
+
+      try{
+        const response = await fetch(CSV_URL, {cache:"no-store"});
+        if(!response.ok) throw new Error(`Resposta HTTP ${response.status}`);
+
+        const text = await response.text();
+        rawRows = parseCSV(text);
+        if(rawRows.length < 2) throw new Error("A planilha não retornou linhas de dados.");
+
+        dataset = rawRows
+          .slice(1)
+          .map(rowToRecord)
+          .filter(isValidDataRow);
+
+        if(!dataset.length){
+          throw new Error("Nenhuma linha válida foi encontrada. Verifique se as colunas A a S estão preenchidas conforme o layout informado.");
+        }
+
+        populateYearsAndMonths();
+        populateTeachers();
+        render();
+
+        const now = new Date();
+        const stamp = now.toLocaleString("pt-BR", {dateStyle:"short", timeStyle:"short"});
+        showStatus(true, `Base atualizada • ${stamp}`);
+      }catch(err){
+        console.error(err);
+        showStatus(false, "Falha ao carregar a base");
+        document.getElementById("errorText").textContent =
+          `${err.message}. Confirme se a planilha continua publicada para acesso público em CSV e se há conexão com a internet.`;
+        errorBox.classList.add("show");
+        dataset = [];
+        renderCards([]);
+        renderChart([]);
+        renderTable([]);
+      }finally{
+        loading.classList.add("hidden");
+      }
+    }
+
+    document.getElementById("yearFilter").addEventListener("change", e => {
+      populateMonths(Number(e.target.value));
+      render();
+    });
+
+    document.getElementById("monthFilter").addEventListener("change", render);
+    document.getElementById("teacherFilter").addEventListener("input", render);
+
+    document.getElementById("clearTeacher").addEventListener("click", () => {
+      document.getElementById("teacherFilter").value = "";
+      render();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
