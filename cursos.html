@@ -47,7 +47,7 @@
     .app {
       height: 100dvh;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
 
     .topbar {
@@ -157,6 +157,33 @@
 
     .theme-toggle svg { width: 18px; height: 18px; }
     .theme-toggle .icon-sun { display: none; }
+
+    .enroll-btn {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(11, 92, 171, .16);
+      background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+      color: #fff;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 850;
+      white-space: nowrap;
+      box-shadow: 0 7px 18px rgba(11, 92, 171, .18);
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+
+    .enroll-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(11, 92, 171, .24);
+      filter: saturate(1.06);
+    }
+
+    .enroll-btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
 
     .course-nav-wrap { position: relative; }
 
@@ -277,7 +304,7 @@
     .course-title {
       margin: 0;
       color: var(--blue-950);
-      font-size: clamp(2rem, 4.4vw, 4.5rem);
+      font-size: clamp(1.7rem, 3.2vw, 3.4rem);
       line-height: .98;
       letter-spacing: -0.04em;
       max-width: 1000px;
@@ -603,6 +630,84 @@
     .nav-arrow.next { right: 12px; }
     .nav-arrow svg { width: 19px; height: 19px; }
 
+    .contact-strip {
+      position: relative;
+      z-index: 15;
+      border-top: 1px solid rgba(11, 92, 171, .12);
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(14px);
+    }
+
+    .contact-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 9px clamp(16px, 3vw, 44px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .contact-copy {
+      min-width: 0;
+      color: var(--muted);
+      font-size: .72rem;
+      line-height: 1.35;
+    }
+
+    .contact-copy strong {
+      display: block;
+      color: var(--blue-900);
+      font-size: .76rem;
+      margin-bottom: 1px;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      flex: 0 0 auto;
+    }
+
+    .contact-btn {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--blue-800);
+      text-decoration: none;
+      font-size: .72rem;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+
+    .contact-btn:hover {
+      transform: translateY(-1px);
+      border-color: #afd3ef;
+      background: var(--blue-050);
+    }
+
+    .contact-btn.whatsapp {
+      color: #0c7650;
+      border-color: rgba(22, 135, 91, .24);
+      background: #f2fbf7;
+    }
+
+    .contact-btn svg { width: 14px; height: 14px; flex: 0 0 auto; }
+
+    .contact-btn.is-disabled {
+      opacity: .48;
+      cursor: default;
+      pointer-events: none;
+    }
+
     .loading,
     .error-state,
     .empty-state {
@@ -770,6 +875,24 @@
     body[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
     body[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 
+    body[data-theme="dark"] .contact-strip {
+      background: rgba(10, 27, 41, .95);
+      border-top-color: rgba(119, 185, 236, .12);
+    }
+
+    body[data-theme="dark"] .contact-copy strong { color: #dcecf8; }
+    body[data-theme="dark"] .contact-btn {
+      background: #12283a;
+      border-color: #29475f;
+      color: #8ecbf5;
+    }
+    body[data-theme="dark"] .contact-btn:hover { background: #17364f; border-color: #3d6c8f; }
+    body[data-theme="dark"] .contact-btn.whatsapp {
+      background: #123a32;
+      border-color: #275c4c;
+      color: #79d8b2;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fade { from { opacity: .25; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
@@ -801,12 +924,14 @@
       .brand-kicker { font-size: .62rem; }
       .brand-title { font-size: .98rem; }
       .course-counter { display: none; }
+      .brand-actions { gap: 7px; }
+      .enroll-btn { min-height: 36px; padding: 8px 11px; font-size: .76rem; }
       .course-tab { padding: 9px 12px; font-size: .81rem; max-width: 220px; }
       .stage { padding: 10px; }
       .course-shell { border-radius: 21px; min-height: 0; }
       .course-shell::before { width: 4px; }
       .info-pane { padding: 22px 18px 18px 21px; }
-      .course-title { font-size: clamp(2rem, 10vw, 3.1rem); }
+      .course-title { font-size: clamp(1.6rem, 7.5vw, 2.5rem); }
       .course-intro-line { margin: 17px 0 18px; }
       .detail-grid { grid-template-columns: 1fr; }
       .detail-card.full { grid-column: auto; }
@@ -819,6 +944,31 @@
         grid-template-rows: 52vh 34vh;
       }
       .profession-photo, .lab-carousel { border-radius: 17px; }
+      .contact-inner {
+        padding: 10px 14px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .contact-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .contact-btn { min-height: 36px; }
+    }
+
+    @media (max-width: 560px) {
+      .brand-title { max-width: 125px; }
+      .brand-kicker { display: none; }
+      .enroll-btn { padding-inline: 10px; }
+    }
+
+    @media (max-width: 390px) {
+      .brand-mark { display: none; }
+      .brand-title { max-width: 92px; }
+      .brand-row { gap: 9px; }
+      .enroll-btn { padding-inline: 9px; font-size: .72rem; }
+      .theme-toggle { width: 34px; height: 34px; }
     }
 
     @media (max-width: 460px) {
@@ -847,12 +997,16 @@
           <div class="brand">
             <div class="brand-mark" aria-hidden="true"></div>
             <div class="brand-text">
-              <span class="brand-kicker">Formação profissional</span>
+              <span class="brand-kicker">Escola SENAI Itumbiara</span>
               <h1 class="brand-title">Conheça nossos cursos</h1>
             </div>
           </div>
           <div class="brand-actions">
             <div class="course-counter" id="courseCounter">Carregando cursos...</div>
+            <a class="enroll-btn" href="https://wa.me/5564999854154?text=Ol%C3%A1%21%20Tenho%20interesse%20em%20me%20matricular%20em%20um%20curso%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener noreferrer" aria-label="Matricule-se pelo WhatsApp" title="Matricule-se pelo WhatsApp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-3.7-.9L3 20l1.2-4.1A8.4 8.4 0 1 1 20 11.5Z"/><path d="M8.2 8.3c.3-.7.6-.7.9-.7h.7c.2 0 .4.1.5.4l.8 1.9c.1.3 0 .5-.1.7l-.6.8c-.2.2-.2.4 0 .7.4.7 1 1.4 1.7 1.9.8.6 1.5.9 1.8 1 .3.1.5 0 .7-.2l.9-1.1c.2-.2.4-.3.7-.2l1.8.9c.3.1.5.2.5.4.1.2.1 1-.3 1.8-.4.8-1.4 1.4-2.3 1.5-.6.1-1.5.1-2.9-.5-1.7-.7-3.4-2-4.7-3.6-1.2-1.4-2.1-3.1-2.3-4.4-.2-.9 0-1.7.3-2.3Z"/></svg>
+              <span>Matricule-se</span>
+            </a>
             <button class="theme-toggle" id="themeToggle" type="button" aria-label="Ativar tema escuro" title="Alternar tema">
               <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
               <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -874,10 +1028,70 @@
         </div>
       </section>
     </main>
+
+    <footer class="contact-strip" aria-label="Canais de contato">
+      <div class="contact-inner">
+        <div class="contact-copy">
+          <strong>Fale com a gente</strong>
+          <span id="contactSummary">WhatsApp: (64) 99235-4297</span>
+        </div>
+        <div class="contact-actions">
+          <a class="contact-btn is-disabled" id="contactEmail" href="#" aria-disabled="true" title="Informe o e-mail no bloco CONTACT do código">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            E-mail
+          </a>
+          <a class="contact-btn is-disabled" id="contactPhone" href="#" aria-disabled="true" title="Informe o telefone fixo no bloco CONTACT do código">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9Z"/></svg>
+            Telefone fixo
+          </a>
+          <a class="contact-btn whatsapp" href="https://wa.me/5564992354297?text=Ol%C3%A1%21%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20cursos." target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-3.7-.9L3 20l1.2-4.1A8.4 8.4 0 1 1 20 11.5Z"/><path d="M8.2 8.3c.3-.7.6-.7.9-.7h.7c.2 0 .4.1.5.4l.8 1.9c.1.3 0 .5-.1.7l-.6.8c-.2.2-.2.4 0 .7.4.7 1 1.4 1.7 1.9.8.6 1.5.9 1.8 1 .3.1.5 0 .7-.2l.9-1.1c.2-.2.4-.3.7-.2l1.8.9c.3.1.5.2.5.4.1.2.1 1-.3 1.8-.4.8-1.4 1.4-2.3 1.5-.6.1-1.5.1-2.9-.5-1.7-.7-3.4-2-4.7-3.6-1.2-1.4-2.1-3.1-2.3-4.4-.2-.9 0-1.7.3-2.3Z"/></svg>
+            WhatsApp
+          </a>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLT_mixqDBcXn4j32THVawTIIdwfBMK-p_txUrxwKF5c6RYJA0FKucHptQ-yo6_2qECW7RsL3T1923/pub?output=csv';
+
+
+    // CONTATOS: preencha e-mail e telefone fixo quando tiver os dados definitivos.
+    // Exemplo: email: 'cursos@empresa.com.br', fixedPhoneDisplay: '(64) 3431-0000', fixedPhoneHref: '+556434310000'
+    const CONTACT = {
+      email: 'secretariasenaiitb@fieg.com.br',
+      fixedPhoneDisplay: '64-3432-2500',
+      fixedPhoneHref: '+556434322500',
+      whatsappDisplay: '(64) 99985-4154',
+      whatsappHref: '556499854154'
+    };
+
+    function setupContacts() {
+      const emailLink = document.getElementById('contactEmail');
+      const phoneLink = document.getElementById('contactPhone');
+      const summary = document.getElementById('contactSummary');
+      const details = [];
+
+      if (CONTACT.email && emailLink) {
+        emailLink.href = `mailto:${CONTACT.email}`;
+        emailLink.classList.remove('is-disabled');
+        emailLink.removeAttribute('aria-disabled');
+        emailLink.title = CONTACT.email;
+        details.push(`E-mail: ${CONTACT.email}`);
+      }
+
+      if (CONTACT.fixedPhoneHref && phoneLink) {
+        phoneLink.href = `tel:${CONTACT.fixedPhoneHref}`;
+        phoneLink.classList.remove('is-disabled');
+        phoneLink.removeAttribute('aria-disabled');
+        phoneLink.title = CONTACT.fixedPhoneDisplay || CONTACT.fixedPhoneHref;
+        details.push(`Telefone: ${CONTACT.fixedPhoneDisplay || CONTACT.fixedPhoneHref}`);
+      }
+
+      details.push(`WhatsApp: ${CONTACT.whatsappDisplay}`);
+      if (summary) summary.textContent = details.join('  •  ');
+    }
 
     const state = {
       courses: [],
@@ -1155,7 +1369,7 @@
                   <p class="salary-label">Faixa salarial estimada</p>
                   <p class="salary-range-text">${hasSalary ? `${esc(start)} <span style="opacity:.6">—</span> ${esc(end)}` : 'Não informada'}</p>
                 </div>
-                <div class="salary-caption">Valores de referência, considerando porte das empresas, complexidade das atividades e nível de experiência.</div>
+                <div class="salary-caption">Valores de referência cadastrados na base de dados.</div>
               </div>
               <div class="salary-track" aria-hidden="true"></div>
               <div class="salary-ends">
@@ -1291,6 +1505,7 @@
     });
 
     setupThemeToggle();
+    setupContacts();
     loadData();
   </script>
 </body>
