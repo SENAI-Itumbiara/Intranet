@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b5cab" />
+  <title>Conheça nossos cursos</title>
+  <style>
+    :root {
+      --blue-950: #06213d;
+      --blue-900: #08345f;
+      --blue-800: #0b4c85;
+      --blue-700: #0b5cab;
+      --blue-600: #1173c8;
+      --blue-500: #1987e4;
+      --blue-100: #eaf5ff;
+      --blue-050: #f4f9ff;
+      --ink: #17324d;
+      --muted: #66819a;
+      --line: #dceaf5;
+      --white: #ffffff;
+      --green: #16875b;
+      --shadow: 0 22px 55px rgba(9, 68, 117, 0.14);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --header-h: 104px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 90% 10%, rgba(25, 135, 228, 0.10), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #edf6ff 100%);
+      overflow: hidden;
+    }
+
+    button { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .app {
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(11, 92, 171, 0.12);
+      box-shadow: 0 8px 24px rgba(18, 76, 126, 0.06);
+    }
+
+    .topbar-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 16px clamp(16px, 3vw, 44px) 14px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+      box-shadow: 0 10px 24px rgba(11, 92, 171, 0.24);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      background: #fff;
+      border-radius: 999px;
+    }
+
+    .brand-mark::before { width: 20px; height: 5px; left: 11px; top: 12px; }
+    .brand-mark::after { width: 14px; height: 5px; left: 11px; top: 23px; }
+
+    .brand-text { min-width: 0; }
+    .brand-kicker {
+      display: block;
+      color: var(--blue-700);
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(1rem, 1.8vw, 1.3rem);
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .course-counter {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--white);
+      color: var(--blue-800);
+      cursor: pointer;
+      box-shadow: 0 5px 14px rgba(11, 92, 171, .08);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      background: var(--blue-050);
+      border-color: #afd3ef;
+    }
+
+    .theme-toggle svg { width: 18px; height: 18px; }
+    .theme-toggle .icon-sun { display: none; }
+
+    .course-nav-wrap { position: relative; }
+
+    .course-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(11, 92, 171, .24) transparent;
+      padding: 1px 2px 7px;
+    }
+
+    .course-nav::-webkit-scrollbar { height: 5px; }
+    .course-nav::-webkit-scrollbar-thumb { background: rgba(11, 92, 171, .22); border-radius: 99px; }
+
+    .course-tab {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--blue-900);
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-weight: 750;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: .2s ease;
+      max-width: 290px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .course-tab:hover {
+      transform: translateY(-1px);
+      border-color: #afd3ef;
+      background: var(--blue-050);
+    }
+
+    .course-tab.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+      box-shadow: 0 7px 18px rgba(11, 92, 171, .23);
+    }
+
+    .stage {
+      min-height: 0;
+      padding: clamp(14px, 2vw, 28px) clamp(14px, 3vw, 44px) clamp(14px, 2vw, 28px);
+    }
+
+    .course-shell {
+      height: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, .93);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr);
+      isolation: isolate;
+    }
+
+    .course-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: linear-gradient(180deg, var(--blue-600), #5db9f8);
+      z-index: 4;
+    }
+
+    .info-pane {
+      min-width: 0;
+      min-height: 0;
+      padding: clamp(24px, 3vw, 48px);
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #bed8eb transparent;
+    }
+
+    .eyebrow-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--blue-100);
+      color: var(--blue-800);
+      font-size: 0.79rem;
+      font-weight: 800;
+    }
+
+    .chip.neutral { background: #f1f5f8; color: #526d83; }
+    .chip.available { background: #e9f8f2; color: var(--green); }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .85;
+    }
+
+    .course-title {
+      margin: 0;
+      color: var(--blue-950);
+      font-size: clamp(2rem, 4.4vw, 4.5rem);
+      line-height: .98;
+      letter-spacing: -0.04em;
+      max-width: 1000px;
+      text-wrap: balance;
+    }
+
+    .course-intro-line {
+      width: 76px;
+      height: 5px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--blue-700), #68c3ff);
+      margin: 22px 0 25px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .detail-card {
+      background: #f8fbfe;
+      border: 1px solid #e4eff7;
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 19px;
+    }
+
+    .detail-card.full { grid-column: 1 / -1; }
+
+    .detail-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 9px;
+      color: var(--blue-700);
+      font-size: .76rem;
+      font-weight: 850;
+      letter-spacing: .085em;
+      text-transform: uppercase;
+    }
+
+    .detail-label svg { width: 17px; height: 17px; flex: 0 0 auto; }
+
+    .detail-text {
+      margin: 0;
+      color: #35516a;
+      font-size: clamp(.95rem, 1.15vw, 1.08rem);
+      line-height: 1.62;
+      white-space: pre-line;
+    }
+
+    .salary-card {
+      margin-top: 14px;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(5, 48, 87, .98), rgba(13, 104, 183, .96));
+      box-shadow: 0 14px 30px rgba(9, 75, 130, .16);
+    }
+
+    .salary-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+
+    .salary-label {
+      margin: 0 0 5px;
+      color: #cfe9ff;
+      font-size: .76rem;
+      font-weight: 850;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .salary-range-text {
+      margin: 0;
+      font-size: clamp(1.15rem, 2vw, 1.65rem);
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .salary-caption {
+      color: #c3def3;
+      font-size: .76rem;
+      text-align: right;
+      max-width: 210px;
+      line-height: 1.35;
+    }
+
+    .salary-track {
+      height: 11px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.18);
+      position: relative;
+      overflow: hidden;
+      margin: 6px 0 9px;
+    }
+
+    .salary-track::before {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      top: 2px;
+      bottom: 2px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #9bd9ff, #ffffff);
+      box-shadow: 0 0 18px rgba(255,255,255,.3);
+    }
+
+    .salary-track::after {
+      content: "";
+      position: absolute;
+      right: 7%;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      transform: translate(50%, -50%);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.18);
+    }
+
+    .salary-ends {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: .83rem;
+      font-weight: 800;
+      color: #e6f4ff;
+    }
+
+    .media-pane {
+      min-height: 0;
+      padding: 18px 18px 18px 0;
+      display: grid;
+      grid-template-rows: minmax(230px, 1.25fr) minmax(180px, .75fr);
+      gap: 12px;
+    }
+
+    .profession-photo,
+    .lab-carousel {
+      min-height: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #d9ebf8, #c8e3f7);
+    }
+
+    .profession-photo img,
+    .lab-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profession-photo img { position: absolute; inset: 0; }
+
+    .profession-photo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 42%, rgba(3, 30, 53, .78) 100%);
+      pointer-events: none;
+    }
+
+    .photo-badge {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 2;
+      background: rgba(255,255,255,.93);
+      color: var(--blue-900);
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: .78rem;
+      font-weight: 850;
+      box-shadow: 0 8px 22px rgba(0,0,0,.12);
+    }
+
+    .image-fallback {
+      height: 100%;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      padding: 30px;
+      text-align: center;
+      color: #55778f;
+      background:
+        radial-gradient(circle at 70% 25%, rgba(255,255,255,.7), transparent 25%),
+        linear-gradient(135deg, #eaf5fd, #d6ebfa);
+    }
+
+    .image-fallback svg { width: 48px; height: 48px; margin: 0 auto 10px; opacity: .65; }
+    .image-fallback strong { display: block; color: var(--blue-900); margin-bottom: 4px; }
+
+    .lab-carousel { isolation: isolate; }
+
+    .lab-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.025);
+      transition: opacity .45s ease, transform .65s ease;
+    }
+
+    .lab-slide.active { opacity: 1; transform: scale(1); }
+
+    .lab-carousel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 48%, rgba(2, 31, 54, .72) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .lab-title {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 4;
+      color: #fff;
+    }
+
+    .lab-title small {
+      display: block;
+      opacity: .78;
+      font-size: .68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      margin-bottom: 2px;
+    }
+
+    .lab-title strong { font-size: .95rem; }
+
+    .carousel-controls {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .carousel-btn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(5, 42, 72, .55);
+      backdrop-filter: blur(7px);
+      cursor: pointer;
+    }
+
+    .carousel-btn:hover { background: rgba(5, 42, 72, .8); }
+    .carousel-btn svg { width: 16px; height: 16px; }
+
+    .carousel-dots {
+      position: absolute;
+      left: 50%;
+      top: 14px;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      gap: 6px;
+    }
+
+    .carousel-dot {
+      width: 7px;
+      height: 7px;
+      border: 0;
+      padding: 0;
+      border-radius: 99px;
+      background: rgba(255,255,255,.55);
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .carousel-dot.active { width: 22px; background: #fff; }
+
+    .empty-media {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: #658299;
+      text-align: center;
+      border: 1px dashed #bcd6e8;
+      background: #f8fcff;
+    }
+
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d9e9f5;
+      background: rgba(255,255,255,.92);
+      color: var(--blue-700);
+      box-shadow: 0 10px 24px rgba(12, 80, 135, .13);
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .nav-arrow:hover { transform: translateY(-50%) scale(1.05); }
+    .nav-arrow.prev { left: 12px; }
+    .nav-arrow.next { right: 12px; }
+    .nav-arrow svg { width: 19px; height: 19px; }
+
+    .loading,
+    .error-state,
+    .empty-state {
+      height: 100%;
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      padding: 30px;
+      text-align: center;
+      background: rgba(255,255,255,.92);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .status-box { max-width: 620px; }
+    .status-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: var(--blue-100);
+      color: var(--blue-700);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+    }
+    .status-icon svg { width: 30px; height: 30px; }
+    .status-box h2 { margin: 0 0 8px; color: var(--blue-950); }
+    .status-box p { margin: 0; color: var(--muted); line-height: 1.55; }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 4px solid #dcecf8;
+      border-top-color: var(--blue-600);
+      animation: spin .8s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    .retry-btn {
+      margin-top: 16px;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      background: var(--blue-700);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .fade-in { animation: fade .35s ease both; }
+
+    body[data-theme="dark"] {
+      --ink: #e6f1fb;
+      --muted: #9db4c8;
+      --line: #27445d;
+      --white: #12283a;
+      --blue-100: #153d5c;
+      --blue-050: #102f48;
+      --shadow: 0 22px 55px rgba(0, 0, 0, .32);
+      background:
+        radial-gradient(circle at 90% 10%, rgba(25, 135, 228, .13), transparent 28%),
+        linear-gradient(180deg, #07131e 0%, #0a1a28 100%);
+      color: var(--ink);
+      color-scheme: dark;
+    }
+
+    body[data-theme="dark"] .topbar {
+      background: rgba(10, 27, 41, .94);
+      border-bottom-color: rgba(119, 185, 236, .12);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+    }
+
+    body[data-theme="dark"] .brand-kicker,
+    body[data-theme="dark"] .detail-label { color: #72baf0; }
+    body[data-theme="dark"] .brand-title,
+    body[data-theme="dark"] .course-title,
+    body[data-theme="dark"] .status-box h2 { color: #eef7ff; }
+
+    body[data-theme="dark"] .course-tab {
+      background: #12283a;
+      color: #d9ecfb;
+      border-color: #29475f;
+    }
+
+    body[data-theme="dark"] .course-tab:hover {
+      background: #17364f;
+      border-color: #3d6c8f;
+    }
+
+    body[data-theme="dark"] .course-tab.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #0b5cab, #1987e4);
+    }
+
+    body[data-theme="dark"] .course-shell {
+      background: rgba(11, 29, 43, .96);
+      border-color: rgba(94, 151, 194, .12);
+    }
+
+    body[data-theme="dark"] .detail-card {
+      background: #102639;
+      border-color: #223f56;
+    }
+
+    body[data-theme="dark"] .detail-text { color: #c6d8e6; }
+    body[data-theme="dark"] .chip { background: #153d5c; color: #8ecaf7; }
+    body[data-theme="dark"] .chip.neutral { background: #1b3448; color: #b8cbd9; }
+    body[data-theme="dark"] .chip.available { background: #123a32; color: #6ed2aa; }
+
+    body[data-theme="dark"] .profession-photo,
+    body[data-theme="dark"] .lab-carousel {
+      background: linear-gradient(135deg, #163247, #102638);
+    }
+
+    body[data-theme="dark"] .image-fallback {
+      color: #9eb6c8;
+      background:
+        radial-gradient(circle at 70% 25%, rgba(78, 142, 187, .15), transparent 25%),
+        linear-gradient(135deg, #112b3f, #17364c);
+    }
+
+    body[data-theme="dark"] .image-fallback strong { color: #e6f4ff; }
+    body[data-theme="dark"] .photo-badge {
+      background: rgba(12, 34, 51, .92);
+      color: #dcedf9;
+    }
+    body[data-theme="dark"] .empty-media {
+      color: #9eb6c8;
+      border-color: #31536b;
+      background: #102638;
+    }
+
+    body[data-theme="dark"] .nav-arrow {
+      background: rgba(15, 38, 56, .94);
+      border-color: #29475f;
+      color: #72baf0;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .24);
+    }
+
+    body[data-theme="dark"] .loading,
+    body[data-theme="dark"] .error-state,
+    body[data-theme="dark"] .empty-state {
+      background: rgba(11, 29, 43, .96);
+    }
+
+    body[data-theme="dark"] .status-icon {
+      background: #153d5c;
+      color: #72baf0;
+    }
+
+    body[data-theme="dark"] .spinner { border-color: #24445d; border-top-color: #4ea8e8; }
+
+    body[data-theme="dark"] .theme-toggle {
+      background: #12283a;
+      color: #f4c95d;
+      border-color: #29475f;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, .18);
+    }
+
+    body[data-theme="dark"] .theme-toggle:hover { background: #17364f; border-color: #3d6c8f; }
+    body[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    body[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fade { from { opacity: .25; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 1120px) {
+      body { overflow: auto; }
+      .app { min-height: 100dvh; height: auto; }
+      .topbar { position: sticky; top: 0; }
+      .stage { min-height: calc(100dvh - 120px); }
+      .course-shell {
+        min-height: calc(100dvh - 150px);
+        height: auto;
+        grid-template-columns: 1fr;
+      }
+      .info-pane { overflow: visible; padding-bottom: 22px; }
+      .media-pane {
+        padding: 0 22px 22px;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+        grid-template-rows: minmax(280px, 48vh);
+      }
+      .nav-arrow { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-inner { padding: 12px 14px 10px; }
+      .brand-row { margin-bottom: 9px; }
+      .brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+      .brand-mark::before { left: 9px; top: 10px; width: 18px; }
+      .brand-mark::after { left: 9px; top: 20px; width: 13px; }
+      .brand-kicker { font-size: .62rem; }
+      .brand-title { font-size: .98rem; }
+      .course-counter { display: none; }
+      .course-tab { padding: 9px 12px; font-size: .81rem; max-width: 220px; }
+      .stage { padding: 10px; }
+      .course-shell { border-radius: 21px; min-height: 0; }
+      .course-shell::before { width: 4px; }
+      .info-pane { padding: 22px 18px 18px 21px; }
+      .course-title { font-size: clamp(2rem, 10vw, 3.1rem); }
+      .course-intro-line { margin: 17px 0 18px; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .detail-card.full { grid-column: auto; }
+      .detail-card { padding: 16px; }
+      .salary-top { align-items: flex-start; flex-direction: column; gap: 5px; }
+      .salary-caption { text-align: left; max-width: none; }
+      .media-pane {
+        padding: 0 14px 14px 17px;
+        grid-template-columns: 1fr;
+        grid-template-rows: 52vh 34vh;
+      }
+      .profession-photo, .lab-carousel { border-radius: 17px; }
+    }
+
+    @media (max-width: 460px) {
+      .eyebrow-row { gap: 6px; }
+      .chip { font-size: .72rem; padding: 6px 9px; }
+      .salary-card { padding: 17px; }
+      .media-pane { grid-template-rows: 44vh 30vh; }
+      .carousel-btn { width: 32px; height: 32px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand-row">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true"></div>
+            <div class="brand-text">
+              <span class="brand-kicker">Formação profissional</span>
+              <h1 class="brand-title">Conheça nossos cursos</h1>
+            </div>
+          </div>
+          <div class="brand-actions">
+            <div class="course-counter" id="courseCounter">Carregando cursos...</div>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Ativar tema escuro" title="Alternar tema">
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="course-nav-wrap">
+          <nav class="course-nav" id="courseNav" aria-label="Lista de cursos"></nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="stage" id="stage">
+      <section class="loading">
+        <div class="status-box">
+          <div class="spinner" aria-hidden="true"></div>
+          <h2>Carregando cursos</h2>
+          <p>Buscando as informações mais recentes na base publicada.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLT_mixqDBcXn4j32THVawTIIdwfBMK-p_txUrxwKF5c6RYJA0FKucHptQ-yo6_2qECW7RsL3T1923/pub?output=csv';
+
+    const state = {
+      courses: [],
+      activeCourse: 0,
+      labIndex: 0,
+      carouselTimer: null
+    };
+
+    function applyTheme(theme) {
+      const isDark = theme === 'dark';
+      document.body.dataset.theme = isDark ? 'dark' : 'light';
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) toggle.setAttribute('aria-label', isDark ? 'Ativar tema claro' : 'Ativar tema escuro');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#0a1a28' : '#0b5cab');
+    }
+
+    function setupThemeToggle() {
+      let savedTheme = 'light';
+      try { savedTheme = localStorage.getItem('cursos-theme') || 'light'; } catch (_) {}
+      applyTheme(savedTheme);
+
+      document.getElementById('themeToggle')?.addEventListener('click', () => {
+        const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try { localStorage.setItem('cursos-theme', nextTheme); } catch (_) {}
+      });
+    }
+
+    const icons = {
+      target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M15 9l5-5M16 4h4v4"/></svg>',
+      briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>',
+      image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 15l-5-5L5 20"/></svg>',
+      chevronLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>',
+      chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>',
+      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>'
+    };
+
+    function esc(value = '') {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (quoted) {
+          if (ch === '"' && next === '"') {
+            cell += '"';
+            i++;
+          } else if (ch === '"') {
+            quoted = false;
+          } else {
+            cell += ch;
+          }
+        } else {
+          if (ch === '"') {
+            quoted = true;
+          } else if (ch === ',') {
+            row.push(cell);
+            cell = '';
+          } else if (ch === '\n') {
+            row.push(cell.replace(/\r$/, ''));
+            rows.push(row);
+            row = [];
+            cell = '';
+          } else {
+            cell += ch;
+          }
+        }
+      }
+
+      if (cell.length || row.length) {
+        row.push(cell.replace(/\r$/, ''));
+        rows.push(row);
+      }
+
+      return rows;
+    }
+
+    function clean(value) {
+      return String(value ?? '').trim();
+    }
+
+    function isYes(value) {
+      return clean(value).toLocaleLowerCase('pt-BR') === 'sim';
+    }
+
+    function isNo(value) {
+      return clean(value).toLocaleLowerCase('pt-BR') === 'não' || clean(value).toLocaleLowerCase('pt-BR') === 'nao';
+    }
+
+    function normalizeUrl(value) {
+      const url = clean(value);
+      if (!url) return '';
+      if (/^https?:\/\//i.test(url)) return url;
+      return '';
+    }
+
+    function currency(value) {
+      const raw = clean(value);
+      if (!raw) return 'Não informado';
+
+      // Preserva valores que já vierem formatados na planilha.
+      if (/r\$/i.test(raw)) return raw;
+
+      const normalized = raw
+        .replace(/\s/g, '')
+        .replace(/\.(?=\d{3}(?:\D|$))/g, '')
+        .replace(',', '.')
+        .replace(/[^0-9.-]/g, '');
+      const num = Number(normalized);
+
+      if (Number.isFinite(num)) {
+        return num.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        });
+      }
+      return raw;
+    }
+
+    function buildCourses(rows) {
+      if (!rows.length) return [];
+
+      // A primeira linha é considerada cabeçalho.
+      return rows.slice(1)
+        .filter(r => isYes(r[0]))
+        .map((r, index) => ({
+          id: `curso-${index}`,
+          name: clean(r[1]) || 'Curso sem nome',
+          modality: clean(r[2]) || 'Modalidade não informada',
+          workload: clean(r[3]) || 'Não informada',
+          objective: clean(r[4]) || 'Objetivo não informado.',
+          workplace: clean(r[5]) || 'Área de atuação não informada.',
+          salaryStart: clean(r[6]),
+          salaryEnd: clean(r[7]),
+          inPerson: isYes(r[8]) ? true : isNo(r[8]) ? false : clean(r[8]),
+          ead: isYes(r[9]) ? true : isNo(r[9]) ? false : clean(r[9]),
+          professionPhoto: normalizeUrl(r[10]),
+          labPhotos: [r[11], r[12], r[13], r[14], r[15]].map(normalizeUrl).filter(Boolean)
+        }));
+    }
+
+    function availabilityChips(course) {
+      const items = [];
+
+      if (course.inPerson === true) items.push('<span class="chip available"><span class="dot"></span>Presencial disponível</span>');
+      else if (typeof course.inPerson === 'string' && course.inPerson) items.push(`<span class="chip neutral">${esc(course.inPerson)}</span>`);
+
+      if (course.ead === true) items.push('<span class="chip available"><span class="dot"></span>EAD disponível</span>');
+      else if (typeof course.ead === 'string' && course.ead) items.push(`<span class="chip neutral">${esc(course.ead)}</span>`);
+
+      return items.join('');
+    }
+
+    function renderNav() {
+      const nav = document.getElementById('courseNav');
+      nav.innerHTML = state.courses.map((course, i) => `
+        <button class="course-tab ${i === state.activeCourse ? 'active' : ''}"
+          type="button"
+          data-index="${i}"
+          title="${esc(course.name)}"
+          aria-pressed="${i === state.activeCourse}">
+          ${esc(course.name)}
+        </button>
+      `).join('');
+
+      nav.querySelectorAll('.course-tab').forEach(btn => {
+        btn.addEventListener('click', () => selectCourse(Number(btn.dataset.index)));
+      });
+    }
+
+    function professionMedia(course) {
+      if (!course.professionPhoto) {
+        return `
+          <div class="image-fallback">
+            <div>
+              ${icons.image}
+              <strong>Imagem da profissão</strong>
+              <span>Adicione uma URL válida na coluna K para exibir uma foto aqui.</span>
+            </div>
+          </div>`;
+      }
+
+      return `
+        <img src="${esc(course.professionPhoto)}" alt="Imagem relacionada ao curso ${esc(course.name)}" loading="eager" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+        <div class="image-fallback" style="display:none">
+          <div>${icons.image}<strong>Imagem indisponível</strong><span>Não foi possível carregar a foto informada na coluna K.</span></div>
+        </div>
+        <div class="photo-badge">Área profissional</div>`;
+    }
+
+    function labCarousel(course) {
+      if (!course.labPhotos.length) {
+        return `<div class="empty-media"><div>${icons.image}<br><strong>Laboratórios da escola</strong><br><span>Nenhuma foto cadastrada nas colunas L a P.</span></div></div>`;
+      }
+
+      const slides = course.labPhotos.map((url, i) => `
+        <div class="lab-slide ${i === 0 ? 'active' : ''}" data-lab-slide="${i}">
+          <img src="${esc(url)}" alt="Laboratório ${i + 1} relacionado ao curso ${esc(course.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" referrerpolicy="no-referrer">
+        </div>`).join('');
+
+      const dots = course.labPhotos.length > 1 ? `
+        <div class="carousel-dots">
+          ${course.labPhotos.map((_, i) => `<button class="carousel-dot ${i === 0 ? 'active' : ''}" data-lab-dot="${i}" aria-label="Exibir foto ${i + 1}"></button>`).join('')}
+        </div>` : '';
+
+      const controls = course.labPhotos.length > 1 ? `
+        <div class="carousel-controls">
+          <button class="carousel-btn" data-lab-prev aria-label="Foto anterior">${icons.chevronLeft}</button>
+          <button class="carousel-btn" data-lab-next aria-label="Próxima foto">${icons.chevronRight}</button>
+        </div>` : '';
+
+      return `
+        ${slides}
+        ${dots}
+        <div class="lab-title"><small>Conheça a estrutura</small><strong>Laboratórios da escola</strong></div>
+        ${controls}`;
+    }
+
+    function renderCourse() {
+      clearInterval(state.carouselTimer);
+      state.labIndex = 0;
+
+      const course = state.courses[state.activeCourse];
+      const start = currency(course.salaryStart);
+      const end = currency(course.salaryEnd);
+      const hasSalary = course.salaryStart || course.salaryEnd;
+
+      document.getElementById('courseCounter').textContent = `${state.activeCourse + 1} de ${state.courses.length} cursos`;
+
+      document.getElementById('stage').innerHTML = `
+        <section class="course-shell fade-in" aria-live="polite">
+          ${state.courses.length > 1 ? `<button class="nav-arrow prev" data-course-prev aria-label="Curso anterior">${icons.chevronLeft}</button>` : ''}
+          ${state.courses.length > 1 ? `<button class="nav-arrow next" data-course-next aria-label="Próximo curso">${icons.chevronRight}</button>` : ''}
+
+          <article class="info-pane">
+            <div class="eyebrow-row">
+              <span class="chip"><span class="dot"></span>${esc(course.modality)}</span>
+              <span class="chip neutral">${esc(/^\s*[0-9.,]+\s*$/.test(course.workload) ? course.workload + ' h' : course.workload)}</span>
+              ${availabilityChips(course)}
+            </div>
+
+            <h2 class="course-title">${esc(course.name)}</h2>
+            <div class="course-intro-line" aria-hidden="true"></div>
+
+            <div class="detail-grid">
+              <section class="detail-card full">
+                <h3 class="detail-label">${icons.target} Objetivo do curso</h3>
+                <p class="detail-text">${esc(course.objective)}</p>
+              </section>
+
+              <section class="detail-card full">
+                <h3 class="detail-label">${icons.briefcase} Onde esse profissional atua</h3>
+                <p class="detail-text">${esc(course.workplace)}</p>
+              </section>
+            </div>
+
+            <section class="salary-card">
+              <div class="salary-top">
+                <div>
+                  <p class="salary-label">Faixa salarial estimada</p>
+                  <p class="salary-range-text">${hasSalary ? `${esc(start)} <span style="opacity:.6">—</span> ${esc(end)}` : 'Não informada'}</p>
+                </div>
+                <div class="salary-caption">Valores de referência, considerando porte das empresas, complexidade das atividades e nível de experiência.</div>
+              </div>
+              <div class="salary-track" aria-hidden="true"></div>
+              <div class="salary-ends">
+                <span>Inicial: ${esc(start)}</span>
+                <span>Final: ${esc(end)}</span>
+              </div>
+            </section>
+          </article>
+
+          <aside class="media-pane">
+            <div class="profession-photo">${professionMedia(course)}</div>
+            <div class="lab-carousel" id="labCarousel">${labCarousel(course)}</div>
+          </aside>
+        </section>`;
+
+      const prev = document.querySelector('[data-course-prev]');
+      const next = document.querySelector('[data-course-next]');
+      if (prev) prev.addEventListener('click', () => selectCourse((state.activeCourse - 1 + state.courses.length) % state.courses.length));
+      if (next) next.addEventListener('click', () => selectCourse((state.activeCourse + 1) % state.courses.length));
+
+      setupLabCarousel(course);
+    }
+
+    function selectCourse(index) {
+      if (!state.courses.length) return;
+      state.activeCourse = (index + state.courses.length) % state.courses.length;
+      renderNav();
+      renderCourse();
+
+      const activeTab = document.querySelector('.course-tab.active');
+      activeTab?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    function setupLabCarousel(course) {
+      if (course.labPhotos.length <= 1) return;
+
+      const show = (index) => {
+        state.labIndex = (index + course.labPhotos.length) % course.labPhotos.length;
+        document.querySelectorAll('[data-lab-slide]').forEach(el => el.classList.toggle('active', Number(el.dataset.labSlide) === state.labIndex));
+        document.querySelectorAll('[data-lab-dot]').forEach(el => el.classList.toggle('active', Number(el.dataset.labDot) === state.labIndex));
+      };
+
+      document.querySelector('[data-lab-prev]')?.addEventListener('click', () => {
+        show(state.labIndex - 1);
+        restartLabTimer();
+      });
+      document.querySelector('[data-lab-next]')?.addEventListener('click', () => {
+        show(state.labIndex + 1);
+        restartLabTimer();
+      });
+      document.querySelectorAll('[data-lab-dot]').forEach(dot => dot.addEventListener('click', () => {
+        show(Number(dot.dataset.labDot));
+        restartLabTimer();
+      }));
+
+      const carousel = document.getElementById('labCarousel');
+      let touchX = null;
+      carousel?.addEventListener('touchstart', e => { touchX = e.touches[0]?.clientX ?? null; }, { passive: true });
+      carousel?.addEventListener('touchend', e => {
+        if (touchX === null) return;
+        const endX = e.changedTouches[0]?.clientX ?? touchX;
+        const delta = endX - touchX;
+        if (Math.abs(delta) > 40) show(state.labIndex + (delta < 0 ? 1 : -1));
+        touchX = null;
+        restartLabTimer();
+      }, { passive: true });
+
+      function restartLabTimer() {
+        clearInterval(state.carouselTimer);
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          state.carouselTimer = setInterval(() => show(state.labIndex + 1), 4500);
+        }
+      }
+      restartLabTimer();
+    }
+
+    function showError(message) {
+      document.getElementById('courseCounter').textContent = 'Falha ao carregar';
+      document.getElementById('courseNav').innerHTML = '';
+      document.getElementById('stage').innerHTML = `
+        <section class="error-state">
+          <div class="status-box">
+            <div class="status-icon">${icons.alert}</div>
+            <h2>Não foi possível carregar os cursos</h2>
+            <p>${esc(message)}</p>
+            <button class="retry-btn" id="retryBtn" type="button">Tentar novamente</button>
+          </div>
+        </section>`;
+      document.getElementById('retryBtn').addEventListener('click', loadData);
+    }
+
+    function showEmpty() {
+      document.getElementById('courseCounter').textContent = 'Nenhum curso ativo';
+      document.getElementById('courseNav').innerHTML = '';
+      document.getElementById('stage').innerHTML = `
+        <section class="empty-state">
+          <div class="status-box">
+            <div class="status-icon">${icons.target}</div>
+            <h2>Nenhum curso disponível</h2>
+            <p>A base foi carregada, mas nenhuma linha está marcada com <strong>“Sim”</strong> na coluna A.</p>
+          </div>
+        </section>`;
+    }
+
+    async function loadData() {
+      try {
+        document.getElementById('courseCounter').textContent = 'Carregando cursos...';
+        const response = await fetch(CSV_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`A base respondeu com o status ${response.status}.`);
+
+        const text = await response.text();
+        const rows = parseCSV(text.replace(/^\uFEFF/, ''));
+        state.courses = buildCourses(rows);
+        state.activeCourse = 0;
+
+        if (!state.courses.length) {
+          showEmpty();
+          return;
+        }
+
+        renderNav();
+        renderCourse();
+      } catch (error) {
+        console.error(error);
+        showError('Verifique se a planilha continua publicada para acesso público e se há conexão com a internet.');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!state.courses.length || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+      if (e.key === 'ArrowRight') selectCourse(state.activeCourse + 1);
+      if (e.key === 'ArrowLeft') selectCourse(state.activeCourse - 1);
+    });
+
+    setupThemeToggle();
+    loadData();
+  </script>
+</body>
+</html>
