@@ -1,188 +1,851 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Links Úteis</title>
-    <!-- Bootstrap CSS para estilo limpo e responsivo -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { 
-            background-color: #f4f6f9; 
-            padding-top: 40px; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .header-title { 
-            font-weight: 700; 
-            color: #2c3e50;
-        }
-        .search-box {
-            border-radius: 30px;
-            padding: 15px 25px;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #e1e5eb;
-        }
-        .search-box:focus {
-            box-shadow: 0 4px 20px rgba(0,123,255,0.15);
-            border-color: #80bdff;
-        }
-        .table-container { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 5px 25px rgba(0,0,0,0.05); 
-            margin-top: 20px;
-            margin-bottom: 50px;
-        }
-        .badge-tipo {
-            font-size: 0.85em;
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
-        .btn-acessar {
-            border-radius: 20px;
-            padding: 6px 20px;
-            font-weight: 600;
-        }
-        .table>tbody>tr>td {
-            vertical-align: middle;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pesquisa e exibição de links úteis por departamento e tipo de documento." />
+  <title>Links Úteis</title>
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #172033;
+      --muted: #667085;
+      --border: #dfe6ef;
+      --primary: #0b66c3;
+      --primary-dark: #084f98;
+      --primary-soft: #eaf3ff;
+      --shadow: 0 10px 28px rgba(18, 38, 63, 0.08);
+      --shadow-hover: 0 16px 36px rgba(18, 38, 63, 0.13);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(11, 102, 195, 0.08), transparent 28rem),
+        var(--bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page-shell {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .top-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      border: 1px solid rgba(11, 102, 195, 0.12);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .top-panel::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      right: -100px;
+      top: -130px;
+      border-radius: 50%;
+      background: rgba(11, 102, 195, 0.07);
+      pointer-events: none;
+    }
+
+    .heading-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 3vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+
+    .count-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid #cfe2f8;
+      border-radius: 999px;
+      color: var(--primary-dark);
+      background: var(--primary-soft);
+      font-size: 0.9rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .filters {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(280px, 2fr) repeat(2, minmax(190px, 1fr)) auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: #3e4a5e;
+      font-size: 0.78rem;
+      font-weight: 750;
+    }
+
+    .control-wrap {
+      position: relative;
+    }
+
+    .control-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      transform: translateY(-50%);
+      color: #8691a3;
+      pointer-events: none;
+    }
+
+    input[type="search"],
+    select {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="search"] {
+      padding: 0 14px 0 42px;
+    }
+
+    select {
+      padding: 0 38px 0 13px;
+      cursor: pointer;
+    }
+
+    input[type="search"]:focus,
+    select:focus {
+      border-color: #7db5ed;
+      box-shadow: 0 0 0 4px rgba(11, 102, 195, 0.10);
+    }
+
+    .clear-button {
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #344054;
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .clear-button:hover {
+      background: #f5f8fc;
+      border-color: #c9d4e2;
+    }
+
+    .clear-button:active {
+      transform: translateY(1px);
+    }
+
+    .content-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 24px 2px 14px;
+    }
+
+    .result-text {
+      margin: 0;
+      color: #475467;
+      font-size: 0.94rem;
+    }
+
+    .status-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #667085;
+      font-size: 0.82rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2f9e44;
+      box-shadow: 0 0 0 4px rgba(47, 158, 68, 0.12);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .link-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 250px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgba(18, 38, 63, 0.05);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-3px);
+      border-color: #c8d8eb;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .badge.department {
+      color: #0958a8;
+      background: #eaf3ff;
+    }
+
+    .badge.type {
+      color: #4f5664;
+      background: #f1f3f6;
+    }
+
+    .card-title {
+      margin: 0;
+      color: #172033;
+      font-size: 1.08rem;
+      line-height: 1.42;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .card-detail {
+      margin: 12px 0 18px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+
+    .open-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 44px;
+      margin-top: auto;
+      padding: 0 14px;
+      border-radius: 11px;
+      color: #fff;
+      background: var(--primary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 800;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .open-link:hover {
+      background: var(--primary-dark);
+    }
+
+    .open-link:active {
+      transform: translateY(1px);
+    }
+
+    .open-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .empty-state,
+    .error-state {
+      grid-column: 1 / -1;
+      padding: 54px 24px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .empty-state h2,
+    .error-state h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .empty-state p,
+    .error-state p {
+      max-width: 650px;
+      margin: 0 auto;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .retry-button {
+      margin-top: 18px;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--primary);
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .skeleton-card {
+      min-height: 250px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      margin-bottom: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #eef2f6 25%, #f8fafc 50%, #eef2f6 75%);
+      background-size: 200% 100%;
+      animation: loading 1.25s infinite;
+    }
+
+    .skeleton-line.short { width: 42%; }
+    .skeleton-line.medium { width: 68%; }
+    .skeleton-line.large { width: 92%; height: 20px; margin-top: 22px; }
+    .skeleton-line.button { width: 100%; height: 44px; margin-top: 72px; margin-bottom: 0; border-radius: 11px; }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .footer-note {
+      margin-top: 26px;
+      color: #8791a2;
+      text-align: center;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 980px) {
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .field.search-field {
+        grid-column: 1 / -1;
+      }
+
+      .clear-button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .page-shell {
+        width: min(100% - 20px, 1440px);
+        padding-top: 12px;
+      }
+
+      .top-panel {
+        padding: 20px;
+        border-radius: 18px;
+      }
+
+      .heading-row {
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+
+      .count-pill {
+        align-self: flex-start;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .field.search-field {
+        grid-column: auto;
+      }
+
+      .content-bar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .link-card {
+        min-height: 228px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="text-center mb-5">
-            <h1 class="header-title">🔗 Central de Links Úteis</h1>
-            <p class="text-muted fs-5">Acesse rapidamente os documentos e sistemas de cada departamento</p>
+  <main class="page-shell">
+    <section class="top-panel" aria-labelledby="page-title">
+      <div class="heading-row">
+        <div>
+          <div class="eyebrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+           
+          </div>
+          <h1 id="page-title">Links Úteis</h1>
+          <p class="subtitle">Escola SENAI Itumbaira | UI SESI SENAI Quirinópolis</p>
         </div>
 
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <!-- Barra de Pesquisa -->
-                <input type="text" id="searchInput" class="form-control search-box mb-4" placeholder="🔍 Busque por departamento, tipo ou título da página...">
-                
-                <div class="table-container">
-                    <div id="loading" class="text-center my-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                        <p class="mt-3 text-muted">Buscando os links atualizados...</p>
-                    </div>
+        <div class="count-pill" id="countPill" aria-live="polite">Carregando...</div>
+      </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover d-none" id="linksTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col" width="20%">Departamento</th>
-                                    <th scope="col" width="15%">Tipo</th>
-                                    <th scope="col" width="45%">Título do Documento</th>
-                                    <th scope="col" width="20%" class="text-center">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <!-- As linhas da tabela serão inseridas aqui dinamicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+      <div class="filters" aria-label="Filtros de pesquisa">
+        <div class="field search-field">
+          <label for="searchInput">Buscar</label>
+          <div class="control-wrap">
+            <svg class="control-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+              <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input id="searchInput" type="search" autocomplete="off" placeholder="Digite título, departamento ou tipo..." />
+          </div>
         </div>
+
+        <div class="field">
+          <label for="departmentFilter">Departamento</label>
+          <select id="departmentFilter">
+            <option value="">Todos os departamentos</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="typeFilter">Tipo de documento</label>
+          <select id="typeFilter">
+            <option value="">Todos os tipos</option>
+          </select>
+        </div>
+
+        <button class="clear-button" id="clearFilters" type="button">Limpar filtros</button>
+      </div>
+    </section>
+
+    <div class="content-bar">
+      <p class="result-text" id="resultText" aria-live="polite">Carregando documentos...</p>
+      <span class="status-text" id="statusText"><span class="status-dot"></span>Dados da planilha publicada</span>
     </div>
 
-    <!-- Biblioteca PapaParse para ler e processar o arquivo CSV do Google Sheets com facilidade -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script>
-        // URL da planilha fornecida
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4zCn8oMbQMBJKRw4j2Qd4AQBOZs1X-U5JPc0DgyuRF_GJIs_WsZLxWHJyRnUjdnRdtpWiloHn9GaM/pub?output=csv';
-        let allData = [];
+    <section class="cards-grid" id="cardsGrid" aria-live="polite" aria-busy="true"></section>
 
-        // Quando o documento for carregado, inicia o processo
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            
-            // Adiciona o evento de filtro (disparado ao digitar na barra de pesquisa)
-            document.getElementById('searchInput').addEventListener('input', function(e) {
-                const term = e.target.value.toLowerCase();
-                filterData(term);
-            });
-        });
+    <p class="footer-note"></p>
+  </main>
 
-        // Função para carregar e converter os dados do CSV
-        function loadData() {
-            Papa.parse(csvUrl, {
-                download: true,
-                header: false, // Vamos trabalhar com índices: 0=Dept, 1=Tipo, 2=Título, 3=URL
-                skipEmptyLines: true,
-                complete: function(results) {
-                    let data = results.data;
-                    
-                    // Ignora a primeira linha se for cabeçalho (ex: "Departamento", "Tipo")
-                    if (data.length > 0 && data[0][0].toLowerCase().includes('departamento')) {
-                        data.shift(); 
-                    }
+  <script>
+    // Planilha publicada fornecida para esta página.
+    const PUBLISHED_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4zCn8oMbQMBJKRw4j2Qd4AQBOZs1X-U5JPc0DgyuRF_GJIs_WsZLxWHJyRnUjdnRdtpWiloHn9GaM/pubhtml';
+    const CSV_URL = PUBLISHED_SHEET_URL.replace(/\/pubhtml(?:\?.*)?$/i, '/pub?output=csv');
 
-                    // Armazena todos os dados garantindo que tenham pelo menos 4 colunas (A a D)
-                    allData = data.filter(row => row.length >= 4);
-                    
-                    // Oculta o loading e exibe a tabela
-                    document.getElementById('loading').classList.add('d-none');
-                    document.getElementById('linksTable').classList.remove('d-none');
-                    
-                    // Renderiza a tabela inicial com todos os dados
-                    renderTable(allData);
-                },
-                error: function(error) {
-                    console.error("Erro ao carregar o CSV:", error);
-                    document.getElementById('loading').innerHTML = '<p class="text-danger fw-bold">Erro ao carregar os dados. Verifique a sua conexão ou se a planilha está acessível publicamente.</p>';
-                }
-            });
+    const state = {
+      items: [],
+      filtered: []
+    };
+
+    const el = {
+      searchInput: document.getElementById('searchInput'),
+      departmentFilter: document.getElementById('departmentFilter'),
+      typeFilter: document.getElementById('typeFilter'),
+      clearFilters: document.getElementById('clearFilters'),
+      cardsGrid: document.getElementById('cardsGrid'),
+      countPill: document.getElementById('countPill'),
+      resultText: document.getElementById('resultText'),
+      statusText: document.getElementById('statusText')
+    };
+
+    function normalizeText(value) {
+      return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function normalizeUrl(value) {
+      let url = String(value ?? '').trim();
+      if (!url) return '';
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      try {
+        const parsed = new URL(url);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+        return parsed.href;
+      } catch {
+        return '';
+      }
+    }
+
+    // Parser CSV que respeita campos entre aspas, vírgulas e quebras de linha internas.
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            field += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(field);
+          field = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(field);
+          field = '';
+          if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
+          row = [];
+        } else {
+          field += char;
+        }
+      }
+
+      row.push(field);
+      if (row.some(cell => String(cell).trim() !== '')) rows.push(row);
+      return rows;
+    }
+
+    function rowsToItems(rows) {
+      if (!rows.length) return [];
+
+      const firstRow = rows[0].map(normalizeText);
+      const looksLikeHeader =
+        firstRow[0]?.includes('departamento') ||
+        firstRow[1]?.includes('tipo') ||
+        firstRow[2]?.includes('titulo') ||
+        firstRow[3]?.includes('url');
+
+      const dataRows = looksLikeHeader ? rows.slice(1) : rows;
+
+      return dataRows
+        .map((row, index) => ({
+          id: index + 1,
+          department: String(row[0] ?? '').trim(),
+          type: String(row[1] ?? '').trim(),
+          title: String(row[2] ?? '').trim(),
+          url: normalizeUrl(row[3])
+        }))
+        .filter(item => item.department || item.type || item.title || item.url);
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+    }
+
+    function populateSelect(select, values, defaultLabel) {
+      const current = select.value;
+      select.innerHTML = '';
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = defaultLabel;
+      select.appendChild(defaultOption);
+
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+
+      if (values.includes(current)) select.value = current;
+    }
+
+    function buildFilters() {
+      populateSelect(
+        el.departmentFilter,
+        uniqueSorted(state.items.map(item => item.department)),
+        'Todos os departamentos'
+      );
+
+      populateSelect(
+        el.typeFilter,
+        uniqueSorted(state.items.map(item => item.type)),
+        'Todos os tipos'
+      );
+    }
+
+    function createCard(item) {
+      const article = document.createElement('article');
+      article.className = 'link-card';
+
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+
+      if (item.department) {
+        const dep = document.createElement('span');
+        dep.className = 'badge department';
+        dep.textContent = item.department;
+        meta.appendChild(dep);
+      }
+
+      if (item.type) {
+        const type = document.createElement('span');
+        type.className = 'badge type';
+        type.textContent = item.type;
+        meta.appendChild(type);
+      }
+
+      const title = document.createElement('h2');
+      title.className = 'card-title';
+      title.textContent = item.title || 'Documento sem título';
+
+      const detail = document.createElement('p');
+      detail.className = 'card-detail';
+      detail.textContent = 'Acesse o conteúdo correspondente usando o botão abaixo.';
+
+      const link = document.createElement('a');
+      link.className = 'open-link';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      if (item.url) {
+        link.href = item.url;
+        link.innerHTML = `
+          Abrir link
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14 5h5v5M10 14 19 5M19 13v6H5V5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+      } else {
+        link.removeAttribute('href');
+        link.style.opacity = '0.55';
+        link.style.cursor = 'not-allowed';
+        link.textContent = 'Link não informado';
+        link.setAttribute('aria-disabled', 'true');
+      }
+
+      article.append(meta, title, detail, link);
+      return article;
+    }
+
+    function renderCards() {
+      el.cardsGrid.innerHTML = '';
+      el.cardsGrid.setAttribute('aria-busy', 'false');
+
+      const count = state.filtered.length;
+      const total = state.items.length;
+
+      el.countPill.textContent = `${count} ${count === 1 ? 'link' : 'links'}`;
+      el.resultText.textContent = count === total
+        ? `${total} ${total === 1 ? 'documento disponível' : 'documentos disponíveis'}`
+        : `${count} de ${total} ${total === 1 ? 'documento' : 'documentos'} encontrados`;
+
+      if (!count) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = `
+          <h2>Nenhum resultado encontrado</h2>
+          <p>Tente usar outra palavra na busca ou limpar os filtros selecionados.</p>
+        `;
+        el.cardsGrid.appendChild(empty);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      state.filtered.forEach(item => fragment.appendChild(createCard(item)));
+      el.cardsGrid.appendChild(fragment);
+    }
+
+    function applyFilters() {
+      const query = normalizeText(el.searchInput.value);
+      const department = el.departmentFilter.value;
+      const type = el.typeFilter.value;
+
+      state.filtered = state.items.filter(item => {
+        const searchable = normalizeText(`${item.department} ${item.type} ${item.title}`);
+        const matchesQuery = !query || searchable.includes(query);
+        const matchesDepartment = !department || item.department === department;
+        const matchesType = !type || item.type === type;
+        return matchesQuery && matchesDepartment && matchesType;
+      });
+
+      renderCards();
+    }
+
+    function renderSkeletons() {
+      el.cardsGrid.innerHTML = '';
+      el.cardsGrid.setAttribute('aria-busy', 'true');
+
+      for (let i = 0; i < 8; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = `
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line large"></div>
+          <div class="skeleton-line button"></div>
+        `;
+        el.cardsGrid.appendChild(card);
+      }
+    }
+
+    function renderError(message) {
+      el.cardsGrid.setAttribute('aria-busy', 'false');
+      el.cardsGrid.innerHTML = `
+        <div class="error-state">
+          <h2>Não foi possível carregar a planilha</h2>
+          <p>${message}</p>
+          <button class="retry-button" id="retryButton" type="button">Tentar novamente</button>
+        </div>
+      `;
+      el.countPill.textContent = 'Sem dados';
+      el.resultText.textContent = 'Falha no carregamento';
+      el.statusText.innerHTML = '<span class="status-dot" style="background:#d92d20;box-shadow:0 0 0 4px rgba(217,45,32,.10)"></span>Verifique a publicação da planilha';
+      document.getElementById('retryButton')?.addEventListener('click', loadData);
+    }
+
+    async function loadData() {
+      renderSkeletons();
+      el.countPill.textContent = 'Carregando...';
+      el.resultText.textContent = 'Carregando documentos...';
+      el.statusText.innerHTML = '<span class="status-dot"></span>Dados da planilha publicada';
+
+      try {
+        const response = await fetch(CSV_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
+
+        const csvText = await response.text();
+        const rows = parseCSV(csvText.replace(/^\uFEFF/, ''));
+        state.items = rowsToItems(rows)
+          .sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+
+        if (!state.items.length) {
+          throw new Error('A planilha foi acessada, mas não foram encontrados registros nas quatro primeiras colunas.');
         }
 
-        // Função para montar a tabela no HTML
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = ''; // Limpa a tabela atual
-            
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Nenhum link correspondente encontrado.</td></tr>';
-                return;
-            }
+        buildFilters();
+        applyFilters();
+      } catch (error) {
+        console.error(error);
+        renderError('Confirme se a planilha continua publicada na web e se as colunas A a D contêm Departamento, Tipo de documento, Título e URL.');
+      }
+    }
 
-            data.forEach(row => {
-                const departamento = row[0] || '-';
-                const tipo = row[1] || '-';
-                const titulo = row[2] || '-';
-                const link = row[3] || '#';
+    el.searchInput.addEventListener('input', applyFilters);
+    el.departmentFilter.addEventListener('change', applyFilters);
+    el.typeFilter.addEventListener('change', applyFilters);
 
-                const tr = document.createElement('tr');
-                
-                // Estrutura de cada linha
-                tr.innerHTML = `
-                    <td class="fw-medium text-secondary">${departamento}</td>
-                    <td><span class="badge bg-info text-dark badge-tipo">${tipo}</span></td>
-                    <td class="fw-bold text-dark">${titulo}</td>
-                    <td class="text-center">
-                        <a href="${link}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm btn-acessar shadow-sm">
-                            Abrir Link ↗
-                        </a>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    el.clearFilters.addEventListener('click', () => {
+      el.searchInput.value = '';
+      el.departmentFilter.value = '';
+      el.typeFilter.value = '';
+      applyFilters();
+      el.searchInput.focus();
+    });
 
-        // Função de filtro para a barra de pesquisa
-        function filterData(term) {
-            const filtered = allData.filter(row => {
-                const departamento = (row[0] || '').toLowerCase();
-                const tipo = (row[1] || '').toLowerCase();
-                const titulo = (row[2] || '').toLowerCase();
-                // Retorna verdadeiro se o termo pesquisado existir em qualquer uma das colunas (exceto a URL)
-                return departamento.includes(term) || tipo.includes(term) || titulo.includes(term);
-            });
-            renderTable(filtered);
-        }
-    </script>
+    loadData();
+  </script>
 </body>
 </html>
