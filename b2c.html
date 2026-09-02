@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Dashboard B2C | Matrículas e Ações</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #0b5cab;
+      --primary-2: #1677c8;
+      --primary-soft: #eaf4ff;
+      --success: #16835f;
+      --success-soft: #e9f8f2;
+      --warning: #b7791f;
+      --warning-soft: #fff7e6;
+      --danger: #c2414a;
+      --danger-soft: #fff0f1;
+      --purple: #6d5ce7;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+      --shadow-soft: 0 4px 14px rgba(15, 23, 42, 0.05);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --sticky-top: 0px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .sticky-shell {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(244, 247, 251, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(203, 213, 225, 0.78);
+      box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .topbar {
+      min-height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px clamp(16px, 3vw, 34px) 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand-mark {
+      width: 44px; height: 44px; flex: 0 0 auto;
+      display: grid; place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), #38a3ef);
+      box-shadow: 0 8px 18px rgba(11, 92, 171, 0.2);
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .brand-copy { min-width: 0; }
+    .brand-copy h1 { margin: 0; font-size: clamp(1.15rem, 2.1vw, 1.6rem); line-height: 1.15; }
+    .brand-copy p { margin: 5px 0 0; color: var(--muted); font-size: .9rem; }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      border-radius: 999px;
+      font-size: .82rem;
+      white-space: nowrap;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning); box-shadow: 0 0 0 4px var(--warning-soft); }
+    .status-chip.ready .status-dot { background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); }
+    .status-chip.error .status-dot { background: var(--danger); box-shadow: 0 0 0 4px var(--danger-soft); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 40px;
+      padding: 9px 14px;
+      border-radius: 11px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 650;
+      transition: .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn.ghost { background: transparent; }
+
+    .tabs-wrap { padding: 0 clamp(16px, 3vw, 34px); }
+    .tabs {
+      display: flex; gap: 8px; overflow-x: auto; scrollbar-width: thin;
+      padding: 0 0 10px;
+    }
+    .tab-btn {
+      flex: 0 0 auto;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 700;
+      transition: .2s ease;
+    }
+    .tab-btn:hover { color: var(--primary); border-color: #b7d6f3; }
+    .tab-btn.active { color: var(--primary); border-color: #9dc6eb; background: var(--primary-soft); box-shadow: inset 0 0 0 1px rgba(11,92,171,.05); }
+    .tab-index {
+      width: 24px; height: 24px; display: grid; place-items: center;
+      border-radius: 8px; background: #eef2f7; color: #475569; font-size: .78rem;
+    }
+    .tab-btn.active .tab-index { background: var(--primary); color: #fff; }
+
+    .filters-wrap { padding: 0 clamp(16px, 3vw, 34px) 14px; }
+    .filters-panel {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(145px, .8fr)) auto;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,.95);
+      box-shadow: var(--shadow-soft);
+    }
+    .field { position: relative; }
+    .field label { display: block; margin: 0 0 6px 2px; font-size: .72rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .field input, .field select {
+      width: 100%; min-height: 41px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 9px 11px;
+      outline: none;
+      transition: .18s ease;
+    }
+    .field input:focus, .field select:focus { border-color: #7fb4e3; box-shadow: 0 0 0 3px rgba(22,119,200,.1); }
+    .filter-actions { display: flex; align-items: flex-end; gap: 8px; }
+
+    main { padding: 22px clamp(16px, 3vw, 34px) 42px; max-width: 1720px; margin: 0 auto; }
+    .tab-view { display: none; }
+    .tab-view.active { display: block; animation: fade .22s ease; }
+    @keyframes fade { from { opacity: .4; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 14px; }
+    .section-head h2 { margin: 0; font-size: 1.15rem; }
+    .section-head p { margin: 5px 0 0; color: var(--muted); font-size: .88rem; }
+    .data-note { color: var(--muted); font-size: .8rem; text-align: right; }
+
+    .source-alert {
+      display: none;
+      margin: 0 0 14px;
+      padding: 11px 13px;
+      border: 1px solid #f2d28e;
+      border-radius: 12px;
+      background: #fffaf0;
+      color: #8a5a13;
+      font-size: .84rem;
+    }
+    .source-alert.show { display: block; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .kpi-card {
+      position: relative;
+      min-height: 126px;
+      overflow: hidden;
+      padding: 17px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+    .kpi-card::after {
+      content: "";
+      position: absolute; inset: auto -26px -30px auto;
+      width: 90px; height: 90px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(22,119,200,.12), rgba(22,119,200,0) 70%);
+    }
+    .kpi-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .045em; }
+    .kpi-value { margin-top: 10px; font-size: clamp(1.4rem, 2.7vw, 2rem); font-weight: 800; letter-spacing: -.03em; }
+    .kpi-sub { margin-top: 6px; color: var(--muted); font-size: .79rem; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      min-width: 0;
+    }
+    .panel.col-4 { grid-column: span 4; }
+    .panel.col-5 { grid-column: span 5; }
+    .panel.col-6 { grid-column: span 6; }
+    .panel.col-7 { grid-column: span 7; }
+    .panel.col-8 { grid-column: span 8; }
+    .panel.col-12 { grid-column: span 12; }
+    .panel-head { padding: 15px 16px 5px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .panel-title { font-size: .95rem; font-weight: 800; }
+    .panel-subtitle { font-size: .76rem; color: var(--muted); margin-top: 4px; }
+    .panel-body { padding: 8px 14px 14px; }
+    .chart-box { position: relative; height: 290px; }
+    .chart-box.tall { height: 330px; }
+
+    .table-toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 0 16px 12px; color: var(--muted); font-size: .8rem; }
+    .table-wrap { overflow: auto; max-height: 540px; border-top: 1px solid var(--border); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .82rem; min-width: 940px; }
+    thead th {
+      position: sticky; top: 0; z-index: 2;
+      background: #f8fafc;
+      color: #475569;
+      text-align: left;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .035em;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td { padding: 11px 12px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
+    tbody tr:hover td { background: #fbfdff; }
+    .money { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 650; }
+    .date { white-space: nowrap; }
+    .pill { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: .73rem; font-weight: 750; background: #edf2f7; color: #475569; white-space: nowrap; }
+    .pill.success { background: var(--success-soft); color: var(--success); }
+    .pill.warn { background: var(--warning-soft); color: var(--warning); }
+    .pill.info { background: var(--primary-soft); color: var(--primary); }
+    .empty { text-align: center; color: var(--muted); padding: 38px 16px; }
+
+    .loading-layer {
+      position: fixed; inset: 0; z-index: 100;
+      display: none; place-items: center;
+      background: rgba(244,247,251,.68);
+      backdrop-filter: blur(4px);
+    }
+    .loading-layer.show { display: grid; }
+    .loader-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .spinner { width: 22px; height: 22px; border: 3px solid #dbeafe; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer-note { margin-top: 18px; color: var(--muted); font-size: .76rem; text-align: center; }
+
+    @media (max-width: 1250px) {
+      .filters-panel { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+      .filter-actions { align-items: end; }
+      .kpi-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+      .panel.col-4, .panel.col-5, .panel.col-7, .panel.col-8 { grid-column: span 6; }
+    }
+    @media (max-width: 820px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .top-actions { width: 100%; justify-content: flex-start; }
+      .filters-panel { grid-template-columns: 1fr 1fr; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .panel.col-4, .panel.col-5, .panel.col-6, .panel.col-7, .panel.col-8, .panel.col-12 { grid-column: span 12; }
+      .chart-box, .chart-box.tall { height: 270px; }
+    }
+    @media (max-width: 560px) {
+      .topbar { padding-top: 14px; }
+      .brand-mark { width: 40px; height: 40px; }
+      .brand-copy p { display: none; }
+      .status-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+      .filters-panel { grid-template-columns: 1fr; }
+      .filter-actions .btn { flex: 1; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      main { padding-top: 16px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .data-note { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sticky-shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">B2C</div>
+        <div class="brand-copy">
+          <h1>Dashboard B2C • Matrículas e Ações</h1>
+          <p>Acompanhamento comercial, ações de campo, despesas e iniciativas ASCON</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="status-chip" id="loadStatus"><span class="status-dot"></span><span id="statusText">Aguardando dados</span></div>
+        <div class="status-chip" id="lastUpdate">Atualização: —</div>
+        <button class="btn primary" id="refreshBtn" type="button">↻ Atualizar dados</button>
+      </div>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tabs" role="tablist" aria-label="Módulos do dashboard">
+        <button class="tab-btn active" data-tab="enrollments" type="button"><span class="tab-index">1</span> Matrículas B2C</button>
+        <button class="tab-btn" data-tab="actions" type="button"><span class="tab-index">2</span> Ações dos consultores</button>
+        <button class="tab-btn" data-tab="expenses" type="button"><span class="tab-index">3</span> Despesas Marketing/B2C</button>
+        <button class="tab-btn" data-tab="ascon" type="button"><span class="tab-index">4</span> Ações ASCON</button>
+      </div>
+    </div>
+
+    <div class="filters-wrap">
+      <div class="filters-panel">
+        <div class="field">
+          <label for="searchFilter">Pesquisa</label>
+          <input id="searchFilter" type="search" placeholder="Pesquisar em todos os campos visíveis..." autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="unitFilter">Unidade Operacional</label>
+          <select id="unitFilter"><option value="">Todas</option></select>
+        </div>
+        <div class="field">
+          <label id="personFilterLabel" for="personFilter">Consultor / Responsável</label>
+          <select id="personFilter"><option value="">Todos</option></select>
+        </div>
+        <div class="field">
+          <label for="startDateFilter">Data inicial</label>
+          <input id="startDateFilter" type="date" />
+        </div>
+        <div class="field">
+          <label for="endDateFilter">Data final</label>
+          <input id="endDateFilter" type="date" />
+        </div>
+        <div class="filter-actions">
+          <button class="btn ghost" id="clearFiltersBtn" type="button">Limpar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="tab-view active" id="view-enrollments">
+      <div class="section-head">
+        <div><h2>Matrículas realizadas pelos consultores B2C</h2><p>Conversão, receita, origem dos leads, cursos e desempenho por consultor.</p></div>
+        <div class="data-note" id="count-enrollments">0 registros</div>
+      </div>
+      <div class="source-alert" id="alert-enrollments"></div>
+      <div class="kpi-grid" id="kpis-enrollments"></div>
+      <div class="dashboard-grid">
+        <article class="panel col-7"><div class="panel-head"><div><div class="panel-title">Matrículas por consultor</div><div class="panel-subtitle">Quantidade no período filtrado</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-enrollments-consultant"></canvas></div></div></article>
+        <article class="panel col-5"><div class="panel-head"><div><div class="panel-title">Origem dos leads</div><div class="panel-subtitle">Distribuição das matrículas por origem</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-enrollments-leads"></canvas></div></div></article>
+        <article class="panel col-8"><div class="panel-head"><div><div class="panel-title">Receita matriculada ao longo do tempo</div><div class="panel-subtitle">Valor total dos cursos por mês de efetivação</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-enrollments-revenue"></canvas></div></div></article>
+        <article class="panel col-4"><div class="panel-head"><div><div class="panel-title">Modalidades</div><div class="panel-subtitle">Mix de matrículas por modalidade</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-enrollments-modality"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Detalhamento das matrículas</div><div class="panel-subtitle">CPFs do aluno e do responsável não são exibidos</div></div></div><div class="table-toolbar"><span id="table-count-enrollments">0 linhas</span><span>Role horizontalmente para ver mais campos</span></div><div class="table-wrap"><table id="table-enrollments"></table></div></article>
+      </div>
+    </section>
+
+    <section class="tab-view" id="view-actions">
+      <div class="section-head">
+        <div><h2>Ações dos consultores B2C</h2><p>Ritmo de execução, responsáveis, unidades e tipos de ação.</p></div>
+        <div class="data-note" id="count-actions">0 registros</div>
+      </div>
+      <div class="source-alert" id="alert-actions"></div>
+      <div class="kpi-grid" id="kpis-actions"></div>
+      <div class="dashboard-grid">
+        <article class="panel col-6"><div class="panel-head"><div><div class="panel-title">Ações por responsável</div><div class="panel-subtitle">Volume de atividades registradas</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-actions-owner"></canvas></div></div></article>
+        <article class="panel col-6"><div class="panel-head"><div><div class="panel-title">Tipos de ação</div><div class="panel-subtitle">Distribuição por categoria</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-actions-type"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Evolução das ações</div><div class="panel-subtitle">Quantidade de ações por mês</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-actions-timeline"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Detalhamento das ações</div></div></div><div class="table-toolbar"><span id="table-count-actions">0 linhas</span><span>Dados filtrados em tempo real</span></div><div class="table-wrap"><table id="table-actions"></table></div></article>
+      </div>
+    </section>
+
+    <section class="tab-view" id="view-expenses">
+      <div class="section-head">
+        <div><h2>Despesas de Marketing e B2C</h2><p>Investimento realizado, composição por grupo, unidade e evolução dos gastos.</p></div>
+        <div class="data-note" id="count-expenses">0 registros</div>
+      </div>
+      <div class="source-alert" id="alert-expenses"></div>
+      <div class="kpi-grid" id="kpis-expenses"></div>
+      <div class="dashboard-grid">
+        <article class="panel col-5"><div class="panel-head"><div><div class="panel-title">Gastos por grupo</div><div class="panel-subtitle">Participação de cada grupo de despesa</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-expenses-group"></canvas></div></div></article>
+        <article class="panel col-7"><div class="panel-head"><div><div class="panel-title">Gastos por unidade</div><div class="panel-subtitle">Comparativo entre unidades operacionais</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-expenses-unit"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Evolução dos gastos</div><div class="panel-subtitle">Total desembolsado por mês</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-expenses-timeline"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Detalhamento das despesas</div></div></div><div class="table-toolbar"><span id="table-count-expenses">0 linhas</span><span>Valores em reais</span></div><div class="table-wrap"><table id="table-expenses"></table></div></article>
+      </div>
+    </section>
+
+    <section class="tab-view" id="view-ascon">
+      <div class="section-head">
+        <div><h2>Ações realizadas pela ASCON</h2><p>Ações regionais, cidades atendidas, fontes pagadoras e investimentos.</p></div>
+        <div class="data-note" id="count-ascon">0 registros</div>
+      </div>
+      <div class="source-alert" id="alert-ascon"></div>
+      <div class="kpi-grid" id="kpis-ascon"></div>
+      <div class="dashboard-grid">
+        <article class="panel col-5"><div class="panel-head"><div><div class="panel-title">Tipos de ação / grupo de despesa</div><div class="panel-subtitle">Distribuição do investimento</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-ascon-type"></canvas></div></div></article>
+        <article class="panel col-7"><div class="panel-head"><div><div class="panel-title">Fontes pagadoras</div><div class="panel-subtitle">Investimento por origem do recurso</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-ascon-source"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Evolução do investimento ASCON</div><div class="panel-subtitle">Valor gasto por mês de início da ação</div></div></div><div class="panel-body"><div class="chart-box"><canvas id="chart-ascon-timeline"></canvas></div></div></article>
+        <article class="panel col-12"><div class="panel-head"><div><div class="panel-title">Detalhamento das ações ASCON</div></div></div><div class="table-toolbar"><span id="table-count-ascon">0 linhas</span><span>Acompanhamento por cidade, ação e fonte pagadora</span></div><div class="table-wrap"><table id="table-ascon"></table></div></article>
+      </div>
+    </section>
+
+    <div class="footer-note">Escola SENAI Itumbiara - UI SESI SENAI Quirinópolis</div>
+  </main>
+
+  <div class="loading-layer" id="loadingLayer"><div class="loader-card"><span class="spinner"></span> Carregando e consolidando dados...</div></div>
+
+  <script>
+    // ============================================================
+    // CONFIGURAÇÃO DAS 4 FONTES
+    // Cada análise usa uma aba específica da planilha publicada,
+    // identificada pelo seu próprio parâmetro gid.
+    // ============================================================
+    const SOURCES = {
+      enrollments: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmzw0OPZpmUgmEey1bR2RgUVe1J98iApW9U8veDBrSSCupk7rqu-yG73VhnSZPhHEcVmg6XL4j2CSq/pub?gid=0&single=true&output=csv',
+      actions:     'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmzw0OPZpmUgmEey1bR2RgUVe1J98iApW9U8veDBrSSCupk7rqu-yG73VhnSZPhHEcVmg6XL4j2CSq/pub?gid=1969186483&single=true&output=csv',
+      expenses:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmzw0OPZpmUgmEey1bR2RgUVe1J98iApW9U8veDBrSSCupk7rqu-yG73VhnSZPhHEcVmg6XL4j2CSq/pub?gid=759685359&single=true&output=csv',
+      ascon:       'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmzw0OPZpmUgmEey1bR2RgUVe1J98iApW9U8veDBrSSCupk7rqu-yG73VhnSZPhHEcVmg6XL4j2CSq/pub?gid=1317096653&single=true&output=csv'
+    };
+
+    const SOURCE_META = {
+      enrollments: { name: 'Matrículas B2C', expectedColumns: 18 },
+      actions: { name: 'Ações dos consultores', expectedColumns: 5 },
+      expenses: { name: 'Despesas Marketing/B2C', expectedColumns: 7 },
+      ascon: { name: 'Ações ASCON', expectedColumns: 9 }
+    };
+
+    const state = {
+      activeTab: 'enrollments',
+      raw: { enrollments: [], actions: [], expenses: [], ascon: [] },
+      filtered: { enrollments: [], actions: [], expenses: [], ascon: [] },
+      errors: {},
+      warnings: {},
+      charts: {},
+      filters: { search: '', unit: '', person: '', startDate: '', endDate: '' }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const norm = (v) => String(v ?? '').trim();
+    const normLower = (v) => norm(v).toLocaleLowerCase('pt-BR');
+    const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
+    const fmtNumber = new Intl.NumberFormat('pt-BR');
+    const fmtCurrency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtPercent = new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+          if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+          else if (ch === '"') inQuotes = false;
+          else field += ch;
+        } else {
+          if (ch === '"') inQuotes = true;
+          else if (ch === ',') { row.push(field); field = ''; }
+          else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+          else if (ch !== '\r') field += ch;
+        }
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows.filter(r => r.some(c => norm(c) !== ''));
+    }
+
+    function parseBRNumber(value) {
+      let s = norm(value).replace(/\s/g, '').replace(/R\$/gi, '');
+      if (!s) return 0;
+      if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+      else if (s.includes(',')) s = s.replace(',', '.');
+      s = s.replace(/[^0-9.-]/g, '');
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function parseDate(value) {
+      const s = norm(value);
+      if (!s) return null;
+      const br = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+      if (br) {
+        let year = Number(br[3]); if (year < 100) year += 2000;
+        const d = new Date(year, Number(br[2]) - 1, Number(br[1]));
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+      const iso = new Date(s);
+      return Number.isNaN(iso.getTime()) ? null : iso;
+    }
+
+    function formatDate(value) {
+      const d = value instanceof Date ? value : parseDate(value);
+      return d ? d.toLocaleDateString('pt-BR') : norm(value) || '—';
+    }
+
+    function monthKey(value) {
+      const d = value instanceof Date ? value : parseDate(value);
+      return d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` : 'Sem data';
+    }
+
+    function monthLabel(key) {
+      if (key === 'Sem data') return key;
+      const [y, m] = key.split('-').map(Number);
+      return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
+    }
+
+    function safeValue(v, fallback = 'Não informado') { return norm(v) || fallback; }
+
+    function mapRows(tab, rows) {
+      if (!rows.length) return [];
+      const header = rows[0];
+      const data = rows.slice(1).filter(r => r.some(c => norm(c)));
+      const expected = SOURCE_META[tab].expectedColumns;
+      const columnDelta = Math.abs(header.length - expected);
+      if (header.length < expected) state.warnings[tab] = `A fonte retornou ${header.length} colunas; esta aba espera ${expected}. Confira a URL configurada.`;
+      else if (header.length > expected + 3) state.warnings[tab] = `A fonte retornou ${header.length} colunas; esta aba espera cerca de ${expected}. Confira se a aba publicada (gid) corresponde à base esperada.`;
+      else state.warnings[tab] = '';
+
+      // Evita análises enganosas quando uma URL de outra base é usada nesta aba.
+      if (columnDelta >= 3) return [];
+
+      if (tab === 'enrollments') return data.map((r, i) => ({
+        _i: i,
+        consultant: norm(r[0]), leadSource: norm(r[1]), student: norm(r[2]),
+        // r[3] e r[4] (CPFs) são deliberadamente descartados e nunca exibidos.
+        contact: norm(r[5]), event: norm(r[6]), modality: norm(r[7]), course: norm(r[8]), unit: norm(r[9]), city: norm(r[10]),
+        paymentStatus: norm(r[11]), paymentDate: norm(r[12]), paymentMonth: norm(r[13]), observation: norm(r[14]),
+        installmentValue: parseBRNumber(r[15]), totalValue: parseBRNumber(r[16]), enrollmentDate: norm(r[17])
+      }));
+      if (tab === 'actions') return data.map((r, i) => ({ _i: i, unit: norm(r[0]), person: norm(r[1]), actionDate: norm(r[2]), actionType: norm(r[3]), description: norm(r[4]) }));
+      if (tab === 'expenses') return data.map((r, i) => ({ _i: i, unit: norm(r[0]), actionDate: norm(r[1]), expenseDescription: norm(r[2]), expenseSource: norm(r[3]), value: parseBRNumber(r[4]), group: norm(r[5]), observation: norm(r[6]) }));
+      return data.map((r, i) => ({ _i: i, unit: norm(r[0]), city: norm(r[1]), startDate: norm(r[2]), endDate: norm(r[3]), actionType: norm(r[4]), description: norm(r[5]), payerSource: norm(r[6]), value: parseBRNumber(r[7]), observation: norm(r[8]) }));
+    }
+
+    async function fetchSource(tab) {
+      const url = SOURCES[tab];
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      return mapRows(tab, parseCSV(text));
+    }
+
+    async function loadAll() {
+      $('loadingLayer').classList.add('show');
+      setLoadStatus('loading', 'Carregando dados');
+      state.errors = {}; state.warnings = {};
+      const tabs = Object.keys(SOURCES);
+      const results = await Promise.allSettled(tabs.map(fetchSource));
+      results.forEach((result, idx) => {
+        const tab = tabs[idx];
+        if (result.status === 'fulfilled') state.raw[tab] = result.value;
+        else { state.raw[tab] = []; state.errors[tab] = result.reason?.message || 'Falha ao carregar'; }
+      });
+      const successCount = tabs.filter(t => !state.errors[t]).length;
+      if (successCount === tabs.length) setLoadStatus('ready', 'Bases carregadas');
+      else if (successCount) setLoadStatus('ready', `${successCount}/4 bases carregadas`);
+      else setLoadStatus('error', 'Falha ao carregar as bases');
+      $('lastUpdate').textContent = `Atualização: ${new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}`;
+      $('loadingLayer').classList.remove('show');
+      refreshFilterOptions();
+      applyFilters();
+    }
+
+    function setLoadStatus(kind, text) {
+      const chip = $('loadStatus');
+      chip.classList.remove('ready', 'error');
+      if (kind === 'ready') chip.classList.add('ready');
+      if (kind === 'error') chip.classList.add('error');
+      $('statusText').textContent = text;
+    }
+
+    function tabConfig(tab) {
+      return {
+        enrollments: { unit: 'unit', person: 'consultant', date: 'enrollmentDate', personLabel: 'Consultor' },
+        actions: { unit: 'unit', person: 'person', date: 'actionDate', personLabel: 'Responsável' },
+        expenses: { unit: 'unit', person: null, date: 'actionDate', personLabel: 'Responsável' },
+        ascon: { unit: 'unit', person: null, date: 'startDate', personLabel: 'Responsável' }
+      }[tab];
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.map(norm).filter(Boolean))].sort(collator.compare);
+    }
+
+    function setSelectOptions(select, values, allLabel, currentValue = '') {
+      const opts = [`<option value="">${escapeHTML(allLabel)}</option>`]
+        .concat(uniqueSorted(values).map(v => `<option value="${escapeAttr(v)}">${escapeHTML(v)}</option>`));
+      select.innerHTML = opts.join('');
+      if ([...select.options].some(o => o.value === currentValue)) select.value = currentValue;
+      else select.value = '';
+    }
+
+    function refreshFilterOptions() {
+      const tab = state.activeTab;
+      const cfg = tabConfig(tab);
+      const rows = state.raw[tab];
+      setSelectOptions($('unitFilter'), rows.map(r => r[cfg.unit]), 'Todas', state.filters.unit);
+      const personField = $('personFilter');
+      $('personFilterLabel').textContent = cfg.personLabel;
+      if (cfg.person) {
+        personField.disabled = false;
+        setSelectOptions(personField, rows.map(r => r[cfg.person]), 'Todos', state.filters.person);
+      } else {
+        personField.disabled = true;
+        personField.innerHTML = '<option value="">Não se aplica</option>';
+        state.filters.person = '';
+      }
+    }
+
+    function applyFilters() {
+      const tab = state.activeTab;
+      const cfg = tabConfig(tab);
+      state.filters.search = $('searchFilter').value;
+      state.filters.unit = $('unitFilter').value;
+      state.filters.person = $('personFilter').disabled ? '' : $('personFilter').value;
+      state.filters.startDate = $('startDateFilter').value;
+      state.filters.endDate = $('endDateFilter').value;
+      const query = normLower(state.filters.search);
+      const start = state.filters.startDate ? new Date(`${state.filters.startDate}T00:00:00`) : null;
+      const end = state.filters.endDate ? new Date(`${state.filters.endDate}T23:59:59`) : null;
+      const rows = state.raw[tab].filter(r => {
+        if (state.filters.unit && r[cfg.unit] !== state.filters.unit) return false;
+        if (cfg.person && state.filters.person && r[cfg.person] !== state.filters.person) return false;
+        if (start || end) {
+          const d = parseDate(r[cfg.date]);
+          if (!d) return false;
+          if (start && d < start) return false;
+          if (end && d > end) return false;
+        }
+        if (query) {
+          const searchable = Object.entries(r).filter(([k]) => !k.startsWith('_')).map(([,v]) => v).join(' | ').toLocaleLowerCase('pt-BR');
+          if (!searchable.includes(query)) return false;
+        }
+        return true;
+      });
+      state.filtered[tab] = rows;
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      const tab = state.activeTab;
+      const rows = state.filtered[tab];
+      $(`count-${tab}`).textContent = `${fmtNumber.format(rows.length)} registros no filtro atual`;
+      renderAlert(tab);
+      if (tab === 'enrollments') renderEnrollments(rows);
+      if (tab === 'actions') renderActions(rows);
+      if (tab === 'expenses') renderExpenses(rows);
+      if (tab === 'ascon') renderAscon(rows);
+    }
+
+    function renderAlert(tab) {
+      const el = $(`alert-${tab}`);
+      const msg = state.errors[tab] ? `Não foi possível carregar esta base: ${state.errors[tab]}.` : state.warnings[tab];
+      if (msg) { el.textContent = msg; el.classList.add('show'); }
+      else { el.textContent = ''; el.classList.remove('show'); }
+    }
+
+    function groupCount(rows, field) {
+      const m = new Map();
+      rows.forEach(r => { const k = safeValue(r[field]); m.set(k, (m.get(k) || 0) + 1); });
+      return m;
+    }
+    function groupSum(rows, groupField, valueField) {
+      const m = new Map();
+      rows.forEach(r => { const k = safeValue(r[groupField]); m.set(k, (m.get(k) || 0) + Number(r[valueField] || 0)); });
+      return m;
+    }
+    function timeCount(rows, dateField) {
+      const m = new Map(); rows.forEach(r => { const k = monthKey(r[dateField]); m.set(k, (m.get(k) || 0) + 1); }); return m;
+    }
+    function timeSum(rows, dateField, valueField) {
+      const m = new Map(); rows.forEach(r => { const k = monthKey(r[dateField]); m.set(k, (m.get(k) || 0) + Number(r[valueField] || 0)); }); return m;
+    }
+    function topEntry(map) {
+      const entries = [...map.entries()].sort((a,b) => b[1] - a[1]);
+      return entries[0] || ['—', 0];
+    }
+    function sortedEntries(map, limit = 12, byValue = true) {
+      const arr = [...map.entries()];
+      if (byValue) arr.sort((a,b) => b[1] - a[1] || collator.compare(a[0], b[0])); else arr.sort((a,b) => collator.compare(a[0], b[0]));
+      return limit ? arr.slice(0, limit) : arr;
+    }
+    function sortedTimeEntries(map) {
+      return [...map.entries()].sort((a,b) => a[0] === 'Sem data' ? 1 : b[0] === 'Sem data' ? -1 : a[0].localeCompare(b[0]));
+    }
+
+    function renderKPIs(tab, items) {
+      $(`kpis-${tab}`).innerHTML = items.map(x => `<div class="kpi-card"><div class="kpi-label">${escapeHTML(x.label)}</div><div class="kpi-value">${x.value}</div><div class="kpi-sub">${escapeHTML(x.sub || '')}</div></div>`).join('');
+    }
+
+    function chartColors(n) {
+      const palette = ['#0B5CAB','#1677C8','#38A3EF','#6D5CE7','#16A085','#F59E0B','#E66D45','#8B5CF6','#22A06B','#64748B','#2C7BE5','#9C6ADE'];
+      return Array.from({length: n}, (_,i) => palette[i % palette.length]);
+    }
+
+    function makeChart(id, type, labels, data, options = {}) {
+      const canvas = $(id);
+      if (!canvas || typeof Chart === 'undefined') return;
+      if (state.charts[id]) state.charts[id].destroy();
+      const isBar = type === 'bar';
+      const isLine = type === 'line';
+      state.charts[id] = new Chart(canvas, {
+        type,
+        data: { labels, datasets: [{
+          label: options.label || '', data,
+          backgroundColor: isBar ? '#1677C8' : isLine ? 'rgba(22,119,200,.14)' : chartColors(data.length),
+          borderColor: isLine ? '#0B5CAB' : isBar ? '#0B5CAB' : '#ffffff',
+          borderWidth: isLine ? 2.5 : 1,
+          tension: .3,
+          fill: isLine,
+          pointRadius: isLine ? 3 : 0,
+          borderRadius: isBar ? 7 : 0,
+          maxBarThickness: isBar ? 46 : undefined
+        }]},
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: ['doughnut','pie'].includes(type), position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 15, font: { size: 11 } } },
+            tooltip: { callbacks: { label: (ctx) => {
+              const val = Number(ctx.raw || 0);
+              if (options.currency) return `${ctx.label ? ctx.label + ': ' : ''}${fmtCurrency.format(val)}`;
+              return `${ctx.label ? ctx.label + ': ' : ''}${fmtNumber.format(val)}`;
+            } } }
+          },
+          scales: ['doughnut','pie'].includes(type) ? {} : {
+            x: { grid: { display: false }, ticks: { color: '#64748b', maxRotation: 30, minRotation: 0 } },
+            y: { beginAtZero: true, grid: { color: '#eef2f7' }, ticks: { color: '#64748b', callback: (v) => options.currency ? shortCurrency(v) : fmtNumber.format(v) } }
+          }
+        }
+      });
+    }
+
+    function shortCurrency(v) {
+      const n = Number(v || 0);
+      if (Math.abs(n) >= 1000000) return `R$ ${(n/1000000).toFixed(1).replace('.',',')} mi`;
+      if (Math.abs(n) >= 1000) return `R$ ${(n/1000).toFixed(1).replace('.',',')} mil`;
+      return `R$ ${Math.round(n)}`;
+    }
+
+    function renderEnrollments(rows) {
+      const totalRevenue = rows.reduce((s,r) => s + r.totalValue, 0);
+      const installmentSum = rows.reduce((s,r) => s + r.installmentValue, 0);
+      const paid = rows.filter(r => /pago|quitado|confirmado|efetivado/i.test(r.paymentStatus)).length;
+      const consultants = new Set(rows.map(r => r.consultant).filter(Boolean)).size;
+      renderKPIs('enrollments', [
+        { label:'Matrículas', value: fmtNumber.format(rows.length), sub:`${consultants} consultor(es) no filtro` },
+        { label:'Valor total dos cursos', value: shortCurrency(totalRevenue), sub:'Somatório do valor total matriculado' },
+        { label:'Ticket médio', value: rows.length ? fmtCurrency.format(totalRevenue/rows.length) : fmtCurrency.format(0), sub:'Valor médio por matrícula' },
+        { label:'Situação paga', value: rows.length ? fmtPercent.format(paid/rows.length) : '0,0%', sub:`${paid} matrícula(s) com status pago/quitado` },
+        { label:'Valor das parcelas', value: shortCurrency(installmentSum), sub:'Somatório das parcelas registradas' }
+      ]);
+      const c1 = sortedEntries(groupCount(rows,'consultant'), 12); makeChart('chart-enrollments-consultant','bar',c1.map(x=>x[0]),c1.map(x=>x[1]),{label:'Matrículas'});
+      const c2 = sortedEntries(groupCount(rows,'leadSource'), 10); makeChart('chart-enrollments-leads','doughnut',c2.map(x=>x[0]),c2.map(x=>x[1]));
+      const c3 = sortedTimeEntries(timeSum(rows,'enrollmentDate','totalValue')); makeChart('chart-enrollments-revenue','line',c3.map(x=>monthLabel(x[0])),c3.map(x=>x[1]),{currency:true,label:'Valor matriculado'});
+      const c4 = sortedEntries(groupCount(rows,'modality'), 10); makeChart('chart-enrollments-modality','doughnut',c4.map(x=>x[0]),c4.map(x=>x[1]));
+      renderTable('enrollments', rows, [
+        ['Consultor','consultant'],['Origem do lead','leadSource'],['Aluno','student'],['Contato','contact'],['Evento','event'],['Modalidade','modality'],['Curso','course'],['Unidade','unit'],['Cidade','city'],['Pagamento','paymentStatus','status'],['Data pgto.','paymentDate','date'],['Mês pgto.','paymentMonth'],['Parcela','installmentValue','money'],['Valor total','totalValue','money'],['Data matrícula','enrollmentDate','date'],['Observação','observation']
+      ]);
+    }
+
+    function renderActions(rows) {
+      const owners = new Set(rows.map(r=>r.person).filter(Boolean)).size;
+      const units = new Set(rows.map(r=>r.unit).filter(Boolean)).size;
+      const types = new Set(rows.map(r=>r.actionType).filter(Boolean)).size;
+      const top = topEntry(groupCount(rows,'actionType'));
+      renderKPIs('actions', [
+        { label:'Ações registradas', value: fmtNumber.format(rows.length), sub:'Volume total no filtro' },
+        { label:'Responsáveis ativos', value: fmtNumber.format(owners), sub:'Pessoas com ações registradas' },
+        { label:'Unidades envolvidas', value: fmtNumber.format(units), sub:'Cobertura operacional' },
+        { label:'Tipos de ação', value: fmtNumber.format(types), sub:'Diversidade de iniciativas' },
+        { label:'Ação mais frequente', value: escapeHTML(top[0]), sub:`${fmtNumber.format(top[1])} ocorrência(s)` }
+      ]);
+      const c1 = sortedEntries(groupCount(rows,'person'),12); makeChart('chart-actions-owner','bar',c1.map(x=>x[0]),c1.map(x=>x[1]),{label:'Ações'});
+      const c2 = sortedEntries(groupCount(rows,'actionType'),10); makeChart('chart-actions-type','doughnut',c2.map(x=>x[0]),c2.map(x=>x[1]));
+      const c3 = sortedTimeEntries(timeCount(rows,'actionDate')); makeChart('chart-actions-timeline','line',c3.map(x=>monthLabel(x[0])),c3.map(x=>x[1]),{label:'Ações'});
+      renderTable('actions', rows, [['Unidade','unit'],['Responsável','person'],['Data da ação','actionDate','date'],['Tipo de ação','actionType'],['Descrição','description']]);
+    }
+
+    function renderExpenses(rows) {
+      const total = rows.reduce((s,r)=>s+r.value,0);
+      const units = new Set(rows.map(r=>r.unit).filter(Boolean)).size;
+      const groups = groupSum(rows,'group','value');
+      const top = topEntry(groups);
+      renderKPIs('expenses', [
+        { label:'Total investido', value: shortCurrency(total), sub:'Somatório das despesas filtradas' },
+        { label:'Despesa média', value: rows.length ? fmtCurrency.format(total/rows.length) : fmtCurrency.format(0), sub:'Média por lançamento' },
+        { label:'Lançamentos', value: fmtNumber.format(rows.length), sub:'Quantidade de despesas registradas' },
+        { label:'Unidades', value: fmtNumber.format(units), sub:'Unidades com investimento' },
+        { label:'Maior grupo de despesa', value: escapeHTML(top[0]), sub: shortCurrency(top[1]) }
+      ]);
+      const c1 = sortedEntries(groups,10); makeChart('chart-expenses-group','doughnut',c1.map(x=>x[0]),c1.map(x=>x[1]),{currency:true});
+      const c2 = sortedEntries(groupSum(rows,'unit','value'),12); makeChart('chart-expenses-unit','bar',c2.map(x=>x[0]),c2.map(x=>x[1]),{currency:true,label:'Valor gasto'});
+      const c3 = sortedTimeEntries(timeSum(rows,'actionDate','value')); makeChart('chart-expenses-timeline','line',c3.map(x=>monthLabel(x[0])),c3.map(x=>x[1]),{currency:true,label:'Valor gasto'});
+      renderTable('expenses', rows, [['Unidade','unit'],['Data da ação','actionDate','date'],['Descrição da despesa','expenseDescription'],['Fonte da despesa','expenseSource'],['Valor gasto','value','money'],['Grupo','group'],['Observação','observation']]);
+    }
+
+    function renderAscon(rows) {
+      const total = rows.reduce((s,r)=>s+r.value,0);
+      const units = new Set(rows.map(r=>r.unit).filter(Boolean)).size;
+      const cities = new Set(rows.map(r=>r.city).filter(Boolean)).size;
+      const types = new Set(rows.map(r=>r.actionType).filter(Boolean)).size;
+      renderKPIs('ascon', [
+        { label:'Ações ASCON', value: fmtNumber.format(rows.length), sub:'Quantidade de registros filtrados' },
+        { label:'Investimento total', value: shortCurrency(total), sub:'Somatório do valor gasto' },
+        { label:'Investimento médio', value: rows.length ? fmtCurrency.format(total/rows.length) : fmtCurrency.format(0), sub:'Média por ação registrada' },
+        { label:'Cidades atendidas', value: fmtNumber.format(cities), sub:'Abrangência territorial' },
+        { label:'Unidades / tipos', value: `${fmtNumber.format(units)} / ${fmtNumber.format(types)}`, sub:'Unidades e categorias envolvidas' }
+      ]);
+      const c1 = sortedEntries(groupSum(rows,'actionType','value'),10); makeChart('chart-ascon-type','doughnut',c1.map(x=>x[0]),c1.map(x=>x[1]),{currency:true});
+      const c2 = sortedEntries(groupSum(rows,'payerSource','value'),12); makeChart('chart-ascon-source','bar',c2.map(x=>x[0]),c2.map(x=>x[1]),{currency:true,label:'Investimento'});
+      const c3 = sortedTimeEntries(timeSum(rows,'startDate','value')); makeChart('chart-ascon-timeline','line',c3.map(x=>monthLabel(x[0])),c3.map(x=>x[1]),{currency:true,label:'Investimento'});
+      renderTable('ascon', rows, [['Unidade','unit'],['Cidade','city'],['Início','startDate','date'],['Fim','endDate','date'],['Tipo / grupo','actionType'],['Descrição','description'],['Fonte pagadora','payerSource'],['Valor gasto','value','money'],['Observação','observation']]);
+    }
+
+    function renderTable(tab, rows, columns) {
+      const table = $(`table-${tab}`);
+      $(`table-count-${tab}`).textContent = `${fmtNumber.format(rows.length)} linha(s)`;
+      if (!rows.length) { table.innerHTML = '<tbody><tr><td class="empty">Nenhum registro encontrado com os filtros atuais.</td></tr></tbody>'; return; }
+      const head = `<thead><tr>${columns.map(c=>`<th>${escapeHTML(c[0])}</th>`).join('')}</tr></thead>`;
+      const body = `<tbody>${rows.slice(0, 1000).map(r=>`<tr>${columns.map(c=>`<td>${formatCell(r[c[1]], c[2])}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      table.innerHTML = head + body;
+    }
+
+    function formatCell(v, type) {
+      if (type === 'money') return `<span class="money">${fmtCurrency.format(Number(v||0))}</span>`;
+      if (type === 'date') return `<span class="date">${escapeHTML(formatDate(v))}</span>`;
+      if (type === 'status') {
+        const s = norm(v) || 'Não informado';
+        const cls = /pago|quitado|confirmado|efetivado/i.test(s) ? 'success' : /pend|aberto|aguard/i.test(s) ? 'warn' : 'info';
+        return `<span class="pill ${cls}">${escapeHTML(s)}</span>`;
+      }
+      return escapeHTML(norm(v) || '—');
+    }
+
+    function escapeHTML(value) { return String(value ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+    function escapeAttr(value) { return escapeHTML(value).replace(/'/g,'&#39;'); }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      if (tab === state.activeTab) return;
+      state.activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+      document.querySelectorAll('.tab-view').forEach(v=>v.classList.toggle('active', v.id===`view-${tab}`));
+      state.filters = { search:'', unit:'', person:'', startDate:'', endDate:'' };
+      $('searchFilter').value=''; $('startDateFilter').value=''; $('endDateFilter').value='';
+      refreshFilterOptions();
+      applyFilters();
+    }));
+
+    ['searchFilter','unitFilter','personFilter','startDateFilter','endDateFilter'].forEach(id => {
+      const el = $(id); const evt = id === 'searchFilter' ? 'input' : 'change';
+      el.addEventListener(evt, () => applyFilters());
+    });
+
+    $('clearFiltersBtn').addEventListener('click', () => {
+      $('searchFilter').value=''; $('unitFilter').value=''; $('personFilter').value=''; $('startDateFilter').value=''; $('endDateFilter').value=''; applyFilters();
+    });
+    $('refreshBtn').addEventListener('click', loadAll);
+
+    window.addEventListener('DOMContentLoaded', loadAll);
+  </script>
+</body>
+</html>
