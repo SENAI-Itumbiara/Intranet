@@ -1,521 +1,356 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Programação - SENAI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        senai: {
-                            light: '#f0f9ff',
-                            DEFAULT: '#0284c7',
-                            dark: '#0369a1',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .table-container { max-height: 500px; overflow-y: auto; }
-        th { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gestão da Programação de Cursos</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --panel:#ffffff; --line:#dbe4ef; --text:#162235; --muted:#64748b;
+    --blue:#0b67b2; --blue2:#0f7acb; --blueSoft:#eaf4fc; --navy:#11395b;
+    --green:#138a5b; --greenSoft:#eaf8f1; --orange:#d97706; --orangeSoft:#fff5e7;
+    --red:#c2413b; --redSoft:#fff0ee; --graySoft:#eef2f6; --shadow:0 8px 24px rgba(18,48,79,.08);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  body{overflow-y:scroll}
+  button,select,input{font:inherit}
+  .top-shell{position:sticky;top:0;z-index:50;background:rgba(244,247,251,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .top-inner{max-width:1800px;margin:auto;padding:8px 14px 7px}
+  .headline{display:flex;align-items:center;gap:10px;min-height:38px}
+  .brand{display:flex;align-items:center;gap:9px;min-width:260px}
+  .brand-mark{width:31px;height:31px;border-radius:9px;background:linear-gradient(135deg,var(--blue),#3a9add);display:grid;place-items:center;color:white;font-weight:900;box-shadow:0 4px 12px rgba(11,103,178,.25)}
+  .brand h1{font-size:16px;line-height:1.1;margin:0;color:var(--navy)}
+  .brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+  .headline-right{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:#94a3b8;display:inline-block}.status-dot.ok{background:var(--green)}.status-dot.err{background:var(--red)}
+  .btn{border:1px solid var(--line);background:white;color:var(--navy);border-radius:8px;padding:6px 9px;cursor:pointer;font-size:11px;font-weight:700;transition:.15s}
+  .btn:hover{border-color:#a9bed3;background:#f8fbff}.btn.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  .filters{display:grid;grid-template-columns:minmax(180px,1.6fr) repeat(6,minmax(115px,1fr)) auto;gap:6px;align-items:end;margin-top:6px}
+  .field label{display:block;font-size:9px;color:var(--muted);margin:0 0 2px 2px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+  .control{width:100%;height:31px;border:1px solid var(--line);background:white;border-radius:8px;padding:5px 8px;color:var(--text);font-size:11px;outline:none}
+  .control:focus{border-color:#76afe0;box-shadow:0 0 0 3px rgba(11,103,178,.08)}
+  .filter-actions{display:flex;gap:5px;padding-bottom:0}
+  .tabs{display:flex;gap:5px;margin-top:7px}
+  .tab{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .filter-summary{margin-left:auto;display:flex;align-items:center;color:var(--muted);font-size:10px}
+  main{max-width:1800px;margin:0 auto;padding:12px 14px 30px}
+  .loading,.error-box{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:24px;text-align:center;box-shadow:var(--shadow)}
+  .error-box{border-color:#f1c6c2;color:#7f1d1d;background:#fff9f8}
+  .hidden{display:none!important}
+  .cards{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:9px;margin-bottom:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 12px;box-shadow:0 3px 13px rgba(18,48,79,.05);min-height:88px;position:relative;overflow:hidden}
+  .card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
+  .card.green:before{background:var(--green)}.card.orange:before{background:var(--orange)}.card.red:before{background:var(--red)}
+  .card .label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+  .card .value{font-size:25px;line-height:1.05;margin-top:5px;font-weight:850;color:var(--navy)}
+  .card .sub{font-size:10px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.grid-3{display:grid;grid-template-columns:1.1fr .9fr .9fr;gap:10px;margin-bottom:10px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 3px 13px rgba(18,48,79,.05);overflow:hidden}
+  .panel-head{padding:10px 12px 7px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #edf2f7}
+  .panel-head h2{font-size:12px;margin:0;color:var(--navy)}.panel-head p{margin-left:auto;margin-top:0;margin-bottom:0;color:var(--muted);font-size:9px}
+  .panel-body{padding:10px 12px}
+  .bars{display:flex;flex-direction:column;gap:8px}.bar-row{display:grid;grid-template-columns:minmax(105px,190px) 1fr 58px;align-items:center;gap:8px;font-size:10px}
+  .bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#334155}.bar-track{height:8px;background:#edf2f7;border-radius:999px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),#4aa0db);border-radius:999px;min-width:2px}.bar-value{text-align:right;color:var(--navy);font-weight:800}
+  .donut-wrap{display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:center;min-height:150px}.donut{width:126px;height:126px;border-radius:50%;position:relative;margin:auto}.donut:after{content:"";position:absolute;inset:24px;background:white;border-radius:50%;box-shadow:inset 0 0 0 1px #edf2f7}.donut-center{position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center;font-size:20px;font-weight:850;color:var(--navy)}.donut-center small{display:block;font-size:9px;color:var(--muted);font-weight:700;margin-top:-34px}
+  .legend{display:flex;flex-direction:column;gap:6px}.legend-item{display:grid;grid-template-columns:9px 1fr auto;gap:7px;align-items:center;font-size:10px}.swatch{width:8px;height:8px;border-radius:3px}.legend-item span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.legend-item strong{font-size:10px;color:var(--navy)}
+  .table-wrap{overflow:auto;max-height:460px}.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:10px}.data-table th{position:sticky;top:0;background:#f8fafc;color:#475569;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:9px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;z-index:2}.data-table td{padding:7px 8px;border-bottom:1px solid #edf2f7;vertical-align:top}.data-table tr:hover td{background:#f9fcff}.course-cell{min-width:210px;max-width:330px;font-weight:750;color:var(--navy)}.muted{color:var(--muted)}.nowrap{white-space:nowrap}.right{text-align:right!important}
+  .pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:800;background:var(--graySoft);color:#475569;white-space:nowrap}.pill.blue{background:var(--blueSoft);color:#075a9d}.pill.green{background:var(--greenSoft);color:#08744a}.pill.orange{background:var(--orangeSoft);color:#a85f05}.pill.red{background:var(--redSoft);color:#a9312c}
+  .price{font-weight:850;color:var(--navy)}.price-lines{font-size:9px;line-height:1.45;white-space:nowrap}.price-lines span{display:block;color:var(--muted)}
+  .priority-list{display:flex;flex-direction:column;gap:7px}.priority-item{border:1px solid var(--line);border-radius:10px;padding:9px 10px;display:grid;grid-template-columns:1fr auto;gap:8px;background:#fbfdff}.priority-item strong{font-size:10px;color:var(--navy)}.priority-item small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.priority-num{text-align:right;font-size:18px;font-weight:850;color:var(--orange)}
+  .empty{padding:20px;color:var(--muted);text-align:center;font-size:11px}
+  .section-note{font-size:9px;color:var(--muted);margin:5px 0 0}
+  .unit-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .unit-board{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 3px 13px rgba(18,48,79,.05);overflow:hidden}
+  .unit-board-head{display:flex;align-items:center;gap:10px;padding:10px 12px 8px;border-bottom:1px solid #edf2f7}
+  .unit-board-head h2{margin:0;font-size:13px;color:var(--navy)}
+  .unit-board-head span{margin-left:auto;font-size:9px;color:var(--muted);font-weight:700}
+  .unit-board-body{padding:10px 12px}
+  .unit-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+  .unit-metric{border:1px solid #e8eef5;background:#fbfdff;border-radius:10px;padding:8px 7px;min-height:67px}
+  .unit-metric .m-label{font-size:8px;line-height:1.2;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+  .unit-metric .m-value{font-size:22px;line-height:1;margin-top:7px;font-weight:850;color:var(--navy)}
+  .next30{margin-top:9px;border-top:1px solid #edf2f7;padding-top:9px}
+  .next30-title{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:10px;font-weight:850;color:var(--navy)}
+  .next30-title span{margin-left:auto;font-size:8px;color:var(--muted);font-weight:700}
+  .next30-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .next30-card{background:var(--blueSoft);border:1px solid #d8eaf8;border-radius:9px;padding:8px}
+  .next30-card .n-label{font-size:8px;color:#4f6f8d;font-weight:800;text-transform:uppercase}
+  .next30-card .n-value{font-size:20px;line-height:1;margin-top:6px;color:var(--blue);font-weight:850}
+  .combo-lines{line-height:1.4;white-space:nowrap}
+  .combo-lines strong{display:block;color:var(--navy)}
+  @media(max-width:1300px){.filters{grid-template-columns:1.5fr repeat(4,1fr) auto}.filters .hide-lg{display:none}.cards{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}.grid-3>.panel:last-child{grid-column:1/-1}}
+  @media(max-width:1100px){.unit-overview-grid{grid-template-columns:1fr}.unit-metrics{grid-template-columns:repeat(5,1fr)}}
+  @media(max-width:900px){.headline-right .update-text{display:none}.filters{grid-template-columns:1fr 1fr 1fr}.filter-actions{grid-column:3}.cards{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}.grid-3>.panel:last-child{grid-column:auto}.top-shell{position:relative}.tabs{overflow:auto}.filter-summary{display:none}.donut-wrap{grid-template-columns:115px 1fr}}
+  @media(max-width:560px){.top-inner,main{padding-left:8px;padding-right:8px}.brand small{display:none}.brand{min-width:0}.headline-right{font-size:9px}.filters{grid-template-columns:1fr 1fr}.filter-actions{grid-column:auto}.cards{grid-template-columns:1fr 1fr}.card .value{font-size:21px}.bar-row{grid-template-columns:90px 1fr 48px}.unit-metrics{grid-template-columns:repeat(2,1fr)}.unit-metric:last-child{grid-column:1/-1}.next30-grid{grid-template-columns:1fr 1fr 1fr}}
+</style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
-    <div class="max-w-[1600px] mx-auto space-y-6">
-        <!-- Header -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-senai-dark">Programação de Cursos</h1>
-                <p class="text-gray-500 mt-1">Acompanhamento de Turmas - Escola SENAI Itumbiara, UI Quirinópolis - DR-GO</p>
-            </div>
-            <div id="loading" class="px-4 py-2 bg-blue-50 text-senai font-semibold rounded-md animate-pulse">
-                Carregando dados e construindo painel...
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <div class="flex items-center gap-2 mb-4 border-b pb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-senai" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-                <h2 class="text-xl font-semibold text-senai-dark">Filtros de Análise</h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <div class="xl:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Curso</label>
-                    <input type="text" id="filter-nome" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border" placeholder="Digite para buscar...">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="filter-status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todos</option></select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unidade Operacional</label>
-                    <select id="filter-unidade" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Modalidade</label>
-                    <select id="filter-modalidade" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
-                    <select id="filter-area" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todas</option></select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Público / Empresa</label>
-                    <select id="filter-publico" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-senai focus:ring-senai sm:text-sm p-2 border"><option value="">Todos</option></select>
-                </div>
-                
-                <div class="xl:col-span-5 flex items-center mt-6">
-                    <div class="flex items-center bg-blue-50 px-4 py-2 rounded-md border border-blue-100">
-                        <input type="checkbox" id="filter-proximos" class="h-4 w-4 text-senai focus:ring-senai border-gray-300 rounded cursor-pointer">
-                        <label for="filter-proximos" class="ml-2 block text-sm text-senai-dark font-semibold cursor-pointer">
-                            Cursos de Início Próximo 
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Macro Cards -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <!-- Itumbiara -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-t-4 border-t-senai relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-5">
-                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
-                </div>
-                <h2 class="text-2xl font-bold text-senai-dark mb-5 flex items-center gap-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    Itumbiara
-                </h2>
-                
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ano Completo</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Previstas Ano</p><p class="text-xl font-bold text-gray-700" id="itu-previstas">-</p></div>
-                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Não Iniciados</p><p class="text-xl font-bold text-gray-700" id="itu-nao-iniciados">-</p></div>
-                    <div class="bg-blue-50 p-3 rounded-md text-center border border-blue-100"><p class="text-[10px] text-blue-600 font-semibold uppercase">Andamento</p><p class="text-xl font-bold text-blue-700" id="itu-andamento">-</p></div>
-                    <div class="bg-green-50 p-3 rounded-md text-center border border-green-100"><p class="text-[10px] text-green-600 font-semibold uppercase">Concluídos</p><p class="text-xl font-bold text-green-600" id="itu-concluidos">-</p></div>
-                    <div class="bg-red-50 p-3 rounded-md text-center border border-red-100"><p class="text-[10px] text-red-600 font-semibold uppercase">Cancelados</p><p class="text-xl font-bold text-red-500" id="itu-cancelados">-</p></div>
-                </div>
-
-                <h3 class="text-xs font-bold text-senai uppercase tracking-wider mb-2">Painel de Próximos 30 Dias</h3>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
-                        <p class="text-xs text-senai-dark font-semibold uppercase">Cursos</p>
-                        <p class="text-3xl font-black text-senai" id="itu-30d-cursos">-</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
-                        <p class="text-xs text-senai-dark font-semibold uppercase">Vagas Disp.</p>
-                        <p class="text-3xl font-black text-senai" id="itu-30d-vagas">-</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-senai-light to-white p-4 rounded-md text-center border border-senai-light shadow-sm">
-                        <p class="text-xs text-senai-dark font-semibold uppercase">Matrículas</p>
-                        <p class="text-3xl font-black text-senai" id="itu-30d-mat">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quirinópolis -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-t-4 border-t-sky-500 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-5">
-                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
-                </div>
-                <h2 class="text-2xl font-bold text-senai-dark mb-5 flex items-center gap-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    Quirinópolis
-                </h2>
-                
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ano Completo</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Previstas Ano</p><p class="text-xl font-bold text-gray-700" id="qui-previstas">-</p></div>
-                    <div class="bg-gray-50 p-3 rounded-md text-center border border-gray-100"><p class="text-[10px] text-gray-500 font-semibold uppercase">Não Iniciados</p><p class="text-xl font-bold text-gray-700" id="qui-nao-iniciados">-</p></div>
-                    <div class="bg-sky-50 p-3 rounded-md text-center border border-sky-100"><p class="text-[10px] text-sky-600 font-semibold uppercase">Andamento</p><p class="text-xl font-bold text-sky-700" id="qui-andamento">-</p></div>
-                    <div class="bg-green-50 p-3 rounded-md text-center border border-green-100"><p class="text-[10px] text-green-600 font-semibold uppercase">Concluídos</p><p class="text-xl font-bold text-green-600" id="qui-concluidos">-</p></div>
-                    <div class="bg-red-50 p-3 rounded-md text-center border border-red-100"><p class="text-[10px] text-red-600 font-semibold uppercase">Cancelados</p><p class="text-xl font-bold text-red-500" id="qui-cancelados">-</p></div>
-                </div>
-
-                <h3 class="text-xs font-bold text-sky-600 uppercase tracking-wider mb-2">Painel de Próximos 30 Dias</h3>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Cursos</p>
-                        <p class="text-3xl font-black text-slate-700" id="qui-30d-cursos">-</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Vagas Disp.</p>
-                        <p class="text-3xl font-black text-slate-700" id="qui-30d-vagas">-</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-slate-50 to-white p-4 rounded-md text-center border border-slate-200 shadow-sm">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Matrículas</p>
-                        <p class="text-3xl font-black text-slate-700" id="qui-30d-mat">-</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela de Dados -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-senai-dark">Detalhamento das Turmas</h2>
-                <span id="table-count" class="text-sm font-semibold bg-gray-100 text-gray-600 py-1 px-3 rounded-full">0 registros encontrados</span>
-            </div>
-            <div class="table-container rounded-md border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr id="table-head">
-                            <!-- Headers populated dynamically -->
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="bg-white divide-y divide-gray-100 whitespace-nowrap">
-                        <!-- Rows populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Gráficos -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Distribuição por Área</h3>
-                <div class="relative h-[300px]">
-                    <canvas id="chartArea"></canvas>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Status das Turmas</h3>
-                <div class="relative h-[300px]">
-                    <canvas id="chartStatus"></canvas>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
-                <h3 class="text-lg font-semibold text-senai-dark mb-6 text-center">Evolução de Início de Turmas</h3>
-                <div class="relative h-[300px]">
-                    <canvas id="chartTimeline"></canvas>
-                </div>
-            </div>
-        </div>
-
+<body>
+<div class="top-shell">
+  <div class="top-inner">
+    <div class="headline">
+      <div class="brand"><div class="brand-mark">P</div><div><h1>Programação de Cursos</h1><small>Gestão integrada • visão gerencial, secretaria e comercial</small></div></div>
+      <div class="headline-right"><span id="statusDot" class="status-dot"></span><span id="dataStatus">Carregando base...</span><span class="update-text" id="lastUpdate"></span><button id="reloadBtn" class="btn">Atualizar</button></div>
     </div>
+    <div class="filters">
+      <div class="field"><label>Busca</label><input id="searchFilter" class="control" type="search" placeholder="Curso, evento, empresa, responsável..." /></div>
+      <div class="field"><label>Status</label><select id="statusFilter" class="control"><option value="">Todos</option></select></div>
+      <div class="field"><label>Modalidade</label><select id="modalidadeFilter" class="control"><option value="">Todas</option></select></div>
+      <div class="field"><label>Cidade</label><select id="cidadeFilter" class="control"><option value="">Todas</option></select></div>
+      <div class="field"><label>Unidade</label><select id="unidadeFilter" class="control"><option value="">Todas</option></select></div>
+      <div class="field hide-lg"><label>Área</label><select id="areaFilter" class="control"><option value="">Todas</option></select></div>
+      <div class="field hide-lg"><label>Público</label><select id="publicoFilter" class="control"><option value="">Todos</option></select></div>
+      <div class="filter-actions"><button id="clearBtn" class="btn">Limpar</button></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="unidades">Resumo das UOs</button>
+      <button class="tab" data-tab="geral">Visão geral</button>
+      <button class="tab" data-tab="secretaria">Secretaria</button>
+      <button class="tab" data-tab="comercial">Comercial / B2C</button>
+      <div class="filter-summary" id="filterSummary"></div>
+    </div>
+  </div>
+</div>
+<main>
+  <div id="loading" class="loading">Carregando e processando a programação...</div>
+  <div id="error" class="error-box hidden"></div>
+  <section id="unidades" class="tab-page hidden"></section>
+  <section id="geral" class="tab-page hidden"></section>
+  <section id="secretaria" class="tab-page hidden"></section>
+  <section id="comercial" class="tab-page hidden"></section>
+</main>
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15HZoXgYNL7Dzqc3CDHE0YB9Gu883R2b-A5_S67M5AhyUoYiki6ZtHSNOvS0DoYqFvQVSHaZHp_x/pub?gid=1223706624&single=true&output=csv';
+const state = { rows: [], filtered: [], activeTab: 'unidades' };
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const norm = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const brInt = n => new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
+const br1 = n => new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n)||0);
+const brMoney = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(Number(n)||0);
+const pct = (a,b) => b > 0 ? (a/b)*100 : 0;
+const clamp = (n,min,max)=>Math.min(max,Math.max(min,n));
 
-    <script>
-        // App State
-        let rawData = [];
-        let filteredData = [];
-        let charts = {};
-        
-        // Colunas Exigidas da Tabela
-        const tableCols = [
-            'Status', 'Cursos', 'Evento', 'Modalidade', 'Público / Empresa', 'Unidade Operacional', 
-            'Cidade', 'Area', 'Pasta', 'CH', 'Início', 'Término', 'Posição até', 'Horário', 
-            'Valor Total', 'Valor Boleto', 'Valor Cartão', 'Vagas', 'Break-Even', 'Mat ativa', 
-            'Mat. Pré', 'Mat Tot', 'Concluintes', 'Desistentes', 'Evadido', 'Retido', 'TotalTurma'
-        ];
+function parseCSV(text){
+  const rows=[]; let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i], nx=text[i+1];
+    if(ch==='"'){
+      if(q && nx==='"'){cell+='"';i++;} else q=!q;
+    } else if(ch===',' && !q){row.push(cell);cell='';}
+    else if((ch==='\n' || ch==='\r') && !q){
+      if(ch==='\r' && nx==='\n') i++;
+      row.push(cell); cell='';
+      if(row.some(x=>String(x).trim()!=='')) rows.push(row);
+      row=[];
+    } else cell+=ch;
+  }
+  if(cell.length || row.length){row.push(cell); if(row.some(x=>String(x).trim()!=='')) rows.push(row);}
+  return rows;
+}
 
-        document.addEventListener("DOMContentLoaded", () => {
-            initTableHeaders();
-            loadCSV();
-            setupFilters();
-        });
+function toNumber(v){
+  if(v===null || v===undefined || v==='') return 0;
+  let s=String(v).trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/%/g,'');
+  if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(',')) s=s.replace(',','.');
+  const n=Number(s.replace(/[^0-9.-]/g,''));
+  return Number.isFinite(n)?n:0;
+}
+function parseDate(v){
+  const s=String(v??'').trim(); if(!s) return null;
+  let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){let y=+m[3]; if(y<100)y+=2000; const d=new Date(y,+m[2]-1,+m[1]); return isNaN(d)?null:d;}
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m){const d=new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d)?null:d;}
+  const d=new Date(s); return isNaN(d)?null:d;
+}
+function fmtDate(d){return d?new Intl.DateTimeFormat('pt-BR').format(d):'—';}
+function realization(r){
+  const a=fmtDate(r.inicio), b=fmtDate(r.termino);
+  if(a==='—'&&b==='—') return '—'; if(a===b) return a; return `${a}<br><span class="muted">até ${b}</span>`;
+}
+function headerAccessor(headers){
+  const map=new Map(headers.map((h,i)=>[norm(h),i]));
+  return (row, aliases) => {
+    for(const a of aliases){const idx=map.get(norm(a)); if(idx!==undefined) return String(row[idx]??'').trim();}
+    return '';
+  };
+}
+function mapData(matrix){
+  if(matrix.length<2) return [];
+  const headers=matrix[0], get=headerAccessor(headers);
+  return matrix.slice(1).map((row,index)=>{
+    const g = (...a)=>get(row,a);
+    const r={
+      _row:index+2, id:g('ID'), status:g('Status'), curso:g('Cursos','Curso'), evento:g('Evento'), modalidade:g('Modalidade'), publico:g('Público','Publico'),
+      unidade:g('Unidade Operacional','Unidade'), cidade:g('Cidade'), empresa:g('Empresa'), area:g('Area','Área'), pasta:g('Pasta'), ch:toNumber(g('CH')),
+      inicio:parseDate(g('Inicio','Início')), termino:parseDate(g('Prev. Termino','Prev. Término','Previsão Término')), reposicao:g('Reposição','Reposicao'),
+      horaInicio:g('Hora Início','Hora Inicio'), horaTermino:g('Hora Término','Hora Termino'), valor:toNumber(g('Valor Total do Curso')),
+      parcelasBoleto:toNumber(g('Número de Parcelas (Boleto)','Numero de Parcelas (Boleto)')), parcelasCartao:toNumber(g('Número de Parcelas (Cartão)','Numero de Parcelas (Cartao)')),
+      vagas:toNumber(g('Vagas')), breakEven:toNumber(g('Break-even (Equilíbrio)','Break-even (Equilibrio)','Break-even')),
+      matAtiva:toNumber(g('Mat ativa','Mat. ativa','Matrícula ativa')), matPre:toNumber(g('Mat. Pré','Mat Pré','Mat. Pre','Mat Pre')),
+      matDesist:toNumber(g('Mat Desist.','Mat. Desist.','Mat Desist','Mat. Desist')),
+      concluintes:toNumber(g('Concluíntes','Concluintes')), desistentes:toNumber(g('Desistentes')), evadidos:toNumber(g('Evadidos')), retidos:toNumber(g('Retidos')),
+      observacao:g('Observação','Observacao'), responsavel:g('Responsavel','Responsável'), contratos:g('Contratos Aprendizagem')
+    };
+    r.matriculaTotal=r.matPre+r.matDesist;
+    r.fechamento=r.desistentes+r.retidos+r.evadidos+r.concluintes;
+    r.vagasLivres=Math.max(0,r.vagas-r.matriculaTotal);
+    r.ocupacao=pct(r.matriculaTotal,r.vagas);
+    r.breakEvenGap=Math.max(0,r.breakEven-r.matriculaTotal);
+    r.search=norm([r.id,r.status,r.curso,r.evento,r.modalidade,r.publico,r.unidade,r.cidade,r.empresa,r.area,r.observacao,r.responsavel,r.contratos].join(' '));
+    return r;
+  }).filter(r=>r.curso||r.id||r.evento);
+}
+function uniqueValues(key){return [...new Set(state.rows.map(r=>r[key]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));}
+function fillSelect(id,key){const el=$(id), current=el.value; el.innerHTML='<option value="">Todos</option>'+uniqueValues(key).map(v=>`<option>${esc(v)}</option>`).join(''); if([...el.options].some(o=>o.value===current))el.value=current;}
+function populateFilters(){fillSelect('statusFilter','status');fillSelect('modalidadeFilter','modalidade');fillSelect('cidadeFilter','cidade');fillSelect('unidadeFilter','unidade');fillSelect('areaFilter','area');fillSelect('publicoFilter','publico');}
+function applyFilters(){
+  const q=norm($('searchFilter').value), f={status:$('statusFilter').value,modalidade:$('modalidadeFilter').value,cidade:$('cidadeFilter').value,unidade:$('unidadeFilter').value,area:$('areaFilter').value,publico:$('publicoFilter').value};
+  state.filtered=state.rows.filter(r=>(!q||r.search.includes(q)) && Object.entries(f).every(([k,v])=>!v||r[k]===v));
+  $('filterSummary').textContent=`${brInt(state.filtered.length)} de ${brInt(state.rows.length)} turmas`;
+  renderAll();
+}
+function sum(rows,key){return rows.reduce((a,r)=>a+(Number(r[key])||0),0)}
+function avg(rows,key){return rows.length?sum(rows,key)/rows.length:0}
+function groupCount(rows,key){const m={}; rows.forEach(r=>{const k=r[key]||'Não informado';m[k]=(m[k]||0)+1}); return m;}
+function groupSum(rows,key,valueKey){const m={};rows.forEach(r=>{const k=r[key]||'Não informado';m[k]=(m[k]||0)+(Number(r[valueKey])||0)});return m;}
+function topEntries(obj,n=8){return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n)}
+function statusClass(s){const n=norm(s);if(/conclu|finaliz|realiz/.test(n))return'green';if(/cancel|susp|evad/.test(n))return'red';if(/abert|matric|inscri|divulg|program/.test(n))return'blue';return'orange';}
+function isOpen(r){const n=norm(r.status);return !/(conclu|finaliz|cancel|encerr|suspens)/.test(n) && /(abert|matric|inscri|divulg|program|confirm|planej)/.test(n);}
+function isUpcoming(r){if(!r.inicio)return false; const today=new Date();today.setHours(0,0,0,0);return r.inicio>=today;}
+function card(label,value,sub='',cls=''){return `<div class="card ${cls}"><div class="label">${esc(label)}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`}
+function barChart(entries,formatter=brInt){
+  if(!entries.length)return'<div class="empty">Sem dados para o filtro atual.</div>';
+  const max=Math.max(...entries.map(x=>x[1]),1);
+  return `<div class="bars">${entries.map(([k,v])=>`<div class="bar-row"><div class="bar-label" title="${esc(k)}">${esc(k)}</div><div class="bar-track"><div class="bar-fill" style="width:${clamp(v/max*100,1,100)}%"></div></div><div class="bar-value">${formatter(v)}</div></div>`).join('')}</div>`;
+}
+const chartColors=['#0b67b2','#32a0d8','#138a5b','#f59e0b','#7c6ee6','#ef6a61','#6b8aa6','#22a7a7','#b06ab3','#8b5e3c'];
+function donutChart(entries){
+  if(!entries.length)return'<div class="empty">Sem dados.</div>';
+  const total=entries.reduce((a,x)=>a+x[1],0)||1; let start=0; const stops=[];
+  entries.forEach((e,i)=>{const end=start+(e[1]/total)*100;stops.push(`${chartColors[i%chartColors.length]} ${start}% ${end}%`);start=end});
+  return `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops.join(',')})"><div class="donut-center">${brInt(total)}<small>turmas</small></div></div><div class="legend">${entries.slice(0,8).map((e,i)=>`<div class="legend-item"><i class="swatch" style="background:${chartColors[i%chartColors.length]}"></i><span title="${esc(e[0])}">${esc(e[0])}</span><strong>${brInt(e[1])}</strong></div>`).join('')}</div></div>`;
+}
+function panel(title,body,note=''){return `<div class="panel"><div class="panel-head"><h2>${esc(title)}</h2>${note?`<p>${esc(note)}</p>`:''}</div><div class="panel-body">${body}</div></div>`}
+function priceHTML(r){const boleto=r.parcelasBoleto>0?`${brInt(r.parcelasBoleto)}x ${brMoney(r.valor/r.parcelasBoleto)}`:'—';const cartao=r.parcelasCartao>0?`${brInt(r.parcelasCartao)}x ${brMoney(r.valor/r.parcelasCartao)}`:'—';return `<div class="price-lines"><div class="price">${brMoney(r.valor)}</div><span>Boleto: ${boleto}</span><span>Cartão: ${cartao}</span></div>`;}
+function statusPill(s){return `<span class="pill ${statusClass(s)}">${esc(s||'Não informado')}</span>`}
+function table(headers,rowsHtml,maxHeight=460){return `<div class="table-wrap" style="max-height:${maxHeight}px"><table class="data-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml||`<tr><td colspan="${headers.length}" class="empty">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
 
-        function initTableHeaders() {
-            const tr = document.getElementById('table-head');
-            tableCols.forEach(col => {
-                const th = document.createElement('th');
-                th.className = 'px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider bg-gray-50';
-                th.textContent = col;
-                tr.appendChild(th);
-            });
-        }
+function isCancelled(r){return /cancel/.test(norm(r.status));}
+function isCompleted(r){return /conclu|finaliz|encerr/.test(norm(r.status));}
+function unitMatch(r,name){
+  const target=norm(name), u=norm(r.unidade), c=norm(r.cidade);
+  return u.includes(target) || (!u && c.includes(target)) || c===target;
+}
+function courseTime(r){
+  const a=String(r.horaInicio||'').trim(), b=String(r.horaTermino||'').trim();
+  if(!a&&!b)return '—';
+  if(a&&b)return `<div class="combo-lines"><strong>${esc(a)}</strong><span class="muted">até ${esc(b)}</span></div>`;
+  return esc(a||b);
+}
+function publicCompany(r){
+  const pub=r.publico||'', emp=r.empresa||'';
+  if(!pub&&!emp)return '—';
+  return `<div class="combo-lines">${pub?`<strong>${esc(pub)}</strong>`:''}${emp?`<span class="muted">${esc(emp)}</span>`:''}</div>`;
+}
+function unitStats(rows){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const year=now.getFullYear();
+  const annual=rows.filter(r=>r.inicio && r.inicio.getFullYear()===year);
+  const cancelled=annual.filter(isCancelled);
+  const completed=annual.filter(r=>!isCancelled(r) && (isCompleted(r) || (r.termino && r.termino<now)));
+  const notStarted=annual.filter(r=>!isCancelled(r) && !isCompleted(r) && r.inicio>now);
+  const inProgress=annual.filter(r=>{
+    if(isCancelled(r)||isCompleted(r))return false;
+    const byStatus=/andament|execu|realiz/.test(norm(r.status));
+    const byDate=r.inicio && r.inicio<=now && (!r.termino || r.termino>=now);
+    return byStatus||byDate;
+  });
+  const end30=new Date(now); end30.setDate(end30.getDate()+30); end30.setHours(23,59,59,999);
+  const next30=rows.filter(r=>!isCancelled(r) && !isCompleted(r) && r.inicio && r.inicio>=now && r.inicio<=end30);
+  return {
+    year,
+    annual:annual.length,
+    notStarted:notStarted.length,
+    inProgress:inProgress.length,
+    completed:completed.length,
+    cancelled:cancelled.length,
+    nextCount:next30.length,
+    nextVacancies:sum(next30,'vagasLivres'),
+    nextEnrollments:sum(next30,'matriculaTotal')
+  };
+}
+function unitBoard(name,rows){
+  const st=unitStats(rows);
+  const metric=(label,value)=>`<div class="unit-metric"><div class="m-label">${esc(label)}</div><div class="m-value">${brInt(value)}</div></div>`;
+  const next=(label,value)=>`<div class="next30-card"><div class="n-label">${esc(label)}</div><div class="n-value">${brInt(value)}</div></div>`;
+  return `<div class="unit-board"><div class="unit-board-head"><h2>${esc(name)}</h2><span>Indicadores de ${st.year}</span></div><div class="unit-board-body"><div class="unit-metrics">${metric('Turmas previstas no ano',st.annual)}${metric('Turmas não iniciadas',st.notStarted)}${metric('Turmas em andamento',st.inProgress)}${metric('Turmas concluídas',st.completed)}${metric('Turmas canceladas',st.cancelled)}</div><div class="next30"><div class="next30-title">Próximos 30 dias <span>Turmas com início no período</span></div><div class="next30-grid">${next('Turmas previstas',st.nextCount)}${next('Vagas disponíveis',st.nextVacancies)}${next('Matrículas realizadas',st.nextEnrollments)}</div></div></div></div>`;
+}
+function renderUnits(rows){
+  const quir=rows.filter(r=>unitMatch(r,'Quirinópolis'));
+  const itu=rows.filter(r=>unitMatch(r,'Itumbiara'));
+  const selected=[...quir,...itu];
+  const seen=new Set();
+  const scope=selected.filter(r=>{const key=r._row||r.id||r; if(seen.has(key))return false; seen.add(key); return true;});
+  const tableRows=[...(scope.length?scope:rows)].sort((a,b)=>(a.inicio?.getTime()??9e15)-(b.inicio?.getTime()??9e15));
+  const tr=tableRows.map(r=>`<tr><td>${statusPill(r.status)}</td><td class="course-cell">${esc(r.curso||'—')}</td><td>${esc(r.evento||'—')}</td><td>${esc(r.modalidade||'—')}</td><td>${publicCompany(r)}</td><td>${esc(r.unidade||'—')}</td><td>${esc(r.cidade||'—')}</td><td>${realization(r)}</td><td>${courseTime(r)}</td><td class="right"><strong>${brInt(r.matriculaTotal)}</strong></td><td>${priceHTML(r)}</td><td class="right">${brInt(r.vagas)}</td><td class="right">${r.breakEven?brInt(r.breakEven):'—'}</td></tr>`).join('');
+  $('unidades').innerHTML=`<div class="unit-overview-grid">${unitBoard('Quirinópolis',quir)}${unitBoard('Itumbiara',itu)}</div>${panel('Programação das unidades',table(['Status','Cursos','Evento','Modalidade','Público / Empresa','Unidade Operacional','Cidade','Início / Término','Horário','Total de matrículas','Valor do curso','Vagas','Break-even'],tr,590),'Quirinópolis e Itumbiara')}`;
+}
 
-        function loadCSV() {
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQW3rVnWsJZ4Q5uoYdZWCZZ_jlQkfAmmygI2qfQjzsJE77ntk4K2MaZvDFwpT3qGLVXJFgLQnbUiyLf/pub?output=csv';
-            Papa.parse(url, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    document.getElementById('loading').style.display = 'none';
-                    rawData = results.data;
-                    populateFilterOptions();
-                    applyFilters();
-                },
-                error: function(err) {
-                    document.getElementById('loading').className = "px-4 py-2 bg-red-50 text-red-600 font-semibold rounded-md";
-                    document.getElementById('loading').textContent = "Erro ao carregar dados da planilha.";
-                    console.error("Erro PapaParse:", err);
-                }
-            });
-        }
-
-        function getUniqueValues(key) {
-            const vals = new Set();
-            rawData.forEach(row => {
-                if(row[key]) vals.add(row[key].trim());
-            });
-            return Array.from(vals).sort();
-        }
-
-        function populateFilterOptions() {
-            const populate = (id, key) => {
-                const select = document.getElementById(id);
-                getUniqueValues(key).forEach(val => {
-                    const opt = document.createElement('option');
-                    opt.value = val;
-                    opt.textContent = val;
-                    select.appendChild(opt);
-                });
-            };
-            populate('filter-status', 'Status');
-            populate('filter-unidade', 'Unidade Operacional');
-            populate('filter-modalidade', 'Modalidade');
-            populate('filter-area', 'Area');
-            populate('filter-publico', 'Público / Empresa');
-        }
-
-        function setupFilters() {
-            const filterIds = ['filter-nome', 'filter-status', 'filter-unidade', 'filter-modalidade', 'filter-area', 'filter-publico', 'filter-proximos'];
-            filterIds.forEach(id => {
-                document.getElementById(id).addEventListener('input', applyFilters);
-            });
-        }
-
-        function parseDate(dateStr) {
-            if(!dateStr) return null;
-            const parts = dateStr.split('/');
-            if(parts.length === 3) {
-                let year = parseInt(parts[2]);
-                if(year < 100) year += 2000;
-                return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
-            }
-            return null;
-        }
-
-        function applyFilters() {
-            const fNome = document.getElementById('filter-nome').value.toLowerCase();
-            const fStatus = document.getElementById('filter-status').value;
-            const fUnidade = document.getElementById('filter-unidade').value;
-            const fModalidade = document.getElementById('filter-modalidade').value;
-            const fArea = document.getElementById('filter-area').value;
-            const fPublico = document.getElementById('filter-publico').value;
-            const fProximos = document.getElementById('filter-proximos').checked;
-
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const limitPast = new Date(today); limitPast.setDate(today.getDate() - 10);
-            const limitFuture = new Date(today); limitFuture.setDate(today.getDate() + 30);
-
-            filteredData = rawData.filter(row => {
-                if(fNome && (!row['Cursos'] || !row['Cursos'].toLowerCase().includes(fNome))) return false;
-                if(fStatus && row['Status'] !== fStatus) return false;
-                if(fUnidade && row['Unidade Operacional'] !== fUnidade) return false;
-                if(fModalidade && row['Modalidade'] !== fModalidade) return false;
-                if(fArea && row['Area'] !== fArea) return false;
-                if(fPublico && row['Público / Empresa'] !== fPublico) return false;
-
-                const dInicio = parseDate(row['Início']);
-                if(fProximos) {
-                    if(!dInicio) return false;
-                    if(dInicio < limitPast || dInicio > limitFuture) return false;
-                }
-
-                return true;
-            });
-
-            updateDashboard();
-        }
-
-        function isNext30Days(dInicio) {
-            if(!dInicio) return false;
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const future = new Date(today); future.setDate(today.getDate() + 30);
-            return dInicio >= today && dInicio <= future;
-        }
-
-        function updateDashboard() {
-            updateMacroCards();
-            renderTable();
-            renderCharts();
-        }
-
-        function updateMacroCards() {
-            const calcMacros = (cityKeywords) => {
-                const cityData = filteredData.filter(r => {
-                    const cid = (r['Cidade'] || '').toLowerCase();
-                    const uni = (r['Unidade Operacional'] || '').toLowerCase();
-                    return cityKeywords.some(kw => cid.includes(kw) || uni.includes(kw));
-                });
-
-                let naoIniciados = 0, andamento = 0, concluidos = 0, cancelados = 0;
-                let p30Cursos = 0, p30Vagas = 0, p30Mat = 0;
-
-                cityData.forEach(r => {
-                    const status = (r['Status'] || '').toLowerCase();
-                    if(status.includes('iniciar') || status.includes('previst')) naoIniciados++;
-                    else if(status.includes('andamento') || status.includes('execu')) andamento++;
-                    else if(status.includes('concluíd') || status.includes('realizad') || status.includes('encerrad')) concluidos++;
-                    else if(status.includes('cancelad')) cancelados++;
-
-                    const dInicio = parseDate(r['Início']);
-                    if(isNext30Days(dInicio)) {
-                        p30Cursos++;
-                        p30Vagas += parseInt(r['Vagas'] || 0) || 0;
-                        p30Mat += parseInt(r['Mat Tot'] || r['Mat ativa'] || 0) || 0;
-                    }
-                });
-
-                return {
-                    previstas: cityData.length,
-                    naoIniciados, andamento, concluidos, cancelados,
-                    p30Cursos, p30Vagas, p30Mat
-                };
-            };
-
-            const itumbiara = calcMacros(['itumbiara']);
-            const quirinopolis = calcMacros(['quirinópolis', 'quirinopolis']);
-
-            // Atualiza DOM - Itumbiara
-            document.getElementById('itu-previstas').textContent = itumbiara.previstas;
-            document.getElementById('itu-nao-iniciados').textContent = itumbiara.naoIniciados;
-            document.getElementById('itu-andamento').textContent = itumbiara.andamento;
-            document.getElementById('itu-concluidos').textContent = itumbiara.concluidos;
-            document.getElementById('itu-cancelados').textContent = itumbiara.cancelados;
-            document.getElementById('itu-30d-cursos').textContent = itumbiara.p30Cursos;
-            document.getElementById('itu-30d-vagas').textContent = itumbiara.p30Vagas;
-            document.getElementById('itu-30d-mat').textContent = itumbiara.p30Mat;
-
-            // Atualiza DOM - Quirinópolis
-            document.getElementById('qui-previstas').textContent = quirinopolis.previstas;
-            document.getElementById('qui-nao-iniciados').textContent = quirinopolis.naoIniciados;
-            document.getElementById('qui-andamento').textContent = quirinopolis.andamento;
-            document.getElementById('qui-concluidos').textContent = quirinopolis.concluidos;
-            document.getElementById('qui-cancelados').textContent = quirinopolis.cancelados;
-            document.getElementById('qui-30d-cursos').textContent = quirinopolis.p30Cursos;
-            document.getElementById('qui-30d-vagas').textContent = quirinopolis.p30Vagas;
-            document.getElementById('qui-30d-mat').textContent = quirinopolis.p30Mat;
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            document.getElementById('table-count').textContent = `${filteredData.length} registros encontrados`;
-
-            const displayData = filteredData.slice(0, 500); 
-
-            displayData.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-blue-50 transition-colors";
-                
-                tableCols.forEach(col => {
-                    const td = document.createElement('td');
-                    td.className = 'px-4 py-3 text-sm text-gray-700 max-w-[200px] truncate';
-                    td.title = row[col] || '';
-                    
-                    if(col === 'Status') {
-                        const st = (row[col] || '').toLowerCase();
-                        let color = 'bg-gray-100 text-gray-700 border-gray-200';
-                        if(st.includes('andamento') || st.includes('execuç')) color = 'bg-blue-50 text-blue-700 border-blue-200';
-                        else if(st.includes('iniciar') || st.includes('previst')) color = 'bg-yellow-50 text-yellow-700 border-yellow-200';
-                        else if(st.includes('conclu') || st.includes('realizad')) color = 'bg-green-50 text-green-700 border-green-200';
-                        else if(st.includes('cancel')) color = 'bg-red-50 text-red-700 border-red-200';
-                        
-                        td.innerHTML = `<span class="px-2 py-1 rounded-md text-xs font-semibold border ${color}">${row[col] || '-'}</span>`;
-                    } else {
-                        td.textContent = row[col] || '-';
-                    }
-                    
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderCharts() {
-            const areaCount = {};
-            filteredData.forEach(r => {
-                const a = r['Area'] || 'Não definida';
-                areaCount[a] = (areaCount[a] || 0) + 1;
-            });
-            const areaSorted = Object.entries(areaCount).sort((a,b) => b[1] - a[1]).slice(0, 10);
-
-            updateChart('chartArea', 'bar', {
-                labels: areaSorted.map(i => i[0]),
-                datasets: [{
-                    label: 'Quantidade de Cursos',
-                    data: areaSorted.map(i => i[1]),
-                    backgroundColor: '#0284c7',
-                    borderRadius: 4
-                }]
-            });
-
-            const statusCount = {};
-            filteredData.forEach(r => {
-                const s = r['Status'] || 'Sem Status';
-                statusCount[s] = (statusCount[s] || 0) + 1;
-            });
-            
-            updateChart('chartStatus', 'doughnut', {
-                labels: Object.keys(statusCount),
-                datasets: [{
-                    data: Object.values(statusCount),
-                    backgroundColor: ['#eab308', '#3b82f6', '#22c55e', '#ef4444', '#94a3b8'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            });
-
-            const monthCount = {};
-            filteredData.forEach(r => {
-                const d = parseDate(r['Início']);
-                if(d) {
-                    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
-                    monthCount[key] = (monthCount[key] || 0) + 1;
-                }
-            });
-            const sortedMonths = Object.keys(monthCount).sort();
-            
-            updateChart('chartTimeline', 'bar', {
-                labels: sortedMonths,
-                datasets: [{
-                    label: 'Início de Turmas',
-                    data: sortedMonths.map(m => monthCount[m]),
-                    backgroundColor: '#0ea5e9',
-                    borderRadius: 4
-                }]
-            });
-        }
-
-        function updateChart(canvasId, type, data) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            if(charts[canvasId]) {
-                charts[canvasId].destroy();
-            }
-            charts[canvasId] = new Chart(ctx, {
-                type: type,
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: type === 'doughnut' ? 'right' : 'top'
-                        }
-                    },
-                    scales: type !== 'doughnut' ? {
-                        y: { beginAtZero: true }
-                    } : {}
-                }
-            });
-        }
-    </script>
+function renderGeneral(rows){
+  const turmas=rows.length, vagas=sum(rows,'vagas'), mat=sum(rows,'matriculaTotal'), livres=Math.max(0,vagas-mat), fechamento=sum(rows,'fechamento'), abertas=rows.filter(isOpen).length;
+  const cards=`<div class="cards">${card('Turmas',brInt(turmas),'Registros na seleção')}${card('Turmas abertas',brInt(abertas),'Status aberto / matrícula / divulgação','green')}${card('Vagas totais',brInt(vagas),'Capacidade informada')}${card('Matrículas total',brInt(mat),'Mat. Pré + Mat Desist.','green')}${card('Ocupação',`${br1(pct(mat,vagas))}%`,`${brInt(Math.max(0,livres))} vagas livres`,'orange')}${card('Fechamento',brInt(fechamento),'Concluintes + desistentes + evadidos + retidos')}</div>`;
+  const status=topEntries(groupCount(rows,'status'),9), modalidades=topEntries(groupCount(rows,'modalidade'),8), areas=topEntries(groupCount(rows,'area'),10), cidades=topEntries(groupCount(rows,'cidade'),10);
+  const upcoming=[...rows].filter(isUpcoming).sort((a,b)=>a.inicio-b.inicio).slice(0,12);
+  const tr=upcoming.map(r=>`<tr><td class="course-cell">${esc(r.curso||r.evento||'—')}</td><td>${realization(r)}</td><td>${esc(r.cidade||'—')}</td><td>${statusPill(r.status)}</td><td class="right">${brInt(r.vagas)}</td><td class="right">${brInt(r.matriculaTotal)}</td><td class="right">${brInt(r.vagasLivres)}</td></tr>`).join('');
+  $('geral').innerHTML=cards+`<div class="grid-3">${panel('Distribuição por status',donutChart(status),'Quantidade de turmas')}${panel('Modalidades',barChart(modalidades),'Turmas')}${panel('Áreas tecnológicas',barChart(areas),'Top 10')}</div><div class="grid-2">${panel('Cidades com maior programação',barChart(cidades),'Quantidade de turmas')}${panel('Próximas realizações',table(['Curso','Realização','Cidade','Status','Vagas','Matrículas','Livres'],tr,300),'A partir de hoje')}</div>`;
+}
+function renderSecretary(rows){
+  const vagas=sum(rows,'vagas'), mat=sum(rows,'matriculaTotal'), ativa=sum(rows,'matAtiva'), pre=sum(rows,'matPre'), desistMat=sum(rows,'matDesist'), fechamento=sum(rows,'fechamento');
+  const cards=`<div class="cards">${card('Turmas',brInt(rows.length),'Na seleção atual')}${card('Matrículas total',brInt(mat),'Mat. Pré + Mat Desist.','green')}${card('Matrículas ativas',brInt(ativa),'Campo Mat ativa')}${card('Pré-matrículas',brInt(pre),'Campo Mat. Pré','orange')}${card('Mat. desistidas',brInt(desistMat),'Campo Mat Desist.','red')}${card('Fechamento',brInt(fechamento),'Resultado consolidado')}</div>`;
+  const byCity=topEntries(groupSum(rows,'cidade','matriculaTotal'),10), byArea=topEntries(groupSum(rows,'area','matriculaTotal'),10);
+  const sorted=[...rows].sort((a,b)=>(a.inicio?.getTime()??9e15)-(b.inicio?.getTime()??9e15));
+  const tr=sorted.map(r=>`<tr><td class="course-cell">${esc(r.curso||'—')}<div class="muted">${esc(r.evento||'')}</div></td><td>${statusPill(r.status)}</td><td>${realization(r)}</td><td>${esc(r.cidade||'—')}</td><td class="right">${brInt(r.vagas)}</td><td class="right"><strong>${brInt(r.matriculaTotal)}</strong></td><td class="right">${brInt(r.matAtiva)}</td><td class="right">${brInt(r.matPre)}</td><td class="right">${brInt(r.matDesist)}</td><td class="right">${brInt(r.fechamento)}</td><td>${esc(r.responsavel||'—')}</td></tr>`).join('');
+  $('secretaria').innerHTML=cards+`<div class="grid-2">${panel('Matrículas por cidade',barChart(byCity),'Mat. Pré + Mat Desist.')}${panel('Matrículas por área',barChart(byArea),'Top 10 áreas')}</div>${panel('Painel operacional das turmas',table(['Curso / Evento','Status','Realização','Cidade','Vagas','Matrícula total','Mat. ativa','Mat. Pré','Mat. desist.','Fechamento','Responsável'],tr,560),'Dados detalhados para secretaria')}`;
+}
+function renderCommercial(rows){
+  const open=rows.filter(isOpen), scope=open.length?open:rows;
+  const vagas=sum(scope,'vagas'), mat=sum(scope,'matriculaTotal'), livres=Math.max(0,vagas-mat), valorAvg=avg(scope.filter(r=>r.valor>0),'valor');
+  const below=scope.filter(r=>r.breakEven>0 && r.matriculaTotal<r.breakEven), upcoming=scope.filter(isUpcoming);
+  const cards=`<div class="cards">${card('Turmas em comercialização',brInt(open.length),open.length?'Status comercial aberto':'Nenhuma detectada pelo status','green')}${card('Vagas livres',brInt(livres),'Capacidade ainda disponível','orange')}${card('Vagas totais',brInt(vagas),'Nas turmas abertas')}${card('Matrículas total',brInt(mat),'Mat. Pré + Mat Desist.','green')}${card('Valor médio',brMoney(valorAvg),'Valor total do curso')}${card('Abaixo do break-even',brInt(below.length),'Turmas com gap para equilíbrio','red')}</div>`;
+  const byArea=topEntries(groupSum(scope,'area','vagasLivres'),10), byCity=topEntries(groupSum(scope,'cidade','vagasLivres'),10);
+  const campaign=[...upcoming].filter(r=>r.vagasLivres>0).sort((a,b)=>(b.vagasLivres-a.vagasLivres)||((a.inicio?.getTime()??9e15)-(b.inicio?.getTime()??9e15))).slice(0,8);
+  const priority=campaign.length?`<div class="priority-list">${campaign.map(r=>`<div class="priority-item"><div><strong>${esc(r.curso||r.evento||'Curso')}</strong><small>${esc(r.cidade||'Cidade não informada')} • ${r.inicio?fmtDate(r.inicio):'Data não informada'} • ${esc(r.modalidade||'Modalidade não informada')}</small></div><div class="priority-num">${brInt(r.vagasLivres)}<small>vagas</small></div></div>`).join('')}</div>`:'<div class="empty">Nenhuma prioridade automática encontrada.</div>';
+  const sorted=[...scope].sort((a,b)=>(b.vagasLivres-a.vagasLivres)||((a.inicio?.getTime()??9e15)-(b.inicio?.getTime()??9e15)));
+  const tr=sorted.map(r=>`<tr><td class="course-cell">${esc(r.curso||'—')}<div class="muted">${esc(r.evento||'')}</div></td><td>${statusPill(r.status)}</td><td>${realization(r)}</td><td>${esc(r.cidade||'—')}<div class="muted">${esc(r.unidade||'')}</div></td><td>${esc(r.area||'—')}</td><td class="right">${brInt(r.vagas)}</td><td class="right">${brInt(r.matriculaTotal)}</td><td class="right"><strong>${brInt(r.vagasLivres)}</strong></td><td class="right">${r.breakEven?brInt(r.breakEven):'—'}</td><td>${priceHTML(r)}</td><td>${esc(r.responsavel||'—')}</td></tr>`).join('');
+  const note=open.length?'Tabela prioriza turmas identificadas como abertas/com matrícula/divulgação':'Não foram detectados status tipicamente comerciais; exibindo todas as turmas';
+  $('comercial').innerHTML=cards+`<div class="grid-3">${panel('Vagas livres por área',barChart(byArea),'Potencial de campanha')}${panel('Vagas livres por cidade',barChart(byCity),'Potencial local')}${panel('Prioridades de campanha',priority,'Maiores vagas + próximas datas')}</div>${panel('Consulta comercial da programação',table(['Curso / Evento','Status','Realização','Cidade / Unidade','Área','Vagas','Matrículas','Livres','Break-even','Investimento','Responsável'],tr,560),note)}<p class="section-note">Critério automático: “turmas em comercialização” considera status que contenham termos como aberto, matrícula, inscrição, divulgação, programado, confirmado ou planejamento, excluindo concluído, cancelado, encerrado e suspenso.</p>`;
+}
+function renderAll(){renderUnits(state.filtered);renderGeneral(state.filtered);renderSecretary(state.filtered);renderCommercial(state.filtered);showTab(state.activeTab);}
+function showTab(id){state.activeTab=id;document.querySelectorAll('.tab-page').forEach(e=>e.classList.toggle('hidden',e.id!==id));document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));}
+async function loadData(){
+  $('loading').classList.remove('hidden');$('error').classList.add('hidden');$('statusDot').className='status-dot';$('dataStatus').textContent='Carregando base...';
+  try{
+    const res=await fetch(CSV_URL+(CSV_URL.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const text=await res.text(); const matrix=parseCSV(text); state.rows=mapData(matrix);
+    if(!state.rows.length)throw new Error('A base foi carregada, mas não foram encontradas linhas válidas.');
+    populateFilters(); state.filtered=[...state.rows];
+    $('loading').classList.add('hidden');$('statusDot').className='status-dot ok';$('dataStatus').textContent=`${brInt(state.rows.length)} turmas carregadas`;$('lastUpdate').textContent='• atualizado '+new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date());
+    applyFilters();
+  }catch(err){
+    $('loading').classList.add('hidden');$('statusDot').className='status-dot err';$('dataStatus').textContent='Falha ao carregar';
+    $('error').innerHTML=`<strong>Não foi possível carregar a base CSV.</strong><br><br>Verifique se a planilha continua publicada na Web e se o navegador permite acesso ao endereço CSV.<br><span class="muted">Detalhe técnico: ${esc(err.message)}</span>`;$('error').classList.remove('hidden');
+  }
+}
+['searchFilter','statusFilter','modalidadeFilter','cidadeFilter','unidadeFilter','areaFilter','publicoFilter'].forEach(id=>$(id).addEventListener(id==='searchFilter'?'input':'change',applyFilters));
+$('clearBtn').addEventListener('click',()=>{['searchFilter','statusFilter','modalidadeFilter','cidadeFilter','unidadeFilter','areaFilter','publicoFilter'].forEach(id=>$(id).value='');applyFilters();});
+$('reloadBtn').addEventListener('click',loadData);document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+loadData();
+</script>
 </body>
 </html>
