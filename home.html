@@ -263,7 +263,7 @@
             <div class="category-content">
                                 <a href="#" class="menu-link" onclick="abrirLink('gestao_cronogramas.html')">Cronogramas</a>
                                 <a href="#" class="menu-link" onclick="abrirLink('gestao_regencia_docentes.html')">Regência</a>
-
+<a href="#" class="menu-link" onclick="pedirCodigo()">Gerenciar Agendamento de Laboratório</a>
                 <br>
 
 
@@ -313,7 +313,38 @@
         </div>
     </main>
 </div>
+<script>
+function pedirCodigo() {
+    // Abre a janela pedindo a senha
+    let senha = prompt("Acesso restrito, digite o código de acesso:");
 
+    // Se o usuário clicar em "Cancelar", a variável será null e encerramos a função
+    if (senha === null) {
+        return; 
+    }
+
+    // Verifica a senha digitada e direciona para a página correspondentee
+    if (senha === "1234") {
+        // Link para a senha 1
+        abrirLink('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=JP-jmEgkf0mvLRvoz58MaOQH8vjE4itIo29oAe8yOR9UM0JKVFpFMDZXVTdHODg2UTVJSTAxMzlTSy4u');
+        
+    } else if (senha === "5678") {
+        // Link página de gestão dos laboratórios
+        abrirLink('https://script.google.com/macros/s/AKfycbxhKThnbX9yszcZNVsrp5h67Yo7wO93dfquiGEZB8UAZsTUKPGucEJrqRCxe94wYLeC/exec');
+        
+    } else if (senha === "admin") {
+        // Link para a senha 3 (substitua pela sua URL)
+        abrirLink('https://www.paginadoadmin.com.br');
+        
+    } else {
+        // Mensagem de erro caso digite uma senha que não existe
+        alert("Código incorreto ou inválido!");
+    }
+}
+
+</script>
+
+    
 <script>
     function toggleMenu(button) {
         const allHeaders = document.querySelectorAll('.category-header');
