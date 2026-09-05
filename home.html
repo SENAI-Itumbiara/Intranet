@@ -158,7 +158,7 @@
             <div class="category-content">
                 
                 <a href="#" class="menu-link" onclick="abrirLink('programacao_senai.html')">Programação de cursos</a>
-              
+              <a href="#" class="menu-link" onclick="pedirCodigo()">Editar Prog. Cursos</a>
                 <!-- <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiNTUyNTg0YmUtNDM3YS00MzFkLWE5MDctNzNiMDI5ZDg4MDRhIiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Programação de Salas</a> -->
                 <!-- <a href="#" class="menu-link" onclick="abrirLink('educacao/lab_solic.html')">Reserva de Laboratório</a> -->
                  <br>
@@ -247,6 +247,8 @@
                 
                 <a href="#" class="menu-link" onclick="abrirLink('gestao_salas_escola.html')">Programação de Salas</a>
                 <a href="#" class="menu-link" onclick="abrirLink('laboratorio.html')">Reserva de Laboratório</a>
+                <br>
+                <a href="#" class="menu-link" onclick="pedirCodigo()">Gerenciar Agendamento de Laboratório</a>
 
 
                 <br>
@@ -263,7 +265,8 @@
             <div class="category-content">
                                 <a href="#" class="menu-link" onclick="abrirLink('gestao_cronogramas.html')">Cronogramas</a>
                                 <a href="#" class="menu-link" onclick="abrirLink('gestao_regencia_docentes.html')">Regência</a>
-<a href="#" class="menu-link" onclick="pedirCodigo()">Gerenciar Agendamento de Laboratório</a>
+            
+            <a href="#" class="menu-link" onclick="pedirCodigo()">Gestão de contratos</a>   
                 <br>
 
 
@@ -273,6 +276,10 @@
         <div class="menu-category">
             <button class="category-header" onclick="toggleMenu(this)">Processos Administrativos</button>
             <div class="category-content">
+
+                <a href="#" class="menu-link" onclick="pedirCodigo()">Gerenciar agendamento de veículos</a>
+                  <a href="#" class="menu-link" onclick="abrirLink('https://script.google.com/macros/s/AKfycbxt9kIrQdzTINmk9IRERk9U8N-7pkJlbyW2E5lRoQdh8ERY7QCMjARZpOgfc23vavMbLg/exec')">Solicitar diária e Veículo</a>
+                <br>
                 <a href="#" class="menu-link" onclick="abrirLink('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=JP-jmEgkf0mvLRvoz58MaOQH8vjE4itIo29oAe8yOR9UOE5PWFIzNFNQSVdXS0c5QzQ1OUFXRkhQSi4u')">Frota (Solicitação)</a>
                  <a href="#" class="menu-link" onclick="abrirLink('https://app.powerbi.com/view?r=eyJrIjoiYWRkZTcwZjQtZDFhNi00ZDRiLTljMjgtMzU0YmUyNjNkZGE0IiwidCI6Ijk4YTNmZjI0LTI0NDgtNDk3Zi1hZjJkLTFiZThjZjlmMGM2OCJ9')">Acomp. Solic. Veículos</a>
                 <br>
@@ -324,17 +331,23 @@ function pedirCodigo() {
     }
 
     // Verifica a senha digitada e direciona para a página correspondentee
-    if (senha === "1234") {
-        // Link para a senha 1
-        abrirLink('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=JP-jmEgkf0mvLRvoz58MaOQH8vjE4itIo29oAe8yOR9UM0JKVFpFMDZXVTdHODg2UTVJSTAxMzlTSy4u');
+    if (senha === "prog") {
+        // Link para a senha editar programação de cursos
+        abrirLink('https://script.google.com/macros/s/AKfycbw0AVqoWbg-0k7m-u4KgNMM9vwJezZDA6vnaKjAEny9Po0rw9itJZlbDmI7Wn409vSx/exec');
         
-    } else if (senha === "5678") {
+    } else if (senha === "lab") {
         // Link página de gestão dos laboratórios
         abrirLink('https://script.google.com/macros/s/AKfycbxhKThnbX9yszcZNVsrp5h67Yo7wO93dfquiGEZB8UAZsTUKPGucEJrqRCxe94wYLeC/exec');
         
-    } else if (senha === "admin") {
-        // Link para a senha 3 (substitua pela sua URL)
-        abrirLink('https://www.paginadoadmin.com.br');
+    } else if (senha === "frota") {
+        // Link para a Gerenciar agendamento de frota
+        abrirLink('https://script.google.com/macros/s/AKfycbyzygfSKqjMiZqE6WWRyzbggY5TVFNjm1PB_lMKQMRWX7YswhhEtidydQCuiU2CfkDcdw/exec');
+    } else if (senha === "contrato1") {
+        // Link para a senha gestão de contratos coordenação
+        abrirLink('https://script.google.com/macros/s/AKfycbwgqs_PoeffKmduwvMzmQxjeQs7QzZut0TXjMjyuaA1rdYJT_-tZSUbvGsXNaMH-_uu/exec');
+    } else if (senha === "contrato2") {
+        // Link para a senha 3 gestão de contratos RH
+        abrirLink('https://script.google.com/macros/s/AKfycbxVkNFyxtV0QeeR7pm3jhJ5Cfu8kcieb1IFNHPBy9RedeHgndY3RK-b3Nb1Gm7iBNLkdQ/exec');
         
     } else {
         // Mensagem de erro caso digite uma senha que não existe
