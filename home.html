@@ -333,24 +333,24 @@ function pedirCodigo() {
     // Verifica a senha digitada e direciona para a página correspondentee
     if (senha === "prog") {
         // Link para a senha editar programação de cursos
-        abrirLink('https://script.google.com/macros/s/AKfycbw0AVqoWbg-0k7m-u4KgNMM9vwJezZDA6vnaKjAEny9Po0rw9itJZlbDmI7Wn409vSx/exec');
+        abrirLink2('https://script.google.com/macros/s/AKfycbw0AVqoWbg-0k7m-u4KgNMM9vwJezZDA6vnaKjAEny9Po0rw9itJZlbDmI7Wn409vSx/exec');
         
     } else if (senha === "lab") {
         // Link página de gestão dos laboratórios
-        abrirLink('https://script.google.com/macros/s/AKfycbxhKThnbX9yszcZNVsrp5h67Yo7wO93dfquiGEZB8UAZsTUKPGucEJrqRCxe94wYLeC/exec');
+        abrirLink2('https://script.google.com/macros/s/AKfycbxhKThnbX9yszcZNVsrp5h67Yo7wO93dfquiGEZB8UAZsTUKPGucEJrqRCxe94wYLeC/exec');
         
 
     } else if (senha === "contrato1") {
         // Link para a senha gestão de contratos coordenação
-        abrirLink('https://script.google.com/macros/s/AKfycbwgqs_PoeffKmduwvMzmQxjeQs7QzZut0TXjMjyuaA1rdYJT_-tZSUbvGsXNaMH-_uu/exec');
+        abrirLink2('https://script.google.com/macros/s/AKfycbwgqs_PoeffKmduwvMzmQxjeQs7QzZut0TXjMjyuaA1rdYJT_-tZSUbvGsXNaMH-_uu/exec');
         
     } else if (senha === "contrato2") {
         // Link para a senha 3 gestão de contratos RH
-        abrirLink('https://script.google.com/macros/s/AKfycbxVkNFyxtV0QeeR7pm3jhJ5Cfu8kcieb1IFNHPBy9RedeHgndY3RK-b3Nb1Gm7iBNLkdQ/exec');
+        abrirLink2('https://script.google.com/macros/s/AKfycbxVkNFyxtV0QeeR7pm3jhJ5Cfu8kcieb1IFNHPBy9RedeHgndY3RK-b3Nb1Gm7iBNLkdQ/exec');
 
     } else if (senha === "frot") {
         // Link para a senha 3 gestão de contratos RH
-        abrirLink('https://script.google.com/macros/s/AKfycbyzygfSKqjMiZqE6WWRyzbggY5TVFNjm1PB_lMKQMRWX7YswhhEtidydQCuiU2CfkDcdw/exec');
+        abrirLink2('https://script.google.com/macros/s/AKfycbyzygfSKqjMiZqE6WWRyzbggY5TVFNjm1PB_lMKQMRWX7YswhhEtidydQCuiU2CfkDcdw/exec');
 
         
     } else {
@@ -389,6 +389,10 @@ function pedirCodigo() {
             document.getElementById('frame-conteudo').src = url;
         }
     }
+
+function abrirLink2(url) {
+    window.open(url, '_blank');
+}
 
     /* 🔥 COLOQUE ISSO AQUI */
     function toggleSidebar() {
