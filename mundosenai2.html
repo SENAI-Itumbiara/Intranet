@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#061b32">
+  <title>Mundo SENAI Experience - Tela Interativa</title>
+  <style>
+    :root { color-scheme: dark; font-family: Arial, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #061b32; }
+    #stage { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; background: #061b32; }
+    #stage:fullscreen { width: 100%; height: 100%; }
+    #stage:-webkit-full-screen { width: 100%; height: 100%; }
+    #app { display: block; width: 100%; height: 100%; border: 0; background: #061b32; }
+    #launch { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(ellipse at 85% 0%,#17567b 0%,transparent 55%),#061b32; }
+    #launch.hidden { display: none; }
+    .card { width: min(630px,100%); text-align: center; padding: clamp(24px,5vw,52px); background: #0e3555; border: 1px solid #376585; border-radius: 24px; color: #fff; }
+    .brand { font-weight: 900; letter-spacing: .12em; color: #ffae42; font-size: 15px; }
+    h1 { font-size: clamp(27px,4.3vw,48px); margin: 18px 0; line-height: 1.1; }
+    p { font-size: 17px; color: #cce1ef; line-height: 1.55; }
+    button { font: inherit; cursor: pointer; touch-action: manipulation; }
+    .primary { display: block; width: 100%; min-height: 74px; padding: 20px; margin-top: 27px; border: 0; border-radius: 16px; background: #ffaf38; color: #10283d; font-size: clamp(18px,2.4vw,24px); font-weight: 900; }
+    .secondary { margin-top: 15px; min-height: 48px; padding: 12px 18px; border: 1px solid #7ea6c0; border-radius: 12px; color: #e9f6ff; background: transparent; }
+    #message { min-height: 24px; font-size: 14px; color: #ffe1a9; }
+    #again { position: absolute; bottom: 12px; right: 12px; z-index: 4; min-height: 48px; padding: 9px 15px; border: 1px solid #70b5dc; border-radius: 12px; color: #fff; background: #103c62; box-shadow: 0 4px 18px #0007; font-size: 14px; font-weight: 700; }
+    #again.hidden { display: none; }
+    @media(max-width: 600px) { .card { padding: 23px; } p { font-size: 15px; } }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <iframe id="app"
+      src="https://script.google.com/macros/s/AKfycby8p3xfXeIfgLH4_Okhlik4VbxM8WRA6EBGsyPvlCNPY_RLXne8UeWAM8qQFxMNB0f-oA/exec"
+      title="Mundo SENAI Experience"
+      allow="fullscreen; autoplay"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+    <div id="launch">
+      <div class="card">
+        <div class="brand">MUNDO SENAI EXPERIENCE</div>
+        <h1>O FUTURO COMEÇA AQUI</h1>
+        <p>Toque no botão para iniciar a experiência ocupando toda a tela.</p>
+        <button id="start" class="primary" type="button">⛶ Iniciar em tela cheia</button>
+        <button id="normal" class="secondary" type="button">Continuar sem tela cheia</button>
+        <p id="message" aria-live="polite"></p>
+      </div>
+    </div>
+    <button id="again" class="hidden" type="button" title="Tentar entrar em tela cheia">⛶ Tela cheia</button>
+  </div>
+  <script>
+    (function () {
+      'use strict';
+      var stage = document.getElementById('stage');
+      var launch = document.getElementById('launch');
+      var again = document.getElementById('again');
+      var msg = document.getElementById('message');
+      var touched = false;
+      function inFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+      }
+      function update() {
+        // Do not cover the app if the browser exits fullscreen; offer a small retry button.
+        again.className = touched && !inFullscreen() ? '' : 'hidden';
+      }
+      function closeLaunch() {
+        touched = true;
+        launch.className = 'hidden';
+        update();
+      }
+      function fullscreen() {
+        var fn = stage.requestFullscreen || stage.webkitRequestFullscreen || stage.msRequestFullscreen || stage.mozRequestFullScreen;
+        if (!fn) {
+          msg.textContent = 'Este navegador nao permite tela cheia pela pagina. Use o modo quiosque ou tela cheia do proprio navegador.';
+          return;
+        }
+        try {
+          // Important: call synchronously from a real touch/click (browser user activation).
+          var result = fn.call(stage);
+          if (result && typeof result.then === 'function') {
+            result.then(closeLaunch).catch(function () {
+              msg.textContent = 'O navegador bloqueou a tela cheia. Experimente o modo quiosque (kiosk) ou a opcao de tela cheia do navegador.';
+              update();
+            });
+          } else {
+            // Legacy WebKit API may not return a Promise.
+            closeLaunch();
+          }
+        } catch (e) {
+          msg.textContent = 'Tela cheia indisponivel neste navegador. Use o modo quiosque ou a opcao de tela cheia.';
+          update();
+        }
+      }
+      document.getElementById('start').addEventListener('click', fullscreen);
+      document.getElementById('normal').addEventListener('click', closeLaunch);
+      again.addEventListener('click', fullscreen);
+      document.addEventListener('fullscreenchange', update);
+      document.addEventListener('webkitfullscreenchange', update);
+      document.addEventListener('MSFullscreenChange', update);
+    })();
+  </script>
+</body>
+</html>
